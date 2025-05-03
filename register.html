@@ -1,4 +1,3 @@
-<!-- Updated register.html content -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -32,23 +31,22 @@
       color: #007bff;
     }
 
-    input {
+    input, button {
       width: 100%;
       padding: 10px;
       margin-bottom: 16px;
-      border: 1px solid #ccc;
       border-radius: 8px;
       font-size: 1rem;
     }
 
+    input {
+      border: 1px solid #ccc;
+    }
+
     button {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
       background: #007bff;
       color: white;
       border: none;
-      border-radius: 8px;
       cursor: pointer;
     }
 
@@ -58,7 +56,6 @@
 
     p {
       text-align: center;
-      margin-top: 20px;
     }
 
     a {
@@ -76,24 +73,34 @@
     <h1>Register</h1>
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
-    <button onclick="register()">Register</button>
+    <button id="register-btn">Register</button>
     <p>Already have an account? <a href="login.html">Login</a></p>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="supabase.js"></script>
   <script>
-    async function register() {
+    document.getElementById('register-btn').addEventListener('click', async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
-      const { error } = await supabase.auth.signUp({ email, password });
 
-      if (error) {
-        alert("Registration failed: " + error.message);
-      } else {
-        window.location.href = 'index.html';
+      try {
+        const response = await fetch('http://localhost:3002/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          alert('Registration failed: ' + result.error);
+        } else {
+          alert('Registration successful!');
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        alert('Register error: ' + err.message);
       }
-    }
+    });
   </script>
 </body>
 </html>
