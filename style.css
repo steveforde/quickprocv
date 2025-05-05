@@ -92,13 +92,28 @@ input[type="color"] {
   border-radius: 8px;
   border: 1px solid #ccc;
   background-color: var(--bg);
+  color: black;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
-.template-card:hover {
-  transform: scale(1.05);
+[data-theme="dark"] .template-card {
+  color: white;
 }
+
+.template-card.selected-template {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  cursor: default;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.4);
+  transform: scale(1.03);
+}
+
+.template-card.selected-template:hover {
+  transform: scale(1.03);
+}
+
 
 .lock-icon {
   display: none;
@@ -114,6 +129,7 @@ input[type="color"] {
   display: inline;
 }
 
+
 /* Preview Container */
 .preview-section {
   max-width: 794px;
@@ -121,6 +137,8 @@ input[type="color"] {
   padding: 40px;
   background: white;
   color: black;
+  font-size: 0.95rem; /* adjust down slightly */
+  line-height: 1.5;
   box-shadow: 0 0 10px rgba(0,0,0,0.05);
   border-radius: 12px;
   box-sizing: border-box;
@@ -319,7 +337,8 @@ button:hover,
   border-radius: 8px;
   font-size: 14px;
   line-height: 1.5;
-}
+  }
+
 
 /* Profile photo size refinement */
 #profile-photo {
@@ -401,3 +420,199 @@ button:hover,
 [data-theme="dark"] #cv-watermark {
   color: rgba(255, 255, 255, 0.2);
 }
+
+[data-theme="light"] .template-card {
+  color: #000; /* Black text in light mode */
+}
+
+[data-theme="dark"] .template-card {
+  color: #fff; /* White text in dark mode (already working) */
+}
+
+/* TECH TEMPLATE */
+.template-tech {
+  background-color: #1a1a1a;
+  color: #f9f9f9;
+  font-family: 'Inter', sans-serif;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.template-tech h1,
+.template-tech h2,
+.template-tech h3 {
+  color: #00bfff;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.template-tech a {
+  color: #00bfff;
+  text-decoration: underline;
+}
+
+.template-tech section {
+  margin-bottom: 24px;
+}
+
+.template-tech p,
+.template-tech span {
+  color: #f1f1f1;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.template-tech #cv-watermark {
+  color: #ffffff;
+  font-size: 0.75rem;
+  opacity: 0.3;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.template-tech #download-pdf {
+  background-color: #00bfff;
+  color: #1a1a1a;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.template-tech #download-pdf:hover {
+  background-color: #0099cc;
+}
+.template-tech {
+  background-color: #1c1c1c !important;
+  color: #ffffff !important;
+}
+
+.template-tech h1,
+.template-tech h2,
+.template-tech h3,
+.template-tech p,
+.template-tech a {
+  color: #ffffff !important;
+}
+
+/* Marketing Template */
+.template-marketing {
+  background-color: #fff8f5;
+  color: #333;
+  padding: 30px;
+  font-family: 'Inter', sans-serif;
+}
+
+.template-marketing h1,
+.template-marketing h3 {
+  color: #ff6f61;
+}
+
+.template-marketing h3 {
+  border-left: 4px solid #ff6f61;
+  padding-left: 10px;
+  margin-bottom: 8px;
+}
+
+.template-marketing a {
+  color: #ff6f61;
+}
+
+.template-marketing .preview-section {
+  border: 2px solid #ffd8cc;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.preview-section section p {
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.preview-section section p::before {
+  content: "• ";
+  color: var(--accent, #007bff);
+  font-weight: bold;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.preview-section section {
+  margin-bottom: 20px;
+  page-break-inside: avoid;
+}
+.preview-section ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.preview-section li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+}
+
+.download-wrapper {
+  width: 100%;
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+#download-pdf {
+  background-color: #007bff; /* Match top buttons */
+  color: white !important;   /* Force white text */
+  font-weight: 600;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 0;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+}
+
+#download-pdf:hover {
+  background-color: #006be0;
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 123, 255, 0.45);
+}
+
+
+
+
+
+
+button, .template-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover, .template-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4); /* subtle blue glow */
+}
+
+/* Shared button style */
+button {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  background-color: #007bff; /* same as top buttons */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 0;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 123, 255, 0.45);
+  background-color: #006be0;
+}
+
+

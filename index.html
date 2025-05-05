@@ -1,87 +1,61 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>QuickProCV – Build Your Professional CV</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <title>QuickProCV – Coming Soon</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(145deg, #007bff, #00bfff);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100vh;
+      padding: 20px;
+    }
+
+    .coming-soon-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+      max-width: 600px;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+    }
+
+    .disabled-button {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #999;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
-  <div class="top-bar">
-    <button id="theme-toggle">🌙 Dark Mode</button>
-    <button id="logout-btn">Logout</button>
-    <input type="color" id="color-picker" title="Pick your accent color" />
+  <div class="coming-soon-box">
+    <h1>🚀 QuickProCV is Coming Soon</h1>
+    <p>Build your professional CV with ease. Launching shortly.</p>
+    <!-- Disabled button to show users a link is coming -->
+    <span class="disabled-button">Enter Site (Coming Soon)</span>
   </div>
-
-  <div class="container">
-    <div class="form-column">
-      <h1>QuickProCV</h1>
-      <p id="welcome-msg"></p>
-
-      <label for="photo-upload">Profile Photo:</label>
-      <input type="file" id="photo-upload" accept="image/*" />
-
-      <form id="cv-form">
-        <input type="text" id="jobTitle" placeholder="Job Title" />
-        <input type="text" id="name" placeholder="Full Name" />
-        <input type="email" id="email" placeholder="Email" />
-        <input type="tel" id="phone" placeholder="Phone" />
-        <input type="url" id="linkedin" placeholder="LinkedIn" />
-        <button type="button" id="linkedin-import" class="button primary">🔗 Import from LinkedIn</button>
-        <input type="url" id="portfolio" placeholder="Portfolio" />
-        <textarea id="summary" placeholder="Summary"></textarea>
-        <textarea id="work" placeholder="Work Experience"></textarea>
-        <textarea id="education" placeholder="Education"></textarea>
-        <textarea id="projects" placeholder="Projects"></textarea>
-        <textarea id="certifications" placeholder="Certifications"></textarea>
-        <textarea id="languages" placeholder="Languages"></textarea>
-        <textarea id="skills" placeholder="Skills"></textarea>
-        <textarea id="hobbies" placeholder="Hobbies"></textarea>
-        <button type="submit">✨ Preview CV</button>
-      </form>
-    </div>
-
-    <div class="preview-column">
-      <h2>Choose Your Template</h2>
-      <div class="template-options">
-        <button class="template-card" data-template="tech" onclick="switchTemplate('tech')">Tech</button>
-        <button class="template-card" data-template="marketing" onclick="switchTemplate('marketing')">Marketing</button>
-        <button class="template-card" data-template="business" onclick="switchTemplate('business')">Business</button>
-        <button class="template-card" data-template="student" onclick="switchTemplate('student')">Student</button>
-        <button class="template-card" data-template="temp" onclick="switchTemplate('temp')">Temp</button>
-      </div>
-
-      <div id="cv-preview" class="preview-section card template-tech">
-        <img id="profile-photo" src="" alt="Profile Photo" style="display: none;" />
-        <div id="cv-header">
-          <h1 id="preview-name">Your Name</h1>
-          <p id="preview-title">Your Title</p>
-          <p id="preview-contact">you@example.com | 000-000-0000</p>
-          <p id="preview-links"></p>
-        </div>
-
-        <section><h3>Summary</h3><p id="preview-summary"></p></section>
-        <section><h3>Work Experience</h3><p id="preview-work"></p></section>
-        <section><h3>Education</h3><p id="preview-education"></p></section>
-        <section><h3>Projects</h3><p id="preview-projects"></p></section>
-        <section><h3>Certifications</h3><p id="preview-certifications"></p></section>
-        <section><h3>Languages</h3><p id="preview-languages"></p></section>
-        <section><h3>Skills</h3><div id="preview-skills"></div></section>
-        <section><h3>Hobbies</h3><p id="preview-hobbies"></p></section>
-
-        <p class="watermark" id="cv-watermark">Made with QuickProCV — Upgrade to remove watermark</p>
-        <button id="download-pdf">Download PDF</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- External Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="supabase.js"></script>
-  <script src="auth.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="script.js" defer></script>
 </body>
 </html>

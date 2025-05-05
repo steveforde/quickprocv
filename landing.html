@@ -1,62 +1,132 @@
-<!-- Updated landing.html content -->
- <!-- Updated login.html content -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Welcome to QuickProCV</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f4f4f4;
-      color: #222;
+      background-color: #eef3f9;
       margin: 0;
-      padding: 40px 20px;
+      padding: 0;
+      color: #222;
+    }
+
+    header {
+      background-color: #007bff;
+      padding: 50px 20px;
       text-align: center;
+      color: white;
     }
 
-    h1 {
-      font-size: 2.5rem;
+    header h1 {
+      font-size: 3rem;
       margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.25rem;
+      margin-top: 0;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      padding: 60px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+  .card {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  border: 1px solid #007bff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+}
+
+.card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 25px rgba(0, 123, 255, 0.3);
+  border-color: #0056b3;
+}
+
+    .card h3 {
+      font-size: 1.4rem;
       color: #007bff;
+      margin-bottom: 12px;
     }
 
-    p {
-      font-size: 1.2rem;
-      margin-bottom: 30px;
-    }
-
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    a {
-      display: inline-block;
-      padding: 12px 24px;
+    .card p {
       font-size: 1rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .cta {
+      text-align: center;
+      padding: 40px 20px 60px;
+    }
+
+    .cta a {
+      display: inline-block;
+      padding: 16px 32px;
+      font-size: 1.1rem;
+      font-weight: bold;
       background-color: #007bff;
       color: white;
-      border-radius: 8px;
+      border-radius: 10px;
       text-decoration: none;
-      transition: background 0.3s ease;
+      transition: 0.3s ease;
     }
 
-    a:hover {
+    .cta a:hover {
       background-color: #0056b3;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .features {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>QuickProCV</h1>
-  <p>Create professional CVs in minutes. PDF export, AI assistance, and more.</p>
-  <div class="buttons">
-    <a href="login.html">Login</a>
-    <a href="register.html">Register</a>
+  <header>
+    <h1>QuickProCV</h1>
+    <p>Build a job-winning CV in minutes. One-time payment, lifetime access.</p>
+  </header>
+
+  <section class="features">
+    <div class="card">
+      <h3>✨ Only €9.99 for Lifetime Access</h3>
+      <p>Pay once and use QuickProCV forever. No subscriptions, no renewals, no hidden fees. Ever.</p>
+    </div>
+
+    <div class="card">
+      <h3>🧠 AI Assistance Included</h3>
+      <p>Use built-in AI to generate bullet points, career summaries, and achievements instantly.</p>
+    </div>
+
+    <div class="card">
+      <h3>📄 Export Stunning PDF CVs</h3>
+      <p>Choose from multiple modern templates and export your CV instantly with one click.</p>
+    </div>
+
+    <div class="card">
+      <h3>🔄 Monthly Updates Forever</h3>
+      <p>Get new features, templates, and upgrades every month — all included in your one-time payment.</p>
+    </div>
+  </section>
+
+  <div class="cta">
+    <a href="register.html">Join Now for €9.99</a>
   </div>
 </body>
 </html>
+

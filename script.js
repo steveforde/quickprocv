@@ -1,6 +1,6 @@
 // Updated full script.js content
 const premiumTemplates = ['marketing', 'business', 'classic', 'student', 'temp'];
-const isPro = false; // Change to true for pro users
+const isPro = true; // Change to true for pro users
 
 // Initialize template cards
 function initializeTemplateCards() {
@@ -48,7 +48,21 @@ function switchTemplate(templateName) {
     previewName.style.color = currentAccent;
   }
 
+  document.querySelectorAll('.template-card').forEach(btn => {
+    btn.classList.remove('active-template');
+  });
+  const selectedBtn = document.querySelector(`.template-card[data-template="${templateName}"]`);
+  if (selectedBtn) {
+    selectedBtn.classList.add('active-template');
+  }
+
   updateWatermark(templateName);
+}
+
+function convertToBullets(text) {
+  const lines = text.split('\n').filter(line => line.trim() !== '');
+  if (lines.length === 0) return '';
+  return `<ul>${lines.map(line => `<li>${line.trim()}</li>`).join('')}</ul>`;
 }
 
 // Update watermark visibility
@@ -77,9 +91,13 @@ document.getElementById('cv-form').addEventListener('submit', (e) => {
     `<a href="${linkedin}" target="_blank">LinkedIn</a> | <a href="${portfolio}" target="_blank">Portfolio</a>`;
 
   document.getElementById('preview-summary').textContent = document.getElementById('summary').value;
-  document.getElementById('preview-work').textContent = document.getElementById('work').value;
+
+  // Convert work and projects to bullet lists
+  document.getElementById('preview-work').innerHTML = convertToBullets(document.getElementById('work').value);
+  document.getElementById('preview-projects').innerHTML = convertToBullets(document.getElementById('projects').value);
+
+  // Other sections remain as plain text
   document.getElementById('preview-education').textContent = document.getElementById('education').value;
-  document.getElementById('preview-projects').textContent = document.getElementById('projects').value;
   document.getElementById('preview-certifications').textContent = document.getElementById('certifications').value;
   document.getElementById('preview-languages').textContent = document.getElementById('languages').value;
   document.getElementById('preview-hobbies').textContent = document.getElementById('hobbies').value;
@@ -102,14 +120,51 @@ document.getElementById('download-pdf').addEventListener('click', async () => {
   await new Promise(r => setTimeout(r, 100));
 
   const canvas = await html2canvas(preview, {
-    scale: 3,
+    scale: 2,
     useCORS: true,
     backgroundColor: "#ffffff"
   });
 
-  const imgData = canvas.toDataURL("image/jpeg", 1.0);
-  const pdf = new jspdf.jsPDF("p", "mm", "a4");
-  pdf.addImage(imgData, "JPEG", 0, 0, 210, 297);
+  const imgData = canvas.toDataURL('image/jpeg', 1.0);
+  const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  const imgWidth = pageWidth;
+  const imgHeight = canvas.height * imgWidth / canvas.width;
+
+  let position = 0;
+
+  // Add pages as needed
+  if (imgHeight <= pageHeight) {
+    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+  } else {
+    let remainingHeight = imgHeight;
+    let page = 0;
+
+    while (remainingHeight > 0) {
+      const sourceY = page * pageHeight * canvas.width / pageWidth;
+      const section = document.createElement('canvas');
+      section.width = canvas.width;
+      section.height = Math.min(canvas.height - sourceY, canvas.width * pageHeight / pageWidth);
+      const context = section.getContext('2d');
+
+      context.drawImage(
+        canvas,
+        0, sourceY, section.width, section.height,
+        0, 0, section.width, section.height
+      );
+
+      const sectionImgData = section.toDataURL('image/jpeg', 1.0);
+      if (page > 0) pdf.addPage();
+      pdf.addImage(sectionImgData, 'JPEG', 0, 0, imgWidth, imgWidth * section.height / section.width);
+
+      remainingHeight -= pageHeight;
+      page++;
+    }
+  }
+
   pdf.save(`${userName}_CV.pdf`);
 
   button.style.display = 'block';
@@ -118,6 +173,7 @@ document.getElementById('download-pdf').addEventListener('click', async () => {
     watermark.style.opacity = '0.4';
   }
 });
+
 
 // Upload profile photo
 const photoInput = document.getElementById('photo-upload');
@@ -171,6 +227,7 @@ if (colorPicker) {
 
 document.addEventListener('DOMContentLoaded', initializeTemplateCards);
 
+/*
 document.getElementById('linkedin-import').addEventListener('click', async () => {
   const url = document.getElementById('linkedin').value;
   if (!url || !url.includes('linkedin.com')) {
@@ -200,3 +257,4 @@ document.getElementById('linkedin-import').addEventListener('click', async () =>
     alert('Error importing LinkedIn profile.');
   }
 });
+*/
