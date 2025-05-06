@@ -21,6 +21,7 @@
 
       <label for="photo-upload">Profile Photo:</label>
       <input type="file" id="photo-upload" accept="image/*" />
+      <button type="button" id="autofill-btn" class="button primary">⚡ Autofill Test CV</button>
 
       <form id="cv-form">
         <input type="text" id="jobTitle" placeholder="Job Title" />
@@ -28,9 +29,11 @@
         <input type="email" id="email" placeholder="Email" />
         <input type="tel" id="phone" placeholder="Phone" />
         <input type="url" id="linkedin" placeholder="LinkedIn" />
-        <button type="button" id="linkedin-import" class="button primary" style="display: none;">
-          🔗 Import from LinkedIn (Coming Soon)
-        </button>
+        <div id="linkedin-container">
+          <button type="button" id="linkedin-import" class="button primary">
+            🔗 Import from LinkedIn <span class="lock-icon" title="Pro users only">🔒</span>
+          </button>
+        </div>
         <input type="url" id="portfolio" placeholder="Portfolio" />
         <textarea id="summary" placeholder="Summary"></textarea>
         <textarea id="work" placeholder="Work Experience"></textarea>
@@ -48,10 +51,10 @@
       <h2>Choose Your Template</h2>
       <div class="template-options">
         <button class="template-card" data-template="tech" onclick="switchTemplate('tech')">Tech</button>
-        <button class="template-card" data-template="marketing" onclick="switchTemplate('marketing')">Marketing</button>
-        <button class="template-card" data-template="business" onclick="switchTemplate('business')">Business</button>
-        <button class="template-card" data-template="student" onclick="switchTemplate('student')">Student</button>
-        <button class="template-card" data-template="temp" onclick="switchTemplate('temp')">Temp</button>
+        <button class="template-card" data-template="marketing" onclick="switchTemplate('marketing')">Marketing<span class="lock-icon">🔒</span></button>
+        <button class="template-card" data-template="business" onclick="switchTemplate('business')">Business<span class="lock-icon">🔒</span></button>
+        <button class="template-card" data-template="student" onclick="switchTemplate('student')">Student<span class="lock-icon">🔒</span></button>
+        <button class="template-card" data-template="temp" onclick="switchTemplate('temp')">Temp<span class="lock-icon">🔒</span></button>
       </div>
 
       <div id="cv-preview" class="preview-section card template-tech">

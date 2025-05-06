@@ -1,6 +1,21 @@
-// Updated full script.js content
 const premiumTemplates = ['marketing', 'business', 'classic', 'student', 'temp'];
-const isPro = true; // Change to true for pro users
+const isPro = false; // Change to true for pro users
+
+document.addEventListener('DOMContentLoaded', () => {
+  const linkedinButton = document.getElementById('linkedin-import');
+  const lockIcon = linkedinButton.querySelector('.lock-icon');
+
+  if (!isPro) {
+    linkedinButton.disabled = true;
+    linkedinButton.classList.add('locked');
+    linkedinButton.title = "Upgrade to Pro to use LinkedIn import";
+    if (lockIcon) lockIcon.style.display = 'inline';
+  } else {
+    linkedinButton.disabled = false;
+    linkedinButton.classList.remove('locked');
+    if (lockIcon) lockIcon.style.display = 'none';
+  }
+});
 
 // Initialize template cards
 function initializeTemplateCards() {
@@ -43,18 +58,15 @@ function switchTemplate(templateName) {
   document.querySelectorAll('#cv-preview h3').forEach(h3 => {
     h3.style.color = currentAccent;
   });
+
   const previewName = document.getElementById('preview-name');
-  if (previewName) {
-    previewName.style.color = currentAccent;
-  }
+  if (previewName) previewName.style.color = currentAccent;
 
   document.querySelectorAll('.template-card').forEach(btn => {
     btn.classList.remove('active-template');
   });
   const selectedBtn = document.querySelector(`.template-card[data-template="${templateName}"]`);
-  if (selectedBtn) {
-    selectedBtn.classList.add('active-template');
-  }
+  if (selectedBtn) selectedBtn.classList.add('active-template');
 
   updateWatermark(templateName);
 }
@@ -92,11 +104,9 @@ document.getElementById('cv-form').addEventListener('submit', (e) => {
 
   document.getElementById('preview-summary').textContent = document.getElementById('summary').value;
 
-  // Convert work and projects to bullet lists
   document.getElementById('preview-work').innerHTML = convertToBullets(document.getElementById('work').value);
   document.getElementById('preview-projects').innerHTML = convertToBullets(document.getElementById('projects').value);
 
-  // Other sections remain as plain text
   document.getElementById('preview-education').textContent = document.getElementById('education').value;
   document.getElementById('preview-certifications').textContent = document.getElementById('certifications').value;
   document.getElementById('preview-languages').textContent = document.getElementById('languages').value;
@@ -136,7 +146,6 @@ document.getElementById('download-pdf').addEventListener('click', async () => {
 
   let position = 0;
 
-  // Add pages as needed
   if (imgHeight <= pageHeight) {
     pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
   } else {
@@ -174,7 +183,6 @@ document.getElementById('download-pdf').addEventListener('click', async () => {
   }
 });
 
-
 // Upload profile photo
 const photoInput = document.getElementById('photo-upload');
 const profilePhoto = document.getElementById('profile-photo');
@@ -191,7 +199,7 @@ photoInput.addEventListener('change', function (event) {
   }
 });
 
-// Dark/light mode toggle
+// DOMContentLoaded - theme toggle + init templates
 document.addEventListener('DOMContentLoaded', () => {
   const themeToggle = document.getElementById('theme-toggle');
   const html = document.documentElement;
@@ -206,6 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('theme', newTheme);
     themeToggle.textContent = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
   });
+
+  initializeTemplateCards();
 });
 
 // Accent color picker
@@ -225,9 +235,7 @@ if (colorPicker) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', initializeTemplateCards);
-
-/*
+// LinkedIn Import (Pro feature)
 document.getElementById('linkedin-import').addEventListener('click', async () => {
   const url = document.getElementById('linkedin').value;
   if (!url || !url.includes('linkedin.com')) {
@@ -257,4 +265,29 @@ document.getElementById('linkedin-import').addEventListener('click', async () =>
     alert('Error importing LinkedIn profile.');
   }
 });
-*/
+
+
+// === Autofill Test Data ===
+function autofillTestData() {
+  document.getElementById('name').value = 'Sarah Thompson';
+  document.getElementById('jobTitle').value = 'Senior Software Engineer';
+  document.getElementById('email').value = 'sarah.thompson@example.com';
+  document.getElementById('phone').value = '+353 87 123 4567';
+  document.getElementById('linkedin').value = 'https://www.linkedin.com/in/sarahthompson';
+  document.getElementById('portfolio').value = 'https://sarahcodes.dev';
+  document.getElementById('summary').value = `Experienced developer with 8+ years in full-stack development, leading teams and delivering scalable solutions. Passionate about clean code, mentorship, and continuous learning.`;
+  document.getElementById('work').value = `Senior Engineer at TechCorp (2020–Present):\n- Led migration to microservices.\n- Mentored 4 junior developers.\nSoftware Engineer at DevSoft (2016–2020):\n- Built core features for e-commerce platform.`;
+  document.getElementById('education').value = `B.Sc. in Computer Science – University of Limerick (2012–2016)`;
+  document.getElementById('projects').value = `Open Source: Contributed to Vue.js\nFreelance: Built portfolio sites for 12 clients`;
+  document.getElementById('certifications').value = `AWS Certified Solutions Architect\nScrum Master Certification`;
+  document.getElementById('languages').value = `English (Fluent), German (Basic)`;
+  document.getElementById('skills').value = `JavaScript HTML CSS React Node.js MongoDB Git Docker`;
+  document.getElementById('hobbies').value = `Hiking, Photography, Blogging`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const autofillBtn = document.getElementById('autofill-btn');
+  if (autofillBtn) {
+    autofillBtn.addEventListener('click', autofillTestData);
+  }
+});
