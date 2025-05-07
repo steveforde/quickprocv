@@ -1,4 +1,3 @@
-/// linkedin-server/auth.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -13,15 +12,36 @@ app.use(express.json());
 app.post('/api/register', async (req, res) => {
   const { email, password } = req.body;
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  console.log('📩 Registering:', email);
 
-  if (error) {
-    console.error('Register error:', error);
-    return res.status(400).json({ error: error.message });
+  // 1. Create Supabase user and auto-confirm
+  const { data: userData, error: signupError } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+
+  if (signupError) {
+    console.error('❌ Signup error:', signupError.message);
+    return res.status(400).json({ error: signupError.message });
   }
 
-  res.json({ message: 'User registered', data });
+  const userId = userData.user.id;
+  console.log('✅ Supabase user created:', userId);
+
+  // 2. Insert into your metadata table (e.g. users)
+  const { error: insertError } = await supabase
+    .from('users')
+    .insert([{ id: userId, full_name: '', is_pro: false }]);
+
+  if (insertError) {
+    console.error('❌ Metadata insert error:', insertError.message);
+    return res.status(500).json({ error: 'User created, but metadata insert failed: ' + insertError.message });
+  }
+
+  res.json({ message: 'User registered successfully', id: userId });
 });
+
 
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
@@ -33,14 +53,12 @@ app.post('/api/login', async (req, res) => {
     return res.status(400).json({ error: error.message });
   }
 
-  // Check if session is missing (e.g. email not confirmed, invalid user)
   if (!data.session) {
     return res.status(401).json({ error: 'Invalid login credentials.' });
   }
 
   res.json({ message: 'Login successful', data });
 });
-
 
 const PORT = process.env.AUTH_PORT || 3002;
 app.listen(PORT, () => {
