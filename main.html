@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>QuickProCV – Build Your Professional CV</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
- 
+  <link rel="stylesheet" href="style.css"/>
 
 </head>
 <body>
@@ -36,6 +35,7 @@
             🔗 Import from LinkedIn <span class="lock-icon" title="Pro users only">🔒</span>
           </button>
         </div>
+        <button class="buy-pro-button" onclick="startCheckout()">Buy Pro</button>
         <input type="url" id="portfolio" placeholder="Portfolio" />
         <textarea id="summary" placeholder="Summary"></textarea>
         <textarea id="work" placeholder="Work Experience"></textarea>
@@ -48,6 +48,9 @@
         <button type="submit">✨ Preview CV</button>
       </form>
     </div>
+
+
+    
 
     <div class="preview-column">
       <h2>Choose Your Template</h2>
@@ -87,12 +90,12 @@
 
   <!-- External Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script src="supabase.js"></script>
-  <script src="auth.js"></script>
+  <script type="module" src="linkedin-server/auth.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js" defer></script>
-  
+  <!-- Load Supabase -->
+
 
 </body>
 </html>

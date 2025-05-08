@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import supabase from './supabaseClient.js';
 
-dotenv.config();
+dotenv.config({ path: './linkedin-server/.env' });
 
 const app = express();
 app.use(cors());
@@ -32,7 +32,14 @@ app.post('/api/register', async (req, res) => {
   // 2. Insert into your metadata table (e.g. users)
   const { error: insertError } = await supabase
     .from('users')
-    .insert([{ id: userId, full_name: '', is_pro: false }]);
+    .insert([
+      {
+        id: userId,
+        email,
+        full_name: '',
+        is_pro: false
+      }
+    ]);
 
   if (insertError) {
     console.error('❌ Metadata insert error:', insertError.message);
@@ -41,7 +48,6 @@ app.post('/api/register', async (req, res) => {
 
   res.json({ message: 'User registered successfully', id: userId });
 });
-
 
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;

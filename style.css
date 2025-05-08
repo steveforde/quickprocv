@@ -40,14 +40,28 @@ body {
   padding: 20px;
 }
 
+
 .form-column,
 .preview-column {
-  flex: 1;
+  flex: 1 1 47%;
   min-width: 300px;
   background-color: var(--card);
   padding: 30px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+
+@media (max-width: 800px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .form-column,
+  .preview-column {
+    width: 100%;
+    min-width: unset;
+  }
 }
 
 input,
@@ -630,4 +644,24 @@ button:hover {
 button.locked {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+#buy-pro-btn {
+  width: 100%;
+  padding: 14px 0;
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+#buy-pro-btn:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 123, 255, 0.45);
 }

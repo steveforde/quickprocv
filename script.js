@@ -88,6 +88,26 @@ function updateWatermark(templateName) {
   }
 }
 
+
+function startCheckout() {
+  const email = document.getElementById('email').value;
+
+  fetch('http://localhost:3000/create-checkout-session', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email }) // <-- send email from form
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.url) window.location.href = data.url;
+  });
+}
+
+
+
+
 // Fill preview on form submit
 document.getElementById('cv-form').addEventListener('submit', (e) => {
   e.preventDefault();
