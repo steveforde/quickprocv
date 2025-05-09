@@ -109,6 +109,7 @@
           alert('Login failed: ' + result.error);
         } else {
           alert('Login successful!');
+          localStorage.setItem('userEmail', email); // ✅ Store email for later use
           window.location.href = 'main.html';
         }
       } catch (err) {

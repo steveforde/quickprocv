@@ -52,7 +52,7 @@ app.post('/create-checkout-session', async (req, res) => {
       ],
       success_url: 'http://localhost:5500/success.html',
       cancel_url: 'http://localhost:5500/cancel.html',
-      customer_email: 'testuser@example.com',
+      customer_email: req.body.email,
     });
 
     res.json({ url: session.url });

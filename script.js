@@ -1,9 +1,32 @@
 const premiumTemplates = ['marketing', 'business', 'classic', 'student', 'temp'];
-const isPro = false; // Change to true for pro users
 
-document.addEventListener('DOMContentLoaded', () => {
+let isPro = false;
+
+async function checkProStatus() {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+
+  try {
+    const response = await fetch('http://localhost:3002/api/check-pro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const result = await response.json();
+    if (result && result.isPro) {
+      isPro = true;
+    }
+  } catch (err) {
+    console.error('Error checking Pro status:', err.message);
+  }
+}
+
+function updateLinkedInAccess() {
   const linkedinButton = document.getElementById('linkedin-import');
-  const lockIcon = linkedinButton.querySelector('.lock-icon');
+  const lockIcon = linkedinButton?.querySelector('.lock-icon');
+
+  if (!linkedinButton) return;
 
   if (!isPro) {
     linkedinButton.disabled = true;
@@ -13,37 +36,38 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     linkedinButton.disabled = false;
     linkedinButton.classList.remove('locked');
+    linkedinButton.title = "Import from LinkedIn";
     if (lockIcon) lockIcon.style.display = 'none';
   }
-});
-
-// Initialize template cards
-function initializeTemplateCards() {
-  document.querySelectorAll('.template-card').forEach((button, index) => {
-    const templateName = button.dataset.template;
-    const lockIcon = button.querySelector('.lock-icon');
-
-    button.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s both`;
-
-    if (premiumTemplates.includes(templateName)) {
-      if (!isPro) {
-        button.classList.add('locked');
-        if (lockIcon) {
-          lockIcon.style.display = 'inline';
-          lockIcon.style.animation = 'wiggle 2s infinite';
-        }
-      } else {
-        button.classList.remove('locked');
-        if (lockIcon) lockIcon.style.display = 'none';
-      }
-    } else {
-      button.classList.remove('locked');
-      if (lockIcon) lockIcon.style.display = 'none';
-    }
-  });
 }
 
-// Switch templates
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkProStatus();
+  updateLinkedInAccess();
+
+  const welcomeMsg = document.getElementById('welcome-msg');
+  const storedEmail = localStorage.getItem('userEmail');
+  if (storedEmail && welcomeMsg) {
+    welcomeMsg.textContent = `Welcome, ${storedEmail}!`;
+  }
+
+  const themeToggle = document.getElementById('theme-toggle');
+  const html = document.documentElement;
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  html.dataset.theme = savedTheme;
+  themeToggle.textContent = savedTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = html.dataset.theme;
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = newTheme;
+    localStorage.setItem('theme', newTheme);
+    themeToggle.textContent = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+  });
+
+  initializeTemplateCards();
+});
+
 function switchTemplate(templateName) {
   const preview = document.getElementById('cv-preview');
   if (premiumTemplates.includes(templateName) && !isPro) {
@@ -77,7 +101,6 @@ function convertToBullets(text) {
   return `<ul>${lines.map(line => `<li>${line.trim()}</li>`).join('')}</ul>`;
 }
 
-// Update watermark visibility
 function updateWatermark(templateName) {
   const watermark = document.getElementById('cv-watermark');
   if (!isPro && templateName === 'tech') {
@@ -88,16 +111,17 @@ function updateWatermark(templateName) {
   }
 }
 
-
 function startCheckout() {
-  const email = document.getElementById('email').value;
+  const email = localStorage.getItem('userEmail');
+  if (!email) {
+    alert("Please log in first.");
+    return;
+  }
 
   fetch('http://localhost:3000/create-checkout-session', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ email }) // <-- send email from form
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
   })
   .then(res => res.json())
   .then(data => {
@@ -105,10 +129,12 @@ function startCheckout() {
   });
 }
 
+const welcomeMsg = document.getElementById('welcome-msg');
+const storedEmail = localStorage.getItem('userEmail');
+if (storedEmail && welcomeMsg) {
+  welcomeMsg.textContent = `Welcome, ${storedEmail}!`;
+}
 
-
-
-// Fill preview on form submit
 document.getElementById('cv-form').addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -123,10 +149,8 @@ document.getElementById('cv-form').addEventListener('submit', (e) => {
     `<a href="${linkedin}" target="_blank">LinkedIn</a> | <a href="${portfolio}" target="_blank">Portfolio</a>`;
 
   document.getElementById('preview-summary').textContent = document.getElementById('summary').value;
-
   document.getElementById('preview-work').innerHTML = convertToBullets(document.getElementById('work').value);
   document.getElementById('preview-projects').innerHTML = convertToBullets(document.getElementById('projects').value);
-
   document.getElementById('preview-education').textContent = document.getElementById('education').value;
   document.getElementById('preview-certifications').textContent = document.getElementById('certifications').value;
   document.getElementById('preview-languages').textContent = document.getElementById('languages').value;
@@ -137,7 +161,6 @@ document.getElementById('cv-form').addEventListener('submit', (e) => {
     skills.map(skill => `<span>${skill}</span>`).join('');
 });
 
-// Download PDF
 document.getElementById('download-pdf').addEventListener('click', async () => {
   const preview = document.getElementById('cv-preview');
   const userName = document.getElementById('name').value.trim() || 'QuickProCV';
@@ -157,14 +180,10 @@ document.getElementById('download-pdf').addEventListener('click', async () => {
 
   const imgData = canvas.toDataURL('image/jpeg', 1.0);
   const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
-
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-
   const imgWidth = pageWidth;
   const imgHeight = canvas.height * imgWidth / canvas.width;
-
-  let position = 0;
 
   if (imgHeight <= pageHeight) {
     pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
@@ -203,7 +222,6 @@ document.getElementById('download-pdf').addEventListener('click', async () => {
   }
 });
 
-// Upload profile photo
 const photoInput = document.getElementById('photo-upload');
 const profilePhoto = document.getElementById('profile-photo');
 
@@ -219,26 +237,6 @@ photoInput.addEventListener('change', function (event) {
   }
 });
 
-// DOMContentLoaded - theme toggle + init templates
-document.addEventListener('DOMContentLoaded', () => {
-  const themeToggle = document.getElementById('theme-toggle');
-  const html = document.documentElement;
-  const savedTheme = localStorage.getItem('theme') || 'light';
-  html.dataset.theme = savedTheme;
-  themeToggle.textContent = savedTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-
-  themeToggle.addEventListener('click', () => {
-    const currentTheme = html.dataset.theme;
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    html.dataset.theme = newTheme;
-    localStorage.setItem('theme', newTheme);
-    themeToggle.textContent = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-  });
-
-  initializeTemplateCards();
-});
-
-// Accent color picker
 const colorPicker = document.getElementById('color-picker');
 if (colorPicker) {
   const savedColor = localStorage.getItem('accentColor') || '#007bff';
@@ -255,7 +253,6 @@ if (colorPicker) {
   });
 }
 
-// LinkedIn Import (Pro feature)
 document.getElementById('linkedin-import').addEventListener('click', async () => {
   const url = document.getElementById('linkedin').value;
   if (!url || !url.includes('linkedin.com')) {
@@ -286,8 +283,6 @@ document.getElementById('linkedin-import').addEventListener('click', async () =>
   }
 });
 
-
-// === Autofill Test Data ===
 function autofillTestData() {
   document.getElementById('name').value = 'Sarah Thompson';
   document.getElementById('jobTitle').value = 'Senior Software Engineer';

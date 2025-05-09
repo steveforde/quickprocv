@@ -95,19 +95,26 @@
     document.getElementById('register-btn').addEventListener('click', async () => {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
-
+  
       try {
         const response = await fetch('http://localhost:3002/api/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-
+  
         const result = await response.json();
-
+  
         if (!response.ok) {
           alert('Registration failed: ' + result.error);
         } else {
+          // ✅ Insert user into `users` table
+          await fetch('http://localhost:3002/api/insert-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+  
           alert('Registration successful!');
           window.location.href = 'main.html';
         }
@@ -116,5 +123,6 @@
       }
     });
   </script>
+  
 </body>
 </html>
