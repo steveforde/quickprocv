@@ -66,6 +66,26 @@ app.post('/api/login', async (req, res) => {
   res.json({ message: 'Login successful', data });
 });
 
+app.post('/api/check-pro', async (req, res) => {
+  const { email } = req.body;
+  console.log('🔍 Checking Pro status for:', email);
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('is_pro')
+    .eq('email', email.trim().toLowerCase())
+    .single(); // ✅ Chain this directly
+
+  if (error || !data) {
+    console.error('❌ Supabase error or no matching user:', error?.message);
+    return res.status(404).json({ error: 'User not found or Pro status missing.' });
+  }
+
+  const isPro = data.is_pro === true; // ✅ data is a single object, not array
+  res.json({ isPro });
+});
+
+
 const PORT = process.env.AUTH_PORT || 3002;
 app.listen(PORT, () => {
   console.log(`✅ Auth API running at http://localhost:${PORT}`);

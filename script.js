@@ -6,6 +6,8 @@ async function checkProStatus() {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
 
+  console.log("👤 Checking Pro status for:", email); // move it here
+
   try {
     const response = await fetch('http://localhost:3002/api/check-pro', {
       method: 'POST',
@@ -44,6 +46,7 @@ function updateLinkedInAccess() {
 document.addEventListener('DOMContentLoaded', async () => {
   await checkProStatus();
   updateLinkedInAccess();
+  styleTemplateCardsBasedOnProStatus();
 
   const welcomeMsg = document.getElementById('welcome-msg');
   const storedEmail = localStorage.getItem('userEmail');
@@ -67,6 +70,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initializeTemplateCards();
 });
+
+if (window.location.pathname.includes('success.html')) {
+  // Re-check and update the UI
+  checkProStatus().then(() => {
+    updateLinkedInAccess();
+    styleTemplateCardsBasedOnProStatus();
+    console.log('🏁 Success page logic executed');
+  });
+}
+
 
 function switchTemplate(templateName) {
   const preview = document.getElementById('cv-preview');

@@ -93,29 +93,30 @@
 
   <script>
     document.getElementById('login-btn').addEventListener('click', async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
 
-      try {
-        const response = await fetch('http://localhost:3002/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          alert('Login failed: ' + result.error);
-        } else {
-          alert('Login successful!');
-          localStorage.setItem('userEmail', email); // ✅ Store email for later use
-          window.location.href = 'main.html';
-        }
-      } catch (err) {
-        alert('Login error: ' + err.message);
-      }
+  try {
+    const response = await fetch('http://localhost:3002/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
     });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      alert('Login failed: ' + result.error);
+    } else {
+      alert('Login successful!');
+      localStorage.clear(); // ✅ Clear out previous user before storing new one
+      localStorage.setItem('userEmail', email); // ✅ Store fresh login email
+      window.location.href = 'main.html';
+    }
+  } catch (err) {
+    alert('Login error: ' + err.message);
+  }
+});
   </script>
 </body>
 </html>
