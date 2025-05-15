@@ -613,3 +613,99 @@ html[data-theme="dark"] #cv-watermark {
 }
 
 /* --- End of focused top bar button CSS --- */
+
+:root {
+  --accent: #007bff; /* default blue */
+}
+
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --text: #000000;
+}
+
+:root[data-theme='dark'] {
+  --bg: #121212;
+  --text: #f0f0f0;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+:root {
+  --accent: #007bff;
+}
+
+button {
+  background-color: var(--accent);
+}
+
+
+/* Optional hover effect */
+button:hover,
+.template-card:hover {
+  filter: brightness(1.1);
+}
+
+/* CV Preview Headings (changeable by color picker) */
+#cv-preview h2,
+#cv-preview h3,
+#cv-preview .section-heading {
+  color: var(--accent);
+}
+
+/* Optional: Highlight bullets or borders */
+#cv-preview li::marker {
+  color: var(--accent);
+}
+
+#cv-preview hr {
+  border-color: var(--accent);
+}
+
+#autofill-btn,
+#linkedin-import,
+#download-pdf,
+button[type="submit"] {
+  background-color: var(--primary-action-color);
+  border: 1px solid var(--primary-action-color);
+  color: var(--button-text-color);
+}
+
+#autofill-btn:hover,
+#linkedin-import:hover,
+#download-pdf:hover,
+button[type="submit"]:hover {
+  background-color: #0056b3 !important;
+}
+
+h1.main-title,
+.template-options-title,
+#cv-preview h2,
+#cv-preview h3,
+#cv-preview .section-heading,
+#cv-preview li::marker,
+#cv-preview hr {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* QuickProCV title */
+h1.main-title {
+  color: var(--accent);
+}
+
+/* Section headings */
+#cv-preview h3 {
+  color: var(--accent);
+}
+
+/* Optional - links, markers, lines */
+#cv-preview li::marker {
+  color: var(--accent);
+}
+#cv-preview hr {
+  border-color: var(--accent);
+}

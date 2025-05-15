@@ -10,18 +10,17 @@
 <body>
   <!-- Top Bar -->
    <div class="top-bar">
-    <button id="theme-toggle">🌗 Theme</button>
+    <button id="theme-toggle">🌙 Dark Mode</button>
     <button id="buy-pro-btn">Buy Pro</button>
     <button id="logout-btn">Logout</button>
     </div>
     
-    <input type="color" id="accent-picker" title="Choose Accent Color" style="margin-right: 1rem;" />
-
+    <input type="color" id="accent-picker" />
   <!-- Main Container -->
   <div class="container">
     <!-- Left Form Column -->
     <div class="form-column">
-      <h1>QuickProCV</h1>
+      <h1 class="main-title">QuickProCV</h1>
       <p id="welcome-msg">Welcome! Please log in.</p>
 
       <label for="photo-upload">Profile Photo:</label>
@@ -61,8 +60,8 @@
 
     <!-- Right Preview Column -->
     <div class="preview-column">
-     <h2>Choose Your Template</h2>
-<div class="template-options">
+    <h2 class="template-options-title">Choose Your Template</h2>
+  <div class="template-options">
   <button type="button" class="template-card" data-template="tech">Tech</button>
   <button type="button" class="template-card" data-template="marketing">
     Marketing<span class="lock-icon">🔒</span>

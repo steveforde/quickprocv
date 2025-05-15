@@ -285,42 +285,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   refreshAllProUI();      // Updates all UI based on isPro
 
   // Theme Toggle
-  const themeToggle = document.getElementById('theme-toggle');
   const htmlEl = document.documentElement;
-  if (themeToggle && htmlEl) {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    htmlEl.dataset.theme = savedTheme;
-    themeToggle.textContent = savedTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-    themeToggle.addEventListener('click', () => {
-      const newTheme = htmlEl.dataset.theme === 'dark' ? 'light' : 'dark';
-      htmlEl.dataset.theme = newTheme;
-      localStorage.setItem('theme', newTheme);
-      themeToggle.textContent = newTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-    });
-  } else { console.warn("Theme toggle elements not found."); }
+const themeToggleBtn = document.getElementById('theme-toggle');
 
-  // Color Picker
-  const accentPicker = document.getElementById('accent-picker');
-
-if (accentPicker) {
-  // Load saved accent color
-  const savedAccent = localStorage.getItem('accentColor');
-  if (savedAccent) {
-    document.documentElement.style.setProperty('--accent', savedAccent);
-    accentPicker.value = savedAccent;
-  }
-
-  // Listen for color changes
-  accentPicker.addEventListener('input', (e) => {
-    const color = e.target.value;
-    document.documentElement.style.setProperty('--accent', color);
-    localStorage.setItem('accentColor', color);
-    console.log("[Accent Picker] Updated accent color to:", color);
-  });
-} else {
-  console.warn("🎨 Accent picker element not found.");
+function applyTheme(theme) {
+  htmlEl.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+  themeToggleBtn.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
 }
 
+// Load theme on page load
+const savedTheme = localStorage.getItem('theme') || 'light';
+applyTheme(savedTheme);
+
+// Toggle theme on click
+themeToggleBtn.addEventListener('click', () => {
+  const newTheme = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(newTheme);
+});
+
+ 
+  // Accent Color Picker Setup (Fixing double declaration issue)
+  const accentPicker = document.getElementById('accent-picker');
+
+  if (accentPicker) {
+    const savedAccent = localStorage.getItem('accentColor');
+    if (savedAccent) {
+      document.documentElement.style.setProperty('--accent', savedAccent);
+      accentPicker.value = savedAccent;
+    }
+
+    accentPicker.addEventListener('input', (e) => {
+      const color = e.target.value;
+      document.documentElement.style.setProperty('--accent', color);
+      localStorage.setItem('accentColor', color);
+      console.log("[Accent Picker] Updated color to:", color);
+    });
+  } else {
+    console.warn("🎨 Color picker not found.");
+  }
    
 
   // Logout Button
@@ -349,11 +352,7 @@ if (accentPicker) {
   } else { console.warn("Autofill button not found."); }
 
 
-  document.getElementById("theme-toggle")?.addEventListener("click", () => {
-  const html = document.documentElement;
-  const currentTheme = html.getAttribute("data-theme");
-  html.setAttribute("data-theme", currentTheme === "dark" ? "light" : "dark");
-});
+
 
 document.getElementById("logout-btn")?.addEventListener("click", async () => {
   await supabase.auth.signOut();
@@ -611,5 +610,7 @@ document.addEventListener('visibilitychange', async () => {
     refreshAllProUI();
   }
 });
+
+
 
 console.log("Script.js finished initial execution pass.")}); // <-- This closes the big DOMContentLoaded function
