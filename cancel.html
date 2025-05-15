@@ -5,12 +5,13 @@
   <title>Payment Cancelled</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #fff3f3;
+      font-family: Arial, sans-serif; /* Consistent font */
+      background: #fff3f3; /* Light red/pinkish for cancelled/error indication */
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0; /* Good practice */
     }
     .message {
       background: white;
@@ -20,7 +21,21 @@
       text-align: center;
     }
     .message h1 {
-      color: #dc3545;
+      color: #dc3545; /* Red for cancelled/error indication */
+    }
+    /* Added style for the link to make it look like other buttons/links */
+    .message a {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.8rem 1.5rem;
+        background-color: #6c757d; /* Secondary/neutral color */
+        color: white;
+        text-decoration: none;
+        border-radius: 8px; /* Consistent with other buttons */
+        transition: background-color 0.3s ease;
+    }
+    .message a:hover {
+        background-color: #5a6268; /* Darker secondary on hover */
     }
   </style>
 </head>

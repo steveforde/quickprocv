@@ -5,23 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>QuickProCV – Build Your Professional CV</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css"/>
-
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="top-bar">
-    <button id="theme-toggle">🌙 Dark Mode</button>
+  <!-- Top Bar -->
+   <div class="top-bar">
+    <button id="theme-toggle">🌗 Theme</button>
+    <button id="buy-pro-btn">Buy Pro</button>
     <button id="logout-btn">Logout</button>
-    <input type="color" id="color-picker" title="Pick your accent color" />
-  </div>
+    </div>
+    
+    <input type="color" id="accent-picker" title="Choose Accent Color" style="margin-right: 1rem;" />
 
+  <!-- Main Container -->
   <div class="container">
+    <!-- Left Form Column -->
     <div class="form-column">
       <h1>QuickProCV</h1>
-      <p id="welcome-msg"></p>
+      <p id="welcome-msg">Welcome! Please log in.</p>
 
       <label for="photo-upload">Profile Photo:</label>
       <input type="file" id="photo-upload" accept="image/*" />
+
       <button type="button" id="autofill-btn" class="button primary">⚡ Autofill Test CV</button>
 
       <form id="cv-form">
@@ -30,12 +35,13 @@
         <input type="email" id="email" placeholder="Email" />
         <input type="tel" id="phone" placeholder="Phone" />
         <input type="url" id="linkedin" placeholder="LinkedIn" />
+
         <div id="linkedin-container">
           <button type="button" id="linkedin-import" class="button primary">
             🔗 Import from LinkedIn <span class="lock-icon" title="Pro users only">🔒</span>
           </button>
         </div>
-        <button class="buy-pro-button" onclick="startCheckout()">Buy Pro</button>
+
         <input type="url" id="portfolio" placeholder="Portfolio" />
         <textarea id="summary" placeholder="Summary"></textarea>
         <textarea id="work" placeholder="Work Experience"></textarea>
@@ -45,23 +51,36 @@
         <textarea id="languages" placeholder="Languages"></textarea>
         <textarea id="skills" placeholder="Skills"></textarea>
         <textarea id="hobbies" placeholder="Hobbies"></textarea>
+
         <button type="submit">✨ Preview CV</button>
       </form>
+
+      <!-- Buy Pro -->
+      <button id="buy-pro-btn" class="button">Buy Pro</button>
     </div>
 
-
-    
-
+    <!-- Right Preview Column -->
     <div class="preview-column">
-      <h2>Choose Your Template</h2>
-      <div class="template-options">
-        <button class="template-card" data-template="tech" onclick="switchTemplate('tech')">Tech</button>
-        <button class="template-card" data-template="marketing" onclick="switchTemplate('marketing')">Marketing<span class="lock-icon">🔒</span></button>
-        <button class="template-card" data-template="business" onclick="switchTemplate('business')">Business<span class="lock-icon">🔒</span></button>
-        <button class="template-card" data-template="student" onclick="switchTemplate('student')">Student<span class="lock-icon">🔒</span></button>
-        <button class="template-card" data-template="temp" onclick="switchTemplate('temp')">Temp<span class="lock-icon">🔒</span></button>
-      </div>
+     <h2>Choose Your Template</h2>
+<div class="template-options">
+  <button type="button" class="template-card" data-template="tech">Tech</button>
+  <button type="button" class="template-card" data-template="marketing">
+    Marketing<span class="lock-icon">🔒</span>
+  </button>
+  <button type="button" class="template-card" data-template="business">
+    Business<span class="lock-icon">🔒</span>
+  </button>
+  <button type="button" class="template-card" data-template="student">
+    Student<span class="lock-icon">🔒</span>
+  </button>
+  <button type="button" class="template-card" data-template="temp">
+    Temp<span class="lock-icon">🔒</span>
+  </button>
+</div>
 
+
+
+      <!-- CV Preview Area -->
       <div id="cv-preview" class="preview-section card template-tech">
         <img id="profile-photo" src="" alt="Profile Photo" style="display: none;" />
         <div id="cv-header">
@@ -88,14 +107,10 @@
     </div>
   </div>
 
-  <!-- External Libraries -->
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script type="module" src="linkedin-server/auth.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js" defer></script>
-  <!-- Load Supabase -->
-
-
 </body>
 </html>

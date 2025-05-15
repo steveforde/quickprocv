@@ -2,33 +2,108 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Payment Successful</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Payment Successful – QuickProCV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #e0f7ff;
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
     }
-    .message {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+    .header-title {
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      color: #007bff;
       text-align: center;
     }
-    .message h1 {
-      color: #007bff;
+
+    .message-box {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .message-box h2 {
+      color: #28a745;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 1.8rem;
+    }
+
+    .message-box p {
+      font-size: 1.1rem;
+      color: #333;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .message-box .redirect-info {
+      font-size: 0.9rem;
+      color: #555;
+      margin-bottom: 25px;
+    }
+
+    .message-box a.button-link {
+      display: inline-block;
+      padding: 12px 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    .message-box a.button-link:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
-  <div class="message">
-    <h1>✅ Payment Successful!</h1>
-    <p>Thank you for upgrading to <strong>Pro</strong>.</p>
-    <a href="main.html">Back to CV Builder</a>
+  <h1 class="header-title">QuickProCV</h1>
+
+  <div class="message-box">
+    <h2>✅ Payment Successful!</h2>
+    <p>Thank you for upgrading to <strong>Pro</strong>. Your new features are now active!</p>
+    <p class="redirect-info">You will be redirected back to the CV Builder shortly.</p>
+    <a href="main.html" id="return-link" class="button-link">Go to CV Builder Now</a>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const emailFromUrl = params.get('email');
+  const returnLink = document.getElementById('return-link');
+  let redirectUrl = 'main.html';
+
+  if (emailFromUrl && emailFromUrl.includes('@')) {
+    localStorage.setItem('userEmail', emailFromUrl);
+    redirectUrl = `main.html?email=${encodeURIComponent(emailFromUrl)}`;
+    if (returnLink) returnLink.href = redirectUrl;
+    console.log('[success.html] Email saved to localStorage:', emailFromUrl);
+  } else {
+    console.warn('[success.html] Email not in URL, fallback to main.html');
+  }
+
+  console.log(`[success.html] Redirecting to: ${redirectUrl} in 4 sec`);
+  setTimeout(() => window.location.href = redirectUrl, 4000);
+});
+
+  </script>
 </body>
 </html>

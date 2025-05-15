@@ -24,9 +24,9 @@ app.post('/create-checkout-session', async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: 'http://localhost:5500/success.html',
-      cancel_url: 'http://localhost:5500/cancel.html',
-      customer_email: req.body.email, // ✅ Uses the email from frontend
+      customer_email: email,
+      success_url: `http://localhost:3001/success.html?email=${encodeURIComponent(email)}`,
+      cancel_url: `http://localhost:3001/main.html`,
     });
 
     res.json({ url: session.url });

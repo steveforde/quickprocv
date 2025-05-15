@@ -5,84 +5,69 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Register – QuickProCV</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
+  <link rel="stylesheet" href="style.css"/> <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: #f0f4f8;
+      background-color: var(--page-bg-light); /* Using CSS Variable */
+      color: var(--text-color-light);    /* Using CSS Variable */
       margin: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
     }
-
-    h1 {
-      margin-top: -60px;
+    .header-title {
+      margin-bottom: 30px;
       font-size: 2.5rem;
-      color: #007bff;
-    }
-
-    .register-box {
-      background: white;
-      padding: 40px;
-      border-radius: 16px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
-      max-width: 400px;
-      width: 100%;
-      margin-top: 20px;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    p {
+      color: var(--accent-color-dynamic); /* Using CSS Variable */
       text-align: center;
-      margin-top: 16px;
     }
-
-    a {
-      color: #007bff;
-      text-decoration: none;
+    .auth-box {
+      background: var(--card-bg-light); /* Using CSS Variable */
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      max-width: 450px; /* Made slightly wider */
+      width: 100%;
+      box-sizing: border-box;
     }
-
-    a:hover {
-      text-decoration: underline;
+    .auth-box h2 {
+        text-align: center;
+        color: var(--text-color-light);
+        margin-top: 0;
+        margin-bottom: 25px;
+        font-weight: 600;
     }
-
-    .back-link {
+    /* Assuming input styles are in style.css or add class="form-input" */
+    /* Button style will come from general 'button' rule in style.css */
+    .auth-box p {
+      text-align: center;
       margin-top: 20px;
+      font-size: 0.95rem;
+      color: #555;
     }
+    :root[data-theme='dark'] .auth-box p { color: #bbb; }
+    .auth-box a {
+      color: var(--accent-color-dynamic);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .auth-box a:hover { text-decoration: underline; }
+    .back-link { margin-top: 25px; font-size: 0.9rem; }
+    .back-link a { color: var(--accent-color-dynamic); text-decoration: none; }
+    .back-link a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <h1>QuickProCV</h1>
+  <h1 class="header-title">QuickProCV</h1>
 
-  <div class="register-box">
-    <input type="email" id="email" placeholder="Email" />
-    <input type="password" id="password" placeholder="Password" />
+  <div class="auth-box">
+    <h2>Create Account</h2>
+    <input type="email" id="email" class="form-input" placeholder="Email" required />
+    <input type="password" id="password" class="form-input" placeholder="Password" required />
     <button id="register-btn">Register</button>
     <p>Already have an account? <a href="login.html">Login</a></p>
   </div>
@@ -93,9 +78,27 @@
 
   <script>
     document.getElementById('register-btn').addEventListener('click', async () => {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-  
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      // Client-side validation
+      if (!email || !password) {
+        alert('Please enter both email and password.');
+        return;
+      }
+      if (!email.includes('@') || !email.includes('.')) { // Basic email check
+        alert('Please enter a valid email address.');
+        return;
+      }
+      if (password.length < 6) { // Example password policy
+        alert('Password must be at least 6 characters long.');
+        return;
+      }
+
+      console.log(`[Register.html] Attempting registration for: ${email}`);
+
       try {
         const response = await fetch('http://localhost:3002/api/register', {
           method: 'POST',
@@ -103,23 +106,22 @@
           body: JSON.stringify({ email, password })
         });
   
-        const result = await response.json();
+        const result = await response.json(); // Try to parse JSON always
   
         if (!response.ok) {
-          alert('Registration failed: ' + result.error);
+          console.error('[Register.html] Registration failed from backend:', response.status, result.error);
+          alert('Registration failed: ' + (result.error || 'An unknown error occurred. Please try again.'));
         } else {
-          // ✅ Insert user into `users` table
-          await fetch('http://localhost:3002/api/insert-user', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email })
-          });
-  
-          alert('Registration successful!');
-          window.location.href = 'main.html';
+          // Registration was successful according to the backend
+          // The backend /api/register ALREADY handles inserting into your public.users table.
+          console.log('[Register.html] Registration successful:', result.message);
+          alert('Registration successful! Please proceed to login.');
+          window.location.href = 'login.html'; // Redirect to LOGIN page
         }
       } catch (err) {
-        alert('Register error: ' + err.message);
+        // Catches network errors (e.g., auth.js server not running) or if response.json() fails
+        console.error('[Register.html] Registration fetch/network error or JSON parse error:', err);
+        alert('Register error: Failed to connect or server returned an invalid response. Please try again.');
       }
     });
   </script>

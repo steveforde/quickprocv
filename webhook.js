@@ -22,9 +22,29 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+
+
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const email = session.customer_email;
+  
+
+  const email = session.customer_email;
+
+  if (event.type === 'checkout.session.completed') {
+  const session = event.data.object;
+  const email = session.customer_email;
+
+  if (!email) {
+    console.error('❌ No customer_email in session');
+    return res.status(400).send('Missing customer email');
+  }
+
+  // ✅ continue with saving/updating database using the email
+  console.log(`✅ Payment completed for: ${email}`);
+  // e.g., await updateUserToPro(email);
+  res.status(200).send('Webhook processed');
+}
+
+ 
 
     if (!email) {
       console.error('❌ No customer_email in session');

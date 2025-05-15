@@ -1,34 +1,114 @@
 /* Updated full style.css content */
 :root {
-  --accent: #007bff;
-  --card: #ffffff;
-  --text: #000000;
-  --bg: #f4f4f4;
+  /* Original Theme Variables (Light Mode Defaults) */
+  --accent: #007bff; /* Consider phasing this out if --primary-action-color is its replacement */
+  --card: #ffffff;   /* Consider renaming to --card-bg-light for clarity */
+  --text: #000000;   /* Consider renaming to --text-color-light for clarity */
+  --bg: #f4f4f4;     /* Consider renaming to --page-bg-light for clarity */
+
+  /* Light Mode Specific Variables */
+  --text-color-light: #333333;
+  --card-bg-light: #ffffff;
+  --page-bg-light: #f4f4f4; /* Added for consistency */
+  --border-color-light: #cccccc; /* Added from previous suggestions */
+
+  /* Primary UI & Button Styling Variables - Light Mode */
+  --primary-action-color: #007bff;
+  --primary-action-hover-color: #0056b3;
+  --button-text-color: #ffffff; /* Primarily for buttons with --primary-action-color background */
+
+  /* Font and Sizing for "Big Blue Buttons" (Main Action Buttons) */
+  --main-btn-font-family: 'Inter', sans-serif;
+  --main-btn-font-weight: 600;
+  --main-btn-font-size: 1.05rem;
+  --main-btn-padding: 14px 20px;
+  --main-btn-radius: 8px;
+  --main-btn-margin-bottom: 15px;
+
+  /* Specific colors for top bar buttons - Light Mode */
+  --top-bar-theme-toggle-bg: #6c757d;
+  --top-bar-theme-toggle-hover-bg: #545b62;
+  --top-bar-buy-pro-bg: #28a745;
+  --top-bar-buy-pro-hover-bg: #218838;
+  --top-bar-logout-bg: var(--primary-action-color); /* Default blue for logout */
+  --top-bar-logout-hover-bg: var(--primary-action-hover-color);
+
+  /* For locked/disabled state - Light Mode */
+  --locked-bg-color: #adb5bd;
+  --locked-text-color: #495057;
+
+  /* For active template card - Light Mode */
+  --active-template-bg-color: #004494; /* Darker blue, or your choice */
+  --active-template-shadow: inset 0 0 8px rgba(0,0,0,0.3);
+} /* THIS CLOSES THE ONE AND ONLY :root BLOCK */
+
+html[data-theme='dark'] {
+  /* Dark Mode Specific Variables & Overrides */
+  --text-color-dark: #f0f0f0;
+  --card-bg-dark: #1e1e1e;
+  --page-bg-dark: #121212; /* Added for consistency */
+  --border-color-dark: #444444; /* Added from previous suggestions */
+
+  /* Override primary UI colors for dark mode if needed */
+  --primary-action-color: #58a6ff; /* Lighter blue for dark mode */
+  --primary-action-hover-color: #4090E8;
+  /* --button-text-color can often remain #ffffff, or change if needed for contrast with new --primary-action-color */
+  /* --button-text-color: #000000; /* Example if your dark mode blue was very light */
+
+  /* Specific colors for top bar buttons - Dark Mode */
+  --top-bar-theme-toggle-bg: #495057;
+  --top-bar-theme-toggle-hover-bg: #5c636a;
+  --top-bar-buy-pro-bg: #20c997; /* Teal for dark mode Buy Pro */
+  --top-bar-buy-pro-hover-bg: #1baa80;
+  /* --top-bar-logout-bg will use the dark mode's --primary-action-color */
+  /* --top-bar-logout-hover-bg will use the dark mode's --primary-action-hover-color */
+
+
+  /* For locked/disabled state - Dark Mode */
+  --locked-bg-color: #495057;
+  --locked-text-color: #adb5bd;
+
+  /* For active template card - Dark Mode */
+  --active-template-bg-color: #307ac2;
+  --active-template-shadow: inset 0 0 8px rgba(255,255,255,0.2);
+
+  /* Overriding original theme variables for dark mode for clarity if they are still used */
+  --accent: var(--primary-action-color); /* Make old --accent use new dark mode primary */
+  --card: var(--card-bg-dark);
+  --text: var(--text-color-dark);
+  --bg: var(--page-bg-dark);
 }
 
-:root[data-theme='dark'] {
-  --accent: #66aaff;
-  --card: #1e1e1e;
-  --text: #f0f0f0;
-  --bg: #121212;
-}
+/* --- END OF VARIABLES --- */
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--bg); /* Uses original --bg for now */
+  color: var(--text); /* Uses original --text for now */
   margin: 0;
   padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease; /* For theme switch */
 }
 
 .top-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between; /* Push color picker left, buttons right */
   align-items: center;
   gap: 1rem;
   padding: 10px 20px;
-  background: var(--card);
-  border-bottom: 1px solid #ccc;
+  background: var(--card); /* Uses original --card */
+  border-bottom: 1px solid var(--border-color-light); /* Use theme-aware border */
+}
+html[data-theme='dark'] .top-bar {
+  border-bottom-color: var(--border-color-dark);
+}
+
+.top-bar-left { /* For elements like color picker */
+  flex: 0 0 auto;
+}
+.top-bar-right { /* Container for theme, pro, logout buttons */
+  display: flex;
+  gap: 1rem;
 }
 
 .container {
@@ -40,337 +120,299 @@ body {
   padding: 20px;
 }
 
-
 .form-column,
 .preview-column {
   flex: 1 1 47%;
   min-width: 300px;
-  background-color: var(--card);
+  background-color: var(--card); /* Uses original --card */
   padding: 30px;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   box-sizing: border-box;
 }
 
-@media (max-width: 800px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .form-column,
-  .preview-column {
-    width: 100%;
-    min-width: unset;
-  }
-}
-
-input,
-textarea,
-button {
+/* General Input and Textarea Styling (excluding buttons here) */
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="color"]),
+textarea {
   width: 100%;
-  padding: 10px;
+  padding: 10px 15px;
   margin-bottom: 15px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color-light); /* Use theme-aware border */
   border-radius: 8px;
   font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+  background-color: var(--card-bg-light); /* Theme-aware background */
+  color: var(--text-color-light); /* Theme-aware text */
+}
+html[data-theme='dark'] input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="color"]),
+html[data-theme='dark'] textarea {
+  border-color: var(--border-color-dark);
+  background-color: var(--card-bg-dark);
+  color: var(--text-color-dark);
 }
 
+
+/* === STEP 1: Style ALL <button> elements to be "Big Blue Buttons" (Main Action Style) === */
 button {
-  background-color: var(--accent);
-  color: white;
+  display: flex;    /* For robust icon + text alignment */
+  align-items: center; /* Vertically center content */
+  justify-content: center; /* Horizontally center content */
+  width: 100%;       /* Default to full width for form context */
+  padding: var(--main-btn-padding);
+  font-family: var(--main-btn-font-family);
+  font-size: var(--main-btn-font-size);
+  font-weight: var(--main-btn-font-weight);
+  color: var(--button-text-color) !important; /* !important to ensure override of browser defaults */
+  background-color: var(--primary-action-color);
+  text-align: center; /* Fallback, flex handles primary centering */
+  text-decoration: none;
   border: none;
+  border-radius: var(--main-btn-radius);
   cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: var(--main-btn-margin-bottom);
+  box-sizing: border-box;
+  position: relative; /* For potential absolute positioned children like lock icons */
+}
+button:hover:not(:disabled):not(.locked-template):not(.locked) {
+  background-color: var(--primary-action-hover-color);
+  transform: translateY(-1px); /* Subtle lift */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* Subtle shadow */
 }
 
-button:hover {
-  background-color: #0056b3;
+/* Styling for icons placed directly inside buttons */
+button > .icon,
+button > svg {
+  margin-right: 8px; /* Adjust as needed, or use margin-left if icon is on the right */
+  /* Add specific icon sizing here if needed, e.g., width: 1em; height: 1em; */
 }
 
+/* === CSS FOR FULL-WIDTH, STACKED TEMPLATE BUTTONS === */
+
+/* === CSS FOR FULL-WIDTH, STACKED TEMPLATE BUTTONS (Text Color Fix) === */
+
+.template-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+button.template-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 15px;
+  font-family: var(--main-btn-font-family, 'Inter', sans-serif);
+  font-size: 0.9rem;
+  font-weight: var(--main-btn-font-weight, 600);
+  border-radius: var(--main-btn-radius, 8px);
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  box-sizing: border-box;
+  margin-bottom: 0;
+
+  /* Default state (LIGHT MODE - NOT ACTIVE) */
+  background-color: var(--card-bg-light, #ffffff);       /* e.g., White background */
+  color: var(--text-color-light, #333333) !important;   /* DARK TEXT for light mode */
+  border: 2px solid var(--primary-action-color, #007bff); /* Blue border */
+}
+
+/* DARK MODE - Default state for template cards (NOT ACTIVE) */
+html[data-theme='dark'] button.template-card {
+  background-color: var(--card-bg-dark, #1e1e1e);         /* e.g., Dark background */
+  color: var(--text-color-dark, #f0f0f0) !important;     /* LIGHT TEXT for dark mode */
+  border-color: var(--primary-action-color); /* Uses the --primary-action-color defined in html[data-theme='dark'] */
+}
+
+/* HOVER state for non-active, non-locked template cards (applies to both light and dark mode) */
+button.template-card:hover:not(:disabled):not(.locked-template):not(.locked):not(.active-template) {
+  background-color: var(--primary-action-color); /* Blue background on hover */
+  color: var(--button-text-color, #ffffff) !important; /* White text on hover */
+  border-color: var(--primary-action-color);   /* Border matches background */
+  transform: scale(1.01);
+}
+
+/* ACTIVE template card state (applies to both light and dark mode) */
+button.template-card.active-template {
+  background-color: var(--active-template-bg-color, var(--primary-action-color)) !important;
+  color: var(--button-text-color, #ffffff) !important; /* White text */
+  border-color: var(--active-template-bg-color, var(--primary-action-color)) !important;
+  transform: scale(1.01);
+}
+
+/* LOCKED state for template cards (applies to both light and dark mode) */
+button.template-card.locked-template,
+button.template-card.locked {
+  background-color: var(--locked-bg-color, #adb5bd) !important;
+  color: var(--locked-text-color, #495057) !important;
+  border-color: var(--locked-bg-color, #adb5bd) !important;
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Lock icon styling (remains the same) */
+button.template-card .lock-icon {
+  display: none;
+  margin-left: 6px;
+  font-size: 0.85em;
+}
+button.template-card.locked-template .lock-icon,
+button.template-card.locked .lock-icon {
+  display: inline !important;
+}
+
+/* === STEP 4: Specific Overrides for Top Bar Buttons === */
+/* These buttons are direct children of .top-bar-right */
+.top-bar-right button {
+  display: inline-flex; /* Ensure flex properties for icon alignment work */
+  flex: 1; /* Make buttons share space equally in the top bar */
+  width: auto; /* Overridden by flex:1, but good to note */
+  padding: 8px 15px; /* Smaller padding */
+  font-size: 0.9rem; /* Smaller font */
+  margin-bottom: 0;  /* No bottom margin */
+  /* Default background is primary blue, overridden below for specific ones */
+}
+
+/* Specific colors/styles for individual top bar buttons */
+.top-bar-right button#theme-toggle {
+  background-color: var(--top-bar-theme-toggle-bg);
+}
+.top-bar-right button#theme-toggle:hover:not(:disabled) {
+  background-color: var(--top-bar-theme-toggle-hover-bg);
+}
+
+.top-bar-right button#buy-pro-btn { /* Assumes this ID is for the top bar "Buy Pro" */
+  background-color: var(--top-bar-buy-pro-bg);
+}
+.top-bar-right button#buy-pro-btn:hover:not(:disabled) {
+  background-color: var(--top-bar-buy-pro-hover-bg);
+}
+
+/* Logout button in top bar (if it's just a <button> without a specific ID for color) */
+/* will already use var(--primary-action-color). If it has an ID like #logout-btn: */
+.top-bar-right button#logout-btn {
+  background-color: var(--top-bar-logout-bg);
+}
+.top-bar-right button#logout-btn:hover:not(:disabled) {
+  background-color: var(--top-bar-logout-hover-bg);
+}
+
+
+/* === STEP 5: Styling for <input type="file"> (Choose File Button) === */
+.custom-file-upload-button {
+  display: inline-flex; /* Or 'flex' if it should always be block-level and full width */
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Makes it full-width like other form inputs/buttons */
+  padding: var(--main-btn-padding);
+  font-family: var(--main-btn-font-family);
+  font-size: var(--main-btn-font-size);
+  font-weight: var(--main-btn-font-weight);
+  color: var(--button-text-color);
+  background-color: var(--primary-action-color);
+  text-align: center;
+  border: none;
+  border-radius: var(--main-btn-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: var(--main-btn-margin-bottom);
+  box-sizing: border-box;
+}
+.custom-file-upload-button:hover {
+  background-color: var(--primary-action-hover-color);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.custom-file-upload-button > .icon, /* If icon is direct child */
+.custom-file-upload-button > svg {
+  margin-right: 8px;
+}
+
+
+/* === Other Specific Button Instances === */
+/* Example: #download-pdf button or other specific primary action buttons */
+/* If they need to look exactly like the "Big Blue Buttons", they will automatically if they are <button> tags. */
+/* If they have IDs and specific styles, ensure they align or use variables. */
+#download-pdf { /* Assuming this is a button element */
+  /* It will inherit main button styles. If it needs specific margin or width: */
+  width: 90%; /* Example from your old CSS */
+  margin-left: auto; /* Example to center if width is not 100% */
+  margin-right: auto; /* Example to center */
+  /* padding: 14px 0; /* Your old CSS had this - this is 0 horizontal padding!
+                        It will use var(--main-btn-padding) (14px 20px) by default now.
+                        If you truly want 0 horizontal padding for this specific button, uncomment and adjust:
+  /* padding: var(--main-btn-padding-vertical, 14px) 0; */
+}
+
+/* #buy-pro-btn for the main content area (if different from top bar) */
+/* This button will already look like a "Big Blue Button" by default. */
+/* If it needs specific layout (e.g., margin-top), add that here: */
+#buy-pro-btn-main-content { /* Using a more specific ID if it's a different button */
+  margin-top: 10px; /* From your old CSS */
+  /* background-color: #007bff; /* No need, inherits from button rule */
+  /* color: white; /* No need, inherits */
+  /* etc. */
+}
+
+
+/* Input type color - keep existing style */
 input[type="color"] {
   width: 36px;
   height: 36px;
   border: none;
   padding: 0;
+  border-radius: 50%;
   cursor: pointer;
-}
-
-.template-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.template-card {
-  padding: 10px 20px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: var(--bg);
-  color: black;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
-}
-
-[data-theme="dark"] .template-card {
-  color: white;
-}
-
-.template-card.selected-template {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
-  cursor: default;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.4);
-  transform: scale(1.03);
-}
-
-.template-card.selected-template:hover {
-  transform: scale(1.03);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 
-.lock-icon {
-  display: none;
-  margin-left: 5px;
-}
-
-.template-card.locked {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.template-card.locked .lock-icon {
-  display: inline;
-}
-
-
-/* Preview Container */
-.preview-section {
+/* Preview Container & Content - Largely kept from your original, with minor variable integrations */
+.preview-section { /* This seems to be the main CV preview area */
   max-width: 794px;
-  min-height: 1123px;
+  min-height: 1123px; /* A4-ish */
   padding: 40px;
-  background: white;
-  color: black;
-  font-size: 0.95rem; /* adjust down slightly */
+  background: var(--card-bg-light); /* Use theme variable */
+  color: var(--text-color-light); /* Use theme variable */
+  font-size: 0.95rem;
   line-height: 1.5;
   box-shadow: 0 0 10px rgba(0,0,0,0.05);
   border-radius: 12px;
   box-sizing: border-box;
   position: relative;
   overflow-wrap: break-word;
+  margin: 0 auto; /* Center the preview section */
+}
+html[data-theme="dark"] .preview-section {
+  background: var(--card-bg-dark);
+  color: var(--text-color-dark);
 }
 
-#cv-preview section {
+#cv-preview section { /* Sections within the CV */
   margin-bottom: 20px;
+  page-break-inside: avoid;
+  border-bottom: 1px solid var(--border-color-light); /* Theme-aware */
+  padding-bottom: 8px;
+}
+html[data-theme="dark"] #cv-preview section {
+  border-bottom-color: var(--border-color-dark);
 }
 
-#cv-preview h3 {
-  margin-bottom: 6px;
-  font-size: 1rem;
-  color: var(--accent);
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 4px;
-}
-
-#cv-watermark {
-  font-size: 0.85rem;
-  opacity: 0.4;
-  margin-top: 20px;
-  text-align: center;
-}
-
-#download-pdf {
-  margin-top: 20px;
-  position: absolute;
-  right: 40px;
-  bottom: 20px;
-}
-
-/* Profile Photo */
-#profile-photo {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  margin-top: 30px;
-  border: 2px solid var(--accent);
-}
-
-/* Skill pills */
-#preview-skills span {
-  display: inline-block;
-  background: var(--accent);
-  color: white;
-  padding: 5px 10px;
-  margin: 4px 6px 0 0;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-
-/* === Template Variants === */
-.template-modern {
-  background-color: #fff;
-  color: #000;
-}
-
-.template-classic {
-  background-color: #fdfaf6;
-  font-family: Georgia, serif;
-  color: #222;
-}
-
-.template-tech {
-  background-color: #121212;
-  color: #fff;
-}
-
-.template-marketing {
-  background-color: #f0f8ff;
-  color: #333;
-}
-
-.template-business {
-  background-color: #f8f8f8;
-  font-family: 'Arial', sans-serif;
-}
-
-.template-student {
-  background-color: #fffef2;
-  font-size: 0.95rem;
-}
-
-.template-temp {
-  background-color: #ffffff;
-  border: 2px dashed var(--accent);
-  padding: 32px;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-2deg); }
-  50% { transform: rotate(2deg); }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
-}
-
-.fade-theme {
-  transition: background 0.4s ease, color 0.4s ease;
-}
-
-.shake {
-  animation: shake 0.4s;
-}
-
-/* Responsive */
-@media (max-width: 800px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .form-column,
-  .preview-column {
-    width: 100%;
-  }
-
-  #cv-preview {
-    padding: 20px;
-  }
-}
-
-/* Fix neon buttons - brand color */
-button,
-#download-pdf {
-  background-color: #007bff;
-  color: white;
-  font-weight: 600;
-  padding: 12px 20px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-button:hover,
-#download-pdf:hover {
-  background-color: #0056b3;
-}
-
-/* Fix dark mode text visibility */
-[data-theme="dark"] #cv-preview {
-  background-color: #121212;
-  color: #f0f0f0;
-}
-
-[data-theme="dark"] #cv-preview h1,
-[data-theme="dark"] #cv-preview h2,
-[data-theme="dark"] #cv-preview h3,
-[data-theme="dark"] #cv-preview p,
-[data-theme="dark"] #cv-preview span,
-[data-theme="dark"] #cv-preview a {
-  color: #f0f0f0;
-}
-
-/* Ensure watermark stands out in dark mode */
-#cv-watermark {
-  font-size: 0.85rem;
-  text-align: center;
-  margin-top: 20px;
-  color: rgba(100, 100, 100, 0.6);
-}
-
-[data-theme="dark"] #cv-watermark {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-/* Fix preview alignment and responsiveness */
-.preview-section {
-  max-width: 794px;
-  width: 100%;
-  padding: 40px;
-  box-sizing: border-box;
-  background-color: white;
-  margin: 0 auto;
-}
-/* A4-friendly layout */
-#cv-preview {
-  max-width: 794px; /* A4 width in pixels at 96dpi */
-  margin: 0 auto;
-  background: var(--card);
-  padding: 40px;
-  box-sizing: border-box;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 1.5;
-  }
-
-
-/* Profile photo size refinement */
-#profile-photo {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  margin: 0 auto 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Header name/title adjustments */
 #cv-preview h1#preview-name {
   text-align: center;
   font-size: 24px;
   margin: 8px 0 2px;
   font-weight: 700;
+  color: var(--primary-action-color); /* Make name prominent */
 }
 
 #cv-preview p#preview-title {
@@ -378,290 +420,196 @@ button:hover,
   font-size: 14px;
   margin: 0 0 8px;
   font-style: italic;
-  color: var(--text);
+  color: var(--text); /* Uses original --text variable */
 }
 
-#cv-preview p#preview-contact,
-#cv-preview p#preview-links {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text);
-  margin: 4px 0;
-}
-
-/* Section spacing */
-#cv-preview section {
-  margin: 16px 0;
-  border-bottom: 1px solid #444;
-  padding-bottom: 8px;
-}
-
-/* Headings inside preview */
-#cv-preview h3 {
-  font-size: 14px;
-  margin-bottom: 4px;
+#cv-preview h3 { /* Section headings within CV */
+  margin-bottom: 6px;
+  font-size: 1rem; /* Or 14px as you had later */
+  color: var(--primary-action-color); /* Use accent for these headings */
+  /* border-bottom: 1px solid #ddd; */ /* Covered by section border now */
+  padding-bottom: 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--accent);
 }
 
-/* Skills badges */
-#preview-skills span {
-  display: inline-block;
-  background-color: var(--accent);
-  color: #fff;
-  font-size: 12px;
-  padding: 4px 8px;
-  margin: 3px 3px 0 0;
-  border-radius: 6px;
-}
-
-/* Watermark style */
 #cv-watermark {
-  font-size: 11px;
+  font-size: 0.85rem;
   text-align: center;
   margin-top: 30px;
   color: rgba(100, 100, 100, 0.6);
 }
-
-/* Better in dark mode */
-[data-theme="dark"] {
-  --card: #121212;
-  --text: #eeeeee;
-  --accent: #7d5fff;
+html[data-theme="dark"] #cv-watermark {
+  color: rgba(255, 255, 255, 0.3);
 }
 
-[data-theme="dark"] #cv-watermark {
-  color: rgba(255, 255, 255, 0.2);
+#profile-photo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 20px; /* Center and provide bottom margin */
+  border: 2px solid var(--primary-action-color);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-[data-theme="light"] .template-card {
-  color: #000; /* Black text in light mode */
-}
-
-[data-theme="dark"] .template-card {
-  color: #fff; /* White text in dark mode (already working) */
-}
-
-/* TECH TEMPLATE */
-.template-tech {
-  background-color: #1a1a1a;
-  color: #f9f9f9;
-  font-family: 'Inter', sans-serif;
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-
-.template-tech h1,
-.template-tech h2,
-.template-tech h3 {
-  color: #00bfff;
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-
-.template-tech a {
-  color: #00bfff;
-  text-decoration: underline;
-}
-
-.template-tech section {
-  margin-bottom: 24px;
-}
-
-.template-tech p,
-.template-tech span {
-  color: #f1f1f1;
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-.template-tech #cv-watermark {
-  color: #ffffff;
-  font-size: 0.75rem;
-  opacity: 0.3;
-  text-align: center;
-  margin-top: 20px;
-}
-
-.template-tech #download-pdf {
-  background-color: #00bfff;
-  color: #1a1a1a;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: bold;
-  margin-top: 20px;
-  cursor: pointer;
-}
-
-.template-tech #download-pdf:hover {
-  background-color: #0099cc;
-}
-.template-tech {
-  background-color: #1c1c1c !important;
-  color: #ffffff !important;
-}
-
-.template-tech h1,
-.template-tech h2,
-.template-tech h3,
-.template-tech p,
-.template-tech a {
-  color: #ffffff !important;
-}
-
-/* Marketing Template */
-.template-marketing {
-  background-color: #fff8f5;
-  color: #333;
-  padding: 30px;
-  font-family: 'Inter', sans-serif;
-}
-
-.template-marketing h1,
-.template-marketing h3 {
-  color: #ff6f61;
-}
-
-.template-marketing h3 {
-  border-left: 4px solid #ff6f61;
-  padding-left: 10px;
-  margin-bottom: 8px;
-}
-
-.template-marketing a {
-  color: #ff6f61;
-}
-
-.template-marketing .preview-section {
-  border: 2px solid #ffd8cc;
-  border-radius: 10px;
-  padding: 20px;
-}
-
-.preview-section section p {
-  margin-bottom: 12px;
-  line-height: 1.6;
-}
-
-.preview-section section p::before {
-  content: "• ";
-  color: var(--accent, #007bff);
-  font-weight: bold;
+#preview-skills span { /* Skill pills */
   display: inline-block;
-  margin-right: 6px;
+  background: var(--primary-action-color);
+  color: var(--button-text-color);
+  padding: 5px 10px;
+  margin: 4px 6px 0 0;
+  border-radius: 6px;
+  font-size: 0.9rem;
 }
 
-.preview-section section {
-  margin-bottom: 20px;
-  page-break-inside: avoid;
-}
-.preview-section ul {
-  padding-left: 20px;
-  margin: 0;
-}
+/* Template Specific Preview Styles (e.g., .template-modern, .template-tech) */
+/* Keep your existing .template-X styles as they define content appearance, not primary UI buttons */
+.template-modern { background-color: #fff; color: #000; }
+.template-classic { background-color: #fdfaf6; font-family: Georgia, serif; color: #222; }
+/* ... other .template-X styles ... */
 
-.preview-section li {
-  margin-bottom: 6px;
-  line-height: 1.5;
-}
-
-.download-wrapper {
-  width: 100%;
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-}
-
-#download-pdf {
-  background-color: #007bff; /* Match top buttons */
-  color: white !important;   /* Force white text */
-  font-weight: 600;
-  font-size: 1.05rem;
-  border: none;
-  border-radius: 8px;
-  padding: 14px 0;
-  width: 90%;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
-}
-
-#download-pdf:hover {
-  background-color: #006be0;
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(0, 123, 255, 0.45);
-}
-
-
-
-
-
-
-button, .template-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-button:hover, .template-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4); /* subtle blue glow */
-}
-
-/* Shared button style */
-button {
+.template-tech {
+  background-color: #1a1a1a !important; /* Keep important if necessary for specificity */
+  color: #f9f9f9 !important;
   font-family: 'Inter', sans-serif;
-  font-weight: 600;
-  background-color: #007bff; /* same as top buttons */
-  color: white;
+  padding: 40px; /* This styles the preview when tech template is active */
+}
+.template-tech h1, .template-tech h2, .template-tech h3 { color: #00bfff; }
+.template-tech a { color: #00bfff; }
+.template-tech p, .template-tech span { color: #f1f1f1; }
+.template-tech #cv-watermark { color: #ffffff; opacity: 0.3; }
+/* The #download-pdf inside .template-tech might need special styling if it should look different from main download button */
+/* .template-tech button#download-pdf { background-color: #00bfff; color: #1a1a1a; } */
+
+.template-marketing { background-color: #fff8f5; color: #333; }
+.template-marketing h1, .template-marketing h3 { color: #ff6f61; }
+/* ... etc ... */
+
+
+/* Responsive Styles */
+@media (max-width: 800px) {
+  .container {
+    flex-direction: column;
+  }
+  .form-column,
+  .preview-column {
+    width: 100%;
+    min-width: unset;
+  }
+  #cv-preview, .preview-section { /* Ensure preview padding is also responsive if needed */
+    padding: 20px;
+  }
+  .top-bar {
+    flex-direction: column; /* Stack elements in top bar */
+    align-items: stretch; /* Make items full width */
+  }
+  .top-bar-right {
+    flex-direction: column; /* Stack buttons */
+    width: 100%;
+  }
+  .top-bar-right button {
+    width: 100%; /* Make buttons full width in stacked mobile view */
+  }
+}
+
+/* Animations - Keep as is */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes wiggle { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.fade-theme { transition: background 0.4s ease, color 0.4s ease; }
+.shake { animation: shake 0.4s; }
+
+/* From your CSS for top bar layout */
+.top-bar-right { /* Container for the buttons on the right */
+  display: flex;
+  flex: 1; /* Makes this group take available space */
+  gap: 1rem; /* Space between buttons */
+  justify-content: flex-end; /* Align buttons to the right end */
+}
+
+/* Styling for buttons specifically within .top-bar-right */
+.top-bar-right button {
+  display: inline-flex; /* Ensure flex properties for icon alignment work */
+  align-items: center; /* Vertically center text/icon */
+  justify-content: center; /* Horizontally center text/icon */
+  flex: 1; /* Make buttons share space equally in the top bar */
+  /* width: auto; /* Overridden by flex:1, but good to note */
+  padding: 8px 15px; /* Smaller padding */
+  font-size: 0.9rem; /* Smaller font */
+  margin-bottom: 0;  /* No bottom margin */
+  color: var(--button-text-color) !important; /* Explicitly set text color */
+  /* Default background is primary blue, overridden below for specific ones */
+  /* Ensure no !important on background color in the general button rule is fighting this */
+}
+
+/* Specific colors/styles for individual top bar buttons (using IDs is fine here) */
+.top-bar-right button#theme-toggle {
+  background-color: var(--top-bar-theme-toggle-bg);
+  /* If --top-bar-theme-toggle-bg is dark, --button-text-color (white) should be fine. */
+  /* If --button-text-color is not white or --top-bar-theme-toggle-bg is light, override color here: */
+  /* color: #yourSpecificTextColorForDarkButton; */
+}
+/* ... hover styles ... */
+
+.top-bar-right button#buy-pro-btn-topbar { /* Assuming you changed ID */
+  background-color: var(--top-bar-buy-pro-bg);
+}
+/* ... hover styles ... */
+
+.top-bar-right button#logout-btn {
+  background-color: var(--top-bar-logout-bg); /* Should be your primary blue */
+}
+/* ... hover styles ... */
+/* === TOP BAR BUTTONS: 1/3 OF FULL SCREEN WIDTH EACH === */
+
+.top-bar {
+  display: flex;         /* Arrange buttons in a row */
+  width: 100%;           /* Ensure the top bar spans the full screen width */
+  padding: 0;            /* Remove padding if buttons should touch screen edges */
+  margin: 0;             /* Remove margin */
+  /* background-color: #f0f0f0; /* Optional: background for the bar itself */
+}
+
+/* Styling for ALL buttons directly inside .top-bar */
+.top-bar button {
+  flex: 1; /* IMPORTANT: Makes each button take up an equal share (1/3) of .top-bar's width */
+  
+  background-color: #007bff; /* YOUR DESIRED BLUE COLOR */
+  color: #ffffff;            /* White text */
+  
   border: none;
-  border-radius: 8px;
-  padding: 14px 0;
-  font-size: 1.05rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-}
-
-button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(0, 123, 255, 0.45);
-  background-color: #006be0;
-}
-
-.lock-icon {
-  display: none;
-  margin-left: 6px;
-  font-size: 0.9em;
-  color: #999;
-}
-.locked {
-  opacity: 0.6;
-  pointer-events: none;
-  cursor: not-allowed;
-}
-
-button.locked {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-#buy-pro-btn {
-  width: 100%;
-  padding: 14px 0;
-  background-color: #007bff;
-  color: white;
+  padding: 12px 5px; /* Adjust padding: 12px top/bottom (a bit taller), 5px left/right */
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;         /* Slightly larger font for bigger buttons */
   font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  margin-top: 10px;
+  border-radius: 0px;      /* No rounded corners if they should be flush */
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  transition: background-color 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0; /* Remove any default button margins */
 }
 
-#buy-pro-btn:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
-  box-shadow: 0 6px 18px rgba(0, 123, 255, 0.45);
+.top-bar button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
 }
+
+/* If you still have .top-bar-left and it needs to be hidden or managed */
+.top-bar-left {
+  display: none; /* Hide it for this layout */
+  /* Or, if you want it overlaid: */
+  /* position: absolute; */
+  /* top: 10px; */
+  /* left: 10px; */
+  /* z-index: 10; */
+}
+
+/* --- End of focused top bar button CSS --- */
