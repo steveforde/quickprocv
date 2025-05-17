@@ -634,9 +634,6 @@ body {
   transition: background-color 0.3s, color 0.3s;
 }
 
-:root {
-  --accent: #007bff;
-}
 
 button {
   background-color: var(--accent);
@@ -707,5 +704,46 @@ h1.main-title {
   color: var(--accent);
 }
 #cv-preview hr {
+  border-color: var(--accent);
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+#preview-links {
+  margin-top: 6px;
+  text-align: center;
+}
+
+.accent-wrapper {
+  margin-left: 20px; /* or try 30px if you want more space */
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+}
+
+#accent-picker {
+  width: 36px;
+  height: 36px;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1.main-title,
+#preview-name,
+#cv-preview h2,
+#cv-preview h3,
+#cv-preview a,
+#cv-preview li::marker,
+#cv-preview hr {
+  color: var(--accent);
   border-color: var(--accent);
 }

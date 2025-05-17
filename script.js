@@ -306,24 +306,25 @@ themeToggleBtn.addEventListener('click', () => {
 
  
   // Accent Color Picker Setup (Fixing double declaration issue)
-  const accentPicker = document.getElementById('accent-picker');
+ const accentPicker = document.getElementById('accent-picker');
 
-  if (accentPicker) {
-    const savedAccent = localStorage.getItem('accentColor');
-    if (savedAccent) {
-      document.documentElement.style.setProperty('--accent', savedAccent);
-      accentPicker.value = savedAccent;
-    }
+if (accentPicker) {
+  const defaultAccent = '#007bff';
+  const savedAccent = localStorage.getItem('accentColor') || defaultAccent;
 
-    accentPicker.addEventListener('input', (e) => {
-      const color = e.target.value;
-      document.documentElement.style.setProperty('--accent', color);
-      localStorage.setItem('accentColor', color);
-      console.log("[Accent Picker] Updated color to:", color);
-    });
-  } else {
-    console.warn("🎨 Color picker not found.");
-  }
+  // Set the saved color on page load
+  document.documentElement.style.setProperty('--accent', savedAccent);
+  accentPicker.value = savedAccent;
+
+  // Listen to all changes including slider drag
+  accentPicker.addEventListener('input', (e) => {
+    const newColor = e.target.value;
+    document.documentElement.style.setProperty('--accent', newColor);
+    localStorage.setItem('accentColor', newColor);
+    console.log('[Accent Picker] Changed to:', newColor);
+  });
+}
+
    
 
   // Logout Button
