@@ -747,3 +747,67 @@ h1.main-title,
   color: var(--accent);
   border-color: var(--accent);
 }
+
+
+/* MARKETING CV STYLE */
+.template-marketing {
+  background-color: #fff8f5; /* light peachy background */
+  color: #333333;
+  font-family: 'Georgia', serif;
+  padding: 40px;
+  line-height: 1.6;
+}
+
+.template-marketing h1,
+.template-marketing h2,
+.template-marketing h3,
+.template-marketing .section-heading {
+  color: #00aa00; /* Green for light mode */
+}
+
+.template-marketing a {
+  color: #00aa00;
+}
+
+.template-marketing #cv-watermark {
+  color: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode version of marketing template */
+html[data-theme="dark"] .template-marketing {
+  background-color: #2a2321; /* warm coffee brown */
+  color: #e8e6e3; /* soft beige */
+}
+
+html[data-theme="dark"] .template-marketing h1,
+html[data-theme="dark"] .template-marketing h2,
+html[data-theme="dark"] .template-marketing h3,
+html[data-theme="dark"] .template-marketing .section-heading {
+  color: #88ff88; /* soft green glow */
+}
+
+html[data-theme="dark"] .template-marketing a {
+  color: #88ff88;
+}
+
+html[data-theme="dark"] .template-marketing #cv-watermark {
+  color: rgba(255, 255, 255, 0.2);
+}
+html[data-theme="dark"] .template-marketing {
+  background-color: #3a2f2c;
+}
+
+.template-marketing a:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+.template-marketing {
+  box-shadow: 0 0 8px rgba(0,0,0,0.2); /* optional */
+  border: 1px solid rgba(0,0,0,0.1); /* light border */
+}
+
+.template-marketing h1,
+.template-marketing .main-title {
+  font-family: 'Playfair Display', serif;
+}
