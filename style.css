@@ -464,28 +464,7 @@ html[data-theme="dark"] #cv-watermark {
   font-size: 0.9rem;
 }
 
-/* Template Specific Preview Styles (e.g., .template-modern, .template-tech) */
-/* Keep your existing .template-X styles as they define content appearance, not primary UI buttons */
-.template-modern { background-color: #fff; color: #000; }
-.template-classic { background-color: #fdfaf6; font-family: Georgia, serif; color: #222; }
-/* ... other .template-X styles ... */
 
-.template-tech {
-  background-color: #1a1a1a !important; /* Keep important if necessary for specificity */
-  color: #f9f9f9 !important;
-  font-family: 'Inter', sans-serif;
-  padding: 40px; /* This styles the preview when tech template is active */
-}
-.template-tech h1, .template-tech h2, .template-tech h3 { color: #00bfff; }
-.template-tech a { color: #00bfff; }
-.template-tech p, .template-tech span { color: #f1f1f1; }
-.template-tech #cv-watermark { color: #ffffff; opacity: 0.3; }
-/* The #download-pdf inside .template-tech might need special styling if it should look different from main download button */
-/* .template-tech button#download-pdf { background-color: #00bfff; color: #1a1a1a; } */
-
-.template-marketing { background-color: #fff8f5; color: #333; }
-.template-marketing h1, .template-marketing h3 { color: #ff6f61; }
-/* ... etc ... */
 
 
 /* Responsive Styles */
@@ -749,6 +728,56 @@ h1.main-title,
 }
 
 
+/* ========== Base CV Spacing for All Templates ========== */
+/* === UNIVERSAL CV SECTION SPACING & HEADING CONTROL === */
+
+.cv-section {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.cv-section h2,
+.cv-section .section-heading {
+  margin-bottom: 0.5rem;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* light divider line */
+}
+
+html[data-theme="dark"] .cv-section h2,
+html[data-theme="dark"] .cv-section .section-heading {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cv-section p,
+.cv-section div {
+  margin-top: 0.5rem;
+}
+/* ========== CV Template Styles ========== */
+
+/* --- Tech Template --- */
+.template-tech {
+  background-color: #1a1a1a !important; /* Keep important if necessary for specificity */
+  color: #f9f9f9 !important;
+  font-family: 'Inter', sans-serif;
+  padding: 40px; /* This styles the preview when tech template is active */
+}
+.template-tech h1,
+.template-tech h2,
+.template-tech h3 {
+  color: #00bfff;
+}
+.template-tech a {
+  color: #00bfff;
+}
+.template-tech p,
+.template-tech span {
+  color: #f1f1f1;
+}
+.template-tech #cv-watermark {
+  color: #ffffff;
+  opacity: 0.3;
+}
+
 /* MARKETING CV STYLE */
 .template-marketing {
   background-color: #fff8f5; /* light peachy background */
@@ -810,4 +839,190 @@ html[data-theme="dark"] .template-marketing {
 .template-marketing h1,
 .template-marketing .main-title {
   font-family: 'Playfair Display', serif;
+}
+
+/* LIGHT MODE BUSINESS */
+:root {
+  --business-accent-light: #2a3f5f;
+  --business-bg-light: #f5f7fa;
+
+  --business-accent-dark: #69a6ff;
+  --business-bg-dark: #1c1f26;
+}
+
+/* Light Mode */
+.template-business {
+  background-color: var(--business-bg-light);
+  color: #1a1a1a;
+  font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+  padding: 40px;
+  line-height: 1.6;
+}
+
+.template-business h1,
+.template-business h2,
+.template-business h3,
+.template-business .section-heading {
+  color: var(--business-accent-light);
+  border-left: 4px solid var(--business-accent-light);
+  padding-left: 10px;
+}
+
+.template-business a {
+  color: var(--business-accent-light);
+}
+
+.template-business h2,
+.template-business h3,
+.template-business .section-heading {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+/* Dark Mode */
+html[data-theme="dark"] .template-business {
+  background-color: var(--business-bg-dark);
+  color: #e0e4ec;
+}
+
+html[data-theme="dark"] .template-business h1,
+html[data-theme="dark"] .template-business h2,
+html[data-theme="dark"] .template-business h3,
+html[data-theme="dark"] .template-business .section-heading {
+  color: var(--business-accent-dark);
+  border-left: 4px solid var(--business-accent-dark);
+  padding-left: 10px;
+}
+
+html[data-theme="dark"] .template-business a {
+  color: var(--business-accent-dark);
+}
+
+/* STUDENT CV STYLE */
+.template-student {
+  background-color: #e8f0fe; /* soft blue tint */
+  color: #1a1a1a;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  padding: 40px;
+  line-height: 1.6;
+}
+
+
+
+.template-student h1,
+.template-student h2,
+.template-student h3,
+.template-student .section-heading {
+  color: #007acc; /* vibrant student blue */
+}
+
+.template-student a {
+  color: #007acc;
+}
+
+.template-student #cv-watermark {
+  color: rgba(0, 0, 0, 0.1);
+}
+
+/* DARK MODE */
+html[data-theme="dark"] .template-student {
+  background-color: #0f1b2b; /* deep navy */
+  color: #e6f1ff;
+}
+
+html[data-theme="dark"] .template-student h1,
+html[data-theme="dark"] .template-student h2,
+html[data-theme="dark"] .template-student h3,
+html[data-theme="dark"] .template-student .section-heading {
+  color: #4fc3f7; /* lighter blue */
+}
+
+html[data-theme="dark"] .template-student a {
+  color: #4fc3f7;
+}
+
+html[data-theme="dark"] .template-student #cv-watermark {
+  color: rgba(255, 255, 255, 0.1);
+}
+
+.template-temp {
+  background-color: #fefefe;
+  color: #222;
+  font-family: 'Trebuchet MS', sans-serif;
+  border-left: 6px solid var(--primary-action-color); /* was #ffcc00 */
+  padding: 40px;
+  line-height: 1.4;
+}
+
+.template-temp h1,
+.template-temp h2,
+.template-temp h3,
+.template-temp .section-heading {
+  color: var(--primary-action-color); /* was #e67e22 */
+  border-bottom: 2px dashed var(--primary-action-color); /* was #ffcc00 */
+  padding-bottom: 4px;
+}
+
+.template-temp a {
+  color: var(--primary-action-color); /* was #e67e22 */
+}
+
+.template-temp #cv-watermark {
+  color: rgba(0, 0, 0, 0.15);
+}
+
+/* DARK MODE */
+html[data-theme="dark"] .template-temp {
+  background-color: #1e1e1e;
+  color: #f0f0f0;
+  font-family: 'Trebuchet MS', sans-serif;
+  border-left: 6px solid var(--primary-action-color); /* unified */
+}
+
+html[data-theme="dark"] .template-temp h1,
+html[data-theme="dark"] .template-temp h2,
+html[data-theme="dark"] .template-temp h3,
+html[data-theme="dark"] .template-temp .section-heading {
+  color: var(--primary-action-color); /* unified color */
+  border-bottom: 2px dashed var(--primary-action-color); /* unified */
+}
+
+html[data-theme="dark"] .template-temp a {
+  color: var(--primary-action-color); /* unified */
+}
+
+html[data-theme="dark"] .template-temp #cv-watermark {
+  color: rgba(255, 255, 255, 0.1);
+}
+
+
+.cv-section {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.cv-section .section-heading {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-color-light);
+  padding-bottom: 4px;
+}
+
+html[data-theme="dark"] .cv-section .section-heading {
+  border-bottom: 1px solid var(--border-color-dark);
+}
+
+
+.ai-button {
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  margin-top: 0.5rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: not-allowed;
+  opacity: 0.6; /* slightly faded since it's locked */
 }

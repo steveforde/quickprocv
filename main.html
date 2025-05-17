@@ -33,31 +33,57 @@
 
       <button type="button" id="autofill-btn" class="button primary">⚡ Autofill Test CV</button>
 
-      <form id="cv-form">
-        <input type="text" id="jobTitle" placeholder="Job Title" />
-        <input type="text" id="name" placeholder="Full Name" />
-        <input type="email" id="email" placeholder="Email" />
-        <input type="tel" id="phone" placeholder="Phone" />
-        <input type="url" id="linkedin" placeholder="LinkedIn" />
+     <form id="cv-form">
+  <input type="text" id="jobTitle" placeholder="Job Title" />
+  <input type="text" id="name" placeholder="Full Name" />
+  <input type="email" id="email" placeholder="Email" />
+  <input type="tel" id="phone" placeholder="Phone" />
+  <input type="url" id="linkedin" placeholder="LinkedIn" />
 
-        <div id="linkedin-container">
-          <button type="button" id="linkedin-import" class="button primary">
-            🔗 Import from LinkedIn <span class="lock-icon" title="Pro users only">🔒</span>
-          </button>
-        </div>
+  <div id="linkedin-container">
+    <button type="button" id="linkedin-import" class="button primary">
+      🔗 Import from LinkedIn <span class="lock-icon" title="Pro users only">🔒</span>
+    </button>
+  </div>
 
-        <input type="url" id="portfolio" placeholder="Portfolio" />
-        <textarea id="summary" placeholder="Summary"></textarea>
-        <textarea id="work" placeholder="Work Experience"></textarea>
-        <textarea id="education" placeholder="Education"></textarea>
-        <textarea id="projects" placeholder="Projects"></textarea>
-        <textarea id="certifications" placeholder="Certifications"></textarea>
-        <textarea id="languages" placeholder="Languages"></textarea>
-        <textarea id="skills" placeholder="Skills"></textarea>
-        <textarea id="hobbies" placeholder="Hobbies"></textarea>
+  <button type="button" class="ai-button" disabled>Generate Cover Letter 🔒</button>
 
-        <button type="submit">✨ Preview CV</button>
-      </form>
+
+  <input type="url" id="portfolio" placeholder="Portfolio" />
+
+  <label for="summary">Summary</label>
+  <textarea id="summary" placeholder="Summary"></textarea>
+  <button class="ai-button" disabled title="Pro feature – AI summary generation">Generate with AI 🔒</button>
+
+  <label for="work">Work Experience</label>
+  <textarea id="work" placeholder="Work Experience"></textarea>
+  <button class="ai-button" disabled title="Pro feature – AI work experience help">Generate with AI 🔒</button>
+
+  <label for="education">Education <span class="tooltip-icon" title="Pro tip – How to write student CVs">❓</span></label>
+  <textarea id="education" placeholder="Education"></textarea>
+
+  <label for="projects">Projects</label>
+  <textarea id="projects" placeholder="Projects"></textarea>
+  <button class="ai-button" disabled title="Pro feature – AI project bullet points">Generate with AI 🔒</button>
+
+  <label for="certifications">Certifications <span class="tooltip-icon" title="Pro tip – List most recent first">❓</span></label>
+  <textarea id="certifications" placeholder="Certifications"></textarea>
+
+  <label for="languages">Languages</label>
+  <textarea id="languages" placeholder="Languages"></textarea>
+
+  <label for="skills">Skills</label>
+  <span class="pro-tooltip" title="Pro users can generate skill sets based on job title">?</span>
+  </label>
+  <textarea id="skills" placeholder="Skills"></textarea>
+  <button type="button" class="ai-button" disabled>Generate with AI 🔒</button>
+
+
+  <label for="hobbies">Hobbies</label>
+  <textarea id="hobbies" placeholder="Hobbies"></textarea>
+
+  <button type="submit">✨ Preview CV</button>
+</form>
 
       <!-- Buy Pro -->
       <button id="buy-pro-btn" class="button">Buy Pro</button>
@@ -94,14 +120,17 @@
           <p id="preview-links"></p>
         </div>
 
-        <section><h3>Summary</h3><p id="preview-summary"></p></section>
-        <section><h3>Work Experience</h3><p id="preview-work"></p></section>
-        <section><h3>Education</h3><p id="preview-education"></p></section>
-        <section><h3>Projects</h3><p id="preview-projects"></p></section>
-        <section><h3>Certifications</h3><p id="preview-certifications"></p></section>
-        <section><h3>Languages</h3><p id="preview-languages"></p></section>
-        <section><h3>Skills</h3><div id="preview-skills"></div></section>
-        <section><h3>Hobbies</h3><p id="preview-hobbies"></p></section>
+        <section class="cv-section"><h3 class="section-heading">Summary</h3><p id="preview-summary"></p></section>
+        
+        <section class="cv-section"><h3 class="section-heading">Work Experience</h3><p id="preview-work"></p></section>
+        
+        <section class="cv-section"><h3 class="section-heading">Education</h3><p id="preview-education"></p></section>
+        <section class="cv-section"><h3 class="section-heading">Projects</h3><p id="preview-projects"></p></section>
+        <section class="cv-section"><h3 class="section-heading">Certifications</h3><p id="preview-certifications"></p></section>
+        <section class="cv-section"><h3 class="section-heading">Languages</h3><p id="preview-languages"></p></section>
+        <section class="cv-section"><h3 class="section-heading">Skills</h3><div id="preview-skills"></div></section>
+        <section class="cv-section"><h3 class="section-heading">Hobbies</h3><p id="preview-hobbies"></p></section>
+
 
         <p class="watermark" id="cv-watermark">Made with QuickProCV — Upgrade to remove watermark</p>
         <div class="download-wrapper">
