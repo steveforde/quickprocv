@@ -1026,3 +1026,21 @@ html[data-theme="dark"] .cv-section .section-heading {
   cursor: not-allowed;
   opacity: 0.6; /* slightly faded since it's locked */
 }
+.ai-button {
+  background-color: var(--accent);
+  color: #fff;
+  opacity: 1;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.ai-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-button.locked {
+  background-color: lightblue;
+  cursor: not-allowed;
+  opacity: 0.5;
+}

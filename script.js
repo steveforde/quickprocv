@@ -5,6 +5,46 @@ console.log("Script.js starting execution.");
 const premiumTemplates = ['marketing', 'business', 'classic', 'student', 'temp'];
 let isPro = false;
 
+function unlockAIButtons() {
+  console.log("[unlockAIButtons] Running with isPro:", isPro);
+  const aiButtons = document.querySelectorAll('.ai-button');
+  console.log("[unlockAIButtons] Found", aiButtons.length, "AI buttons");
+
+  aiButtons.forEach(btn => {
+    btn.disabled = false;
+    btn.classList.remove('locked');
+    btn.title = "Generate with AI";
+
+    // ✅ Remove the lock icon inside the button if it exists
+    const lockIcon = btn.querySelector('.lock-icon');
+    if (lockIcon) {
+      lockIcon.remove();
+      console.log("[unlockAIButtons] Lock icon removed.");
+    }
+  });
+}
+
+
+
+  // ✅ Also update LinkedIn button
+  const linkedinBtn = document.getElementById('linkedin-import');
+  if (linkedinBtn) {
+    linkedinBtn.disabled = false;
+    linkedinBtn.classList.remove('locked');
+    linkedinBtn.title = "Import from LinkedIn";
+
+    // Remove any embedded lock icon span
+    const lockSpan = linkedinBtn.querySelector('.lock-icon');
+    if (lockSpan) lockSpan.remove();
+
+    // Clean any accidental emoji
+    linkedinBtn.textContent = "🔗 Import from LinkedIn";
+  }
+
+
+
+
+
 // Log initial state
 console.log("[Initial State] isPro:", isPro);
 const initialEmailOnLoad = localStorage.getItem('userEmail');
@@ -19,6 +59,7 @@ if (!email) {
   window.location.href = 'login.html';
 }
 // --- CORE UI UPDATE FUNCTIONS ---
+
 
 /**
  * Updates the LinkedIn import button's state and appearance.
@@ -120,6 +161,7 @@ function refreshAllProUI() {
   const currentTemplateName = activeTemplateCard ? activeTemplateCard.dataset.template : '';
   updateWatermarkUI(currentTemplateName);
 }
+
 
 
 // --- Core Functions (checkProStatus, switchTemplate, etc.) ---
@@ -283,6 +325,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await checkProStatus(); // Checks localStorage & URL param, then backend
   refreshAllProUI();      // Updates all UI based on isPro
+  
+
+if (isPro) {
+  unlockAIButtons(); // 👈 Make sure this is here
+} else {
+  // fallback for free users
+  document.querySelectorAll('.ai-button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      alert('This AI feature is only available to Pro users. Upgrade to unlock.');
+    });
+  });
+}
+
+
+
+
 
   // Theme Toggle
   const htmlEl = document.documentElement;
