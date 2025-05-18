@@ -1053,3 +1053,9 @@ html[data-theme="dark"] .cv-section .section-heading {
   /* Optional for exact sizing */
   background-color: transparent;
 }
+
+button.locked {
+  pointer-events: none;
+  opacity: 0.6;
+  cursor: not-allowed;
+}

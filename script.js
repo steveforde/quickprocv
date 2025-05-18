@@ -66,24 +66,30 @@ if (!email) {
  */
 function updateLinkedInAccessUI() {
   const linkedinButton = document.getElementById('linkedin-import');
-  if (!linkedinButton) {
-    // console.warn("[updateLinkedInAccessUI] LinkedIn import button not found.");
-    return;
+  if (!linkedinButton) return;
+
+  // Get or create the lock icon span
+  let lockIcon = linkedinButton.querySelector('.lock-icon');
+  if (!lockIcon) {
+    lockIcon = document.createElement('span');
+    lockIcon.className = 'lock-icon';
+    lockIcon.textContent = ' 🔒';
+    linkedinButton.appendChild(lockIcon);
   }
-  const lockIcon = linkedinButton.querySelector('.lock-icon');
 
   if (!isPro) {
     linkedinButton.disabled = true;
-    linkedinButton.classList.add('locked'); // Used by script.js to check status and CSS to style
+    linkedinButton.classList.add('locked');
     linkedinButton.title = "Upgrade to Pro to use LinkedIn import";
-    if (lockIcon) lockIcon.style.display = 'inline';
+    lockIcon.style.display = 'inline';
   } else {
     linkedinButton.disabled = false;
     linkedinButton.classList.remove('locked');
     linkedinButton.title = "Import from LinkedIn";
-    if (lockIcon) lockIcon.style.display = 'none';
+    lockIcon.style.display = 'none';
   }
 }
+
 
 function styleTemplateCardsUI() {
   document.querySelectorAll('.template-card').forEach(card => {
