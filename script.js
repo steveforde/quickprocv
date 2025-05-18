@@ -323,6 +323,27 @@ function autofillTestData() {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("🚀 DOM fully loaded and parsed. Initializing main page...");
 
+const saveFields = [
+  'name', 'jobTitle', 'email', 'phone', 'linkedin', 'portfolio',
+  'summary', 'work', 'projects', 'education', 'certifications',
+  'languages', 'skills', 'hobbies'
+];
+
+saveFields.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', () => {
+      const data = {};
+      saveFields.forEach(fid => {
+        const f = document.getElementById(fid);
+        if (f) data[fid] = f.value;
+      });
+      localStorage.setItem('cvData', JSON.stringify(data));
+    });
+  }
+});
+
+
   await checkProStatus(); // Checks localStorage & URL param, then backend
   refreshAllProUI();      // Updates all UI based on isPro
   
@@ -338,6 +359,14 @@ if (isPro) {
   });
 }
 
+const savedCV = JSON.parse(localStorage.getItem('cvData'));
+if (savedCV) {
+  for (const [key, value] of Object.entries(savedCV)) {
+    const field = document.getElementById(key);
+    if (field) field.value = value;
+  }
+  document.getElementById('cv-form')?.dispatchEvent(new Event('submit'));
+}
 
 
 

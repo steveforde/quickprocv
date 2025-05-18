@@ -1016,22 +1016,22 @@ html[data-theme="dark"] .cv-section .section-heading {
 
 
 .ai-button {
-  background-color: #1e90ff;
-  color: white;
+  background-color: #1e90ff !important;
+  color: #fff;
+  font-weight: bold;
   border: none;
   padding: 0.6rem 1rem;
   margin-top: 0.5rem;
-  font-weight: bold;
   border-radius: 4px;
-  cursor: not-allowed;
-  opacity: 0.6; /* slightly faded since it's locked */
-}
-.ai-button {
-  background-color: var(--accent);
-  color: #fff;
-  opacity: 1;
   cursor: pointer;
   transition: 0.3s ease;
+}
+
+.ai-button:disabled,
+.ai-button.locked {
+  background-color: #1e90ff !important;
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .ai-button:disabled {
@@ -1043,4 +1043,13 @@ html[data-theme="dark"] .cv-section .section-heading {
   background-color: lightblue;
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.btn-placeholder {
+  height: 48px; /* matches button height */
+  margin-top: 20px;
+  margin-bottom: 40px; /* adjust as needed for layout balance */
+  border-radius: 8px;
+  /* Optional for exact sizing */
+  background-color: transparent;
 }
