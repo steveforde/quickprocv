@@ -15,6 +15,12 @@ app.use(express.json());
 
 app.post('/create-checkout-session', async (req, res) => {
   try {
+    const { email } = req.body; // ✅ Extract from the frontend POST
+
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Invalid email provided.' });
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
@@ -35,6 +41,7 @@ app.post('/create-checkout-session', async (req, res) => {
     res.status(500).json({ error: 'Stripe session creation failed' });
   }
 });
+
 
 
 const PORT = process.env.PORT || 3000;
