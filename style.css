@@ -433,25 +433,20 @@ html[data-theme="dark"] #cv-preview section {
   letter-spacing: 0.5px;
 }
 
-#cv-watermark {
-  position: absolute;
-  bottom: 30px;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 2rem;
-  color: rgba(0, 0, 0, 0.08);
-  pointer-events: none;
-  z-index: 0;
+
+
+
+/* All other templates - dark text */
+#cv-preview:not(.template-tech) #cv-watermark {
+  color: #333333;
 }
 
+/* Optional: prevent watermark from printing for Pro */
 @media print {
   #cv-watermark {
-    font-size: 2.5rem;
-    color: rgba(0, 0, 0, 0.1);
+    display: block;
   }
 }
-
 
 
 #profile-photo {
@@ -1094,117 +1089,10 @@ button.locked {
     left: 0;
     top: 0;
     width: 100%;
+    padding: 0;
+    margin: 0;
   }
 
-  .download-wrapper,
-  #download-pdf,
-  #buy-pro-btn {
-    display: none !important;
-  }
-}
-
-/* === TECH TEMPLATE STYLING === */
-.template-tech {
-  font-family: 'Courier New', Courier, monospace;
-  background-color: #121212;
-  color: #f4f4f4;
-  padding: 20px;
-  border-radius: 8px;
-}
-
-.template-tech h1,
-.template-tech h2,
-.template-tech h3 {
-  color: var(--accent, #00bfff);
-  margin-top: 20px;
-  border-bottom: 2px solid var(--accent, #00bfff);
-  padding-bottom: 4px;
-}
-
-.template-tech a {
-  color: #1e90ff;
-  text-decoration: none;
-}
-
-.template-tech a:hover {
-  text-decoration: underline;
-}
-
-.template-tech ul {
-  padding-left: 20px;
-  margin-top: 10px;
-}
-
-.template-tech li {
-  margin-bottom: 6px;
-  line-height: 1.4;
-}
-
-.template-tech .skill-badge {
-  display: inline-block;
-  background-color: #1f1f1f;
-  color: #00bfff;
-  border: 1px solid #00bfff;
-  border-radius: 4px;
-  padding: 4px 8px;
-  margin: 4px 4px 0 0;
-  font-size: 0.9rem;
-}
-
-@media print {
-  .template-tech,
-  .template-tech * {
-    color: #000 !important;
-    background: #fff !important;
-    font-weight: 600 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .template-tech .skill-badge {
-    color: #000 !important;
-    background: #eee !important;
-    border: 1px solid #000 !important;
-  }
-
-  body {
-    background: #fff !important;
-    color: #000 !important;
-  }
-
-  a {
-    color: #000 !important;
-    text-decoration: underline !important;
-  }
-
-  .download-wrapper,
-  #theme-toggle,
-  #autofill-btn,
-  #buy-pro-btn,
-  #logout-btn,
-  #download-pdf {
-    display: none !important;
-  }
-
-  body * {
-    visibility: hidden;
-  }
-
-  #cv-preview,
-  #cv-preview * {
-    visibility: visible;
-  }
-
-  #cv-preview {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-  }
-}
-
-/* === END TECH TEMPLATE === */
-@media print {
   .download-wrapper,
   #download-pdf,
   #buy-pro-btn,
@@ -1213,414 +1101,130 @@ button.locked {
   #autofill-btn {
     display: none !important;
   }
+
+  /* Remove header/footer margin in print preview */
+  @page {
+    margin: 0;
+  }
+
+  /* Prevent page break inside sections */
+  .cv-section,
+  .template-tech .cv-section,
+  .template-marketing .cv-section,
+  .template-business .cv-section,
+  .template-student .cv-section,
+  .template-temp .cv-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Force dark backgrounds to white and text to black (except tech) */
+  .template-tech {
+    background-color: #fff !important;
+    color: #000 !important;
+  }
+
+  .template-tech h1,
+  .template-tech h2,
+  .template-tech h3 {
+    color: #000 !important;
+    border-color: #000 !important;
+  }
+
+  .template-tech .skill-badge {
+    border-color: #000 !important;
+    color: #000 !important;
+    background-color: #f1f1f1 !important;
+  }
 }
 
+.download-button {
+  background-color: var(--accent, #007bff);
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 2rem auto;
+  display: block;
+  transition: background-color 0.3s ease;
+}
+.download-button:hover {
+  background-color: #0056b3;
+}
+@media print {
+  .template-tech,
+  .template-tech * {
+    color: #000 !important;
+  }
+
+  .template-tech h1,
+  .template-tech h2,
+  .template-tech h3,
+  .template-tech strong {
+    color: #000 !important;
+    border-color: #000 !important;
+  }
+
+  .template-tech .skill-badge {
+    background-color: #f1f1f1 !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
 
 @media print {
+  @page {
+    margin: 0 !important;
+    size: A4 portrait;
+  }
+
   body {
-    background: #fff !important;
     margin: 0 !important;
     padding: 0 !important;
-    color: #000 !important;
-    font-size: 12pt;
   }
 
-  * {
-    visibility: hidden !important;
+  #cv-preview {
+    margin: 0 auto !important;
+    width: 100% !important;
+    page-break-after: always;
+  }
+}
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
   }
 
-  #cv-preview,
-  #cv-preview * {
-    visibility: visible !important;
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
     color: #000 !important;
   }
 
   #cv-preview {
-    position: relative !important;
-    top: 0 !important;
-    left: 0 !important;
     width: 100% !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    background: #fff !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
+    margin: 0 auto;
+    page-break-after: always;
   }
 
-  #download-pdf,
+  #cv-preview * {
+    color: #000 !important;
+  }
+
   .download-wrapper,
-  #logout-btn,
   #theme-toggle,
-  #autofill-btn,
+  #logout-btn,
   #buy-pro-btn {
     display: none !important;
   }
-
-  @page {
-    margin: 0;
-    size: auto;
-  }
 }
 
-/* Center-align contact info under the name */
-#preview-contact {
-  text-align: center;
-  margin-top: 0.2rem;
-  margin-bottom: 0.4rem;
-  font-size: 0.95rem;
-}
-
-
-/* === MARKETING TEMPLATE === */
-.template-marketing {
-  font-family: 'Georgia', serif;
-  background-color: #fff;
-  color: #222;
-  padding: 20px 30px;
-  border: 2px solid var(--accent, #ff6f61);
-  border-radius: 10px;
-  line-height: 1.6;
-}
-
-.template-marketing h1,
-.template-marketing h2,
-.template-marketing h3 {
-  color: var(--accent, #ff6f61);
-  font-family: 'Georgia', serif;
-  border-bottom: 2px solid var(--accent, #ff6f61);
-  padding-bottom: 6px;
-  margin-bottom: 10px;
-}
-
-.template-marketing a {
-  color: var(--accent, #ff6f61);
-  text-decoration: underline;
-}
-
-.template-marketing .skill-badge {
-  background-color: #ffe9e5;
-  color: #b7372f;
-  border: 1px solid #ff6f61;
-  border-radius: 5px;
-  padding: 4px 8px;
-  margin: 4px 4px 0 0;
-  font-size: 0.85rem;
-}
-
-
-@media print {
-  @page {
-    margin: 0;
-    size: A4;
-  }
-
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    background: white !important;
-    color: black !important;
-    font-family: sans-serif;
-  }
-
-  #cv-preview {
-    margin: 0 auto;
-    padding: 2rem;
-    width: 100%;
-    background: white !important;
-    color: black !important;
-  }
-
-  #cv-preview h1,
-  #cv-preview h2,
-  #cv-preview h3 {
-    color: black !important;
-    border-color: black !important;
-  }
-
-  #cv-preview .skill-badge {
-    background-color: #f0f0f0 !important;
-    border: 1px solid black !important;
-    color: black !important;
-  }
-
-  /* Hide everything non-CV */
-  body * {
-    visibility: hidden;
-  }
-
-  #cv-preview, #cv-preview * {
-    visibility: visible;
-  }
-
-  /* Hide buttons/controls */
-  #download-pdf,
-  #theme-toggle,
-  #logout-btn,
-  #buy-pro-btn,
-  .download-wrapper,
-  .print-tip {
-    display: none !important;
-  }
-}
-
-/* === BUSINESS TEMPLATE STYLING === */
-.template-business {
-  font-family: 'Georgia', serif;
-  background-color: #ffffff;
-  color: #222;
-  padding: 32px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
-}
-
-.template-business h1,
-.template-business h2,
-.template-business h3,
-.template-business .section-heading {
-  font-family: 'Georgia', serif;
-  color: #003366;
-  border-bottom: 2px solid #003366;
-  padding-bottom: 6px;
-  margin-top: 24px;
-  margin-bottom: 12px;
-}
-
-.template-business p,
-.template-business li {
-  line-height: 1.6;
-  font-size: 1rem;
-}
-
-.template-business a {
-  color: #003366;
-  text-decoration: underline;
-}
-
-.template-business .skill-badge {
-  display: inline-block;
-  background-color: #f0f0f0;
-  color: #003366;
-  border: 1px solid #003366;
-  border-radius: 4px;
-  padding: 4px 8px;
-  margin: 4px 4px 0 0;
-  font-size: 0.9rem;
-}
-
-/* Watermark style */
-.template-business #cv-watermark {
-  color: rgba(0, 0, 0, 0.05);
-  font-size: 3rem;
-  font-weight: bold;
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  pointer-events: none;
-  user-select: none;
-}
-
-/* Print Mode for Business Template */
-@media print {
-  .template-business {
-    background-color: #fff !important;
-    color: #000 !important;
-  }
-
-  .template-business h1,
-  .template-business h2,
-  .template-business h3,
-  .template-business .section-heading {
-    color: #000 !important;
-    border-color: #000 !important;
-  }
-
-  .template-business .skill-badge {
-    background-color: #eaeaea !important;
-    color: #000 !important;
-    border-color: #000 !important;
-  }
-
-  .template-business a {
-    color: #000 !important;
-  }
-}
-
-
-/* === STUDENT TEMPLATE STYLING === */
-.template-student {
-  font-family: 'Arial', sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
-  padding: 28px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.04);
-}
-
-.template-student h1,
-.template-student h2,
-.template-student h3,
-.template-student .section-heading {
-  font-family: 'Arial', sans-serif;
-  color: #2e6da4;
-  border-bottom: 2px solid #2e6da4;
-  padding-bottom: 4px;
-  margin-top: 22px;
-  margin-bottom: 10px;
-}
-
-.template-student p,
-.template-student li {
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.template-student a {
-  color: #2e6da4;
-  text-decoration: none;
-}
-
-.template-student a:hover {
-  text-decoration: underline;
-}
-
-.template-student .skill-badge {
-  display: inline-block;
-  background-color: #e3f2fd;
-  color: #2e6da4;
-  border: 1px solid #2e6da4;
-  border-radius: 6px;
-  padding: 4px 8px;
-  margin: 4px 4px 0 0;
-  font-size: 0.85rem;
-}
-
-/* Watermark */
-.template-student #cv-watermark {
-  color: rgba(0, 0, 0, 0.05);
-  font-size: 3rem;
-  font-weight: bold;
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  pointer-events: none;
-  user-select: none;
-}
-
-/* Print Styles for Student Template */
-@media print {
-  .template-student {
-    background-color: #fff !important;
-    color: #000 !important;
-  }
-
-  .template-student h1,
-  .template-student h2,
-  .template-student h3,
-  .template-student .section-heading {
-    color: #000 !important;
-    border-color: #000 !important;
-  }
-
-  .template-student .skill-badge {
-    background-color: #efefef !important;
-    color: #000 !important;
-    border-color: #000 !important;
-  }
-
-  .template-student a {
-    color: #000 !important;
-  }
-}
-
-/* === TEMP TEMPLATE STYLING === */
-.template-temp {
-  font-family: 'Trebuchet MS', sans-serif;
-  background-color: #ffffff;
-  color: #333;
-  padding: 24px;
-  border-radius: 10px;
-  border-left: 6px solid var(--primary-action-color, #007bff);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.template-temp h1,
-.template-temp h2,
-.template-temp h3,
-.template-temp .section-heading {
-  color: var(--primary-action-color, #007bff);
-  border-bottom: 2px dashed var(--primary-action-color, #007bff);
-  padding-bottom: 4px;
-  margin-top: 20px;
-  margin-bottom: 12px;
-}
-
-.template-temp p,
-.template-temp li {
-  font-size: 1rem;
-  line-height: 1.5;
-}
-
-.template-temp a {
-  color: var(--primary-action-color, #007bff);
-  text-decoration: none;
-}
-
-.template-temp a:hover {
-  text-decoration: underline;
-}
-
-.template-temp .skill-badge {
-  display: inline-block;
-  background-color: #eef6ff;
-  color: #007bff;
-  border: 1px solid #007bff;
-  border-radius: 5px;
-  padding: 4px 10px;
-  margin: 4px 4px 0 0;
-  font-size: 0.85rem;
-}
-
-/* Watermark */
-.template-temp #cv-watermark {
-  color: rgba(0, 0, 0, 0.04);
-  font-size: 3rem;
-  font-weight: bold;
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  pointer-events: none;
-  user-select: none;
-}
-
-/* Print Overrides */
-@media print {
-  .template-temp {
-    background-color: #fff !important;
-    color: #000 !important;
-  }
-
-  .template-temp h1,
-  .template-temp h2,
-  .template-temp h3,
-  .template-temp .section-heading {
-    color: #000 !important;
-    border-color: #000 !important;
-  }
-
-  .template-temp .skill-badge {
-    background-color: #efefef !important;
-    color: #000 !important;
-    border-color: #000 !important;
-  }
-
-  .template-temp a {
-    color: #000 !important;
-  }
-}
