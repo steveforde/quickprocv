@@ -1216,7 +1216,7 @@ button.locked {
 }
 
 
-@@media print {
+@media print {
   body {
     background: #fff !important;
     margin: 0 !important;
