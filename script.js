@@ -180,6 +180,7 @@ async function checkProStatus() {
   // ✅ Always check URL param first — it should override anything in localStorage
   const params = new URLSearchParams(window.location.search);
   const emailFromUrl = params.get('email');
+
   if (emailFromUrl && emailFromUrl !== 'null' && emailFromUrl.includes('@')) {
     console.log(`👤 [checkProStatus] Email from URL: ${emailFromUrl}`);
     email = decodeURIComponent(emailFromUrl);
@@ -187,29 +188,18 @@ async function checkProStatus() {
     localStorage.setItem('userEmail', email);
     if (window.history.replaceState) {
       const cleanURL = window.location.pathname + window.location.hash;
-      window.history.replaceState({}, document.title, cleanURL); // clear query
+      window.history.replaceState({}, document.title, cleanURL); // Clean the URL
       console.log("[checkProStatus] Cleaned email from URL.");
     }
   }
 
- if (!email) {
-  const params = new URLSearchParams(window.location.search);
-  const emailFromUrl = params.get('email');
-  if (emailFromUrl && emailFromUrl !== 'null' && emailFromUrl.includes('@')) {
-    console.log(`👤 [checkProStatus] Email from URL: ${emailFromUrl}`);
-    email = decodeURIComponent(emailFromUrl);
-    emailSource = 'URL parameter';
-    localStorage.setItem('userEmail', email); // ✅ Save it for next time
-    if (window.history.replaceState) {
-      const cleanURL = window.location.pathname + window.location.hash;
-      window.history.replaceState({ path: cleanURL }, document.title, cleanURL);
-      console.log("[checkProStatus] Cleaned email from URL.");
-    }
+  if (!email) {
+    console.error("❌ [checkProStatus] No email found.");
+    return;
   }
-}
 
   console.log(`👤 [checkProStatus] Checking Pro for: ${email} (Source: ${emailSource})`);
-  
+
   try {
     const response = await fetch('http://localhost:3002/api/check-pro', {
       method: 'POST',
@@ -229,7 +219,7 @@ async function checkProStatus() {
       isPro = result.isPro;
       console.log(`✅ [checkProStatus] Pro status from backend: ${isPro}`);
     } else {
-      console.warn("❓ [checkProStatus] Backend 'isPro' missing/invalid. Defaulting to false.", result);
+      console.warn("❓ [checkProStatus] Invalid response:", result);
       isPro = false;
     }
   } catch (err) {
@@ -237,6 +227,8 @@ async function checkProStatus() {
     isPro = false;
   }
 }
+
+  
 
 let currentTemplate = 'tech'; // or your default
 
