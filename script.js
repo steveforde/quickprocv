@@ -559,87 +559,13 @@ document.getElementById("buy-pro-btn")?.addEventListener("click", () => {
     });
   } else { console.warn("CV Form not found."); }
 
-  // Download PDF Button Listener
   const downloadPdfBtn = document.getElementById('download-pdf');
-  if (downloadPdfBtn) {
-    downloadPdfBtn.addEventListener('click', async () => {
-        console.log("[PDF Download] Starting PDF generation...");
-        const cvPreview = document.getElementById('cv-preview');
-        if (!cvPreview) { console.error("CV Preview element not found."); return; }
-        const nameInput = document.getElementById('name');
-        const cvName = nameInput ? nameInput.value.trim() || 'QuickProCV' : 'QuickProCV';
-        const watermark = document.getElementById('cv-watermark');
-        const downloadButtonRef = document.getElementById('download-pdf'); // Use a different variable name
-        const buyProBtnElem = document.getElementById('buy-pro-btn');
-        const downloadWrapper = document.querySelector('.download-wrapper');
+if (downloadPdfBtn) {
+  downloadPdfBtn.addEventListener('click', () => {
+    window.print();
+  });
+}
 
-        const originalWatermarkDisplay = watermark ? watermark.style.display : 'none';
-        const originalButtonDisplay = downloadButtonRef ? downloadButtonRef.style.display : 'block';
-        const originalBuyProDisplay = buyProBtnElem ? buyProBtnElem.style.display : null;
-        const originalWrapperDisplay = downloadWrapper ? downloadWrapper.style.display : null;
-
-        if (watermark) watermark.style.display = 'none';
-        if (downloadButtonRef) downloadButtonRef.style.display = 'none';
-        if (buyProBtnElem) buyProBtnElem.style.display = 'none';
-        if (downloadWrapper) downloadWrapper.style.display = 'none';
-
-        await new Promise(resolve => setTimeout(resolve, 150));
-
-        try {
-            if (typeof html2canvas === 'undefined' || typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined') {
-                throw new Error("PDF libraries (html2canvas or jsPDF) not loaded properly.");
-            }
-            const { jsPDF } = window.jspdf;
-            const canvas = await html2canvas(cvPreview, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const imgCanvasWidth = canvas.width;
-            const imgCanvasHeight = canvas.height;
-            
-            const totalImageHeightInPdfUnits = imgCanvasHeight * (pdfWidth / imgCanvasWidth);
-            const totalPdfPages = Math.ceil(totalImageHeightInPdfUnits / pdfHeight);
-
-            for (let i = 0; i < totalPdfPages; i++) {
-                if (i > 0) pdf.addPage();
-                
-                // Calculate y-coordinate of the slice in the source canvas (in canvas pixels)
-                const sourceY = i * (pdfHeight * (imgCanvasWidth / pdfWidth));
-                // Calculate the height of the slice in the source canvas (in canvas pixels)
-                const sourceHeight = Math.min(imgCanvasHeight - sourceY, (pdfHeight * (imgCanvasWidth / pdfWidth)));
-
-                if (sourceHeight <= 0) break;
-
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = imgCanvasWidth;
-                tempCanvas.height = sourceHeight;
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCtx.drawImage(canvas, 0, sourceY, imgCanvasWidth, sourceHeight, 0, 0, imgCanvasWidth, sourceHeight);
-                
-                const pageImgData = tempCanvas.toDataURL('image/jpeg', 1.0);
-                // Calculate the height of this slice when rendered on the PDF page (in PDF units)
-                const sliceRenderHeightOnPdf = sourceHeight * (pdfWidth / imgCanvasWidth);
-                pdf.addImage(pageImgData, 'JPEG', 0, 0, pdfWidth, sliceRenderHeightOnPdf);
-            }
-
-            pdf.save(`${cvName}_CV.pdf`);
-            console.log("[PDF Download] PDF saved successfully.");
-        } catch (pdfError) {
-            console.error("❌ [PDF Download] Error generating PDF:", pdfError);
-            alert(`Sorry, there was an error generating the PDF: ${pdfError.message}`);
-        } finally {
-            if (downloadButtonRef) downloadButtonRef.style.display = originalButtonDisplay;
-            if (buyProBtnElem && originalBuyProDisplay !== null) buyProBtnElem.style.display = originalBuyProDisplay;
-            if (downloadWrapper && originalWrapperDisplay !== null) downloadWrapper.style.display = originalWrapperDisplay;
-            
-            const currentTemplateClass = Array.from(cvPreview.classList).find(cls => cls.startsWith('template-'));
-            const currentTemplate = currentTemplateClass ? currentTemplateClass.replace('template-', '') : '';
-            updateWatermarkUI(currentTemplate);
-            console.log("[PDF Download] UI elements restored.");
-        }
-    });
-  } else { console.warn("Download PDF button not found."); }
 
   // Profile Photo Upload Listener
   const photoUploadInput = document.getElementById('photo-upload');

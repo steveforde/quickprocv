@@ -1228,3 +1228,346 @@ button.locked {
   }
 }
 
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #cv-preview, #cv-preview * {
+    visibility: visible;
+  }
+
+  #cv-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    color: black !important;
+  }
+
+  .download-button,
+  .download-wrapper,
+  #buy-pro-btn {
+    display: none !important;
+  }
+
+  /* Optional: better font and spacing for printing */
+  #cv-preview {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.4;
+    padding: 20mm; /* print-safe padding */
+  }
+
+  /* Fix margin issues */
+  @page {
+    margin: 0;
+  }
+}
+@media print {
+  html, body {
+    height: auto;
+    background: white !important;
+  }
+
+  #cv-preview {
+    box-shadow: none !important;
+  }
+
+  /* Make sure page breaks work (optional tweak) */
+  .cv-section {
+    page-break-inside: avoid;
+  }
+}
+#cv-header {
+  text-align: center;
+}
+
+#profile-photo {
+  display: block;
+  margin: 0 auto 10px auto;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+}
+
+#preview-contact {
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: var(--text-color, #333);
+  text-align: center;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm; /* top, right, bottom, left */
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  #cv-preview {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .cv-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .cv-section h3 {
+    margin-top: 20px;
+  }
+}
+
+@media print {
+  .cv-section {
+    page-break-inside: avoid;
+    padding-top: 24px;
+  }
+
+  .cv-section:first-of-type {
+    padding-top: 0 !important; /* Prevents extra space on page 1 */
+  }
+}
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+
+/* ========================= */
+/* 🎯 MARKETING TEMPLATE     */
+/* ========================= */
+
+.template-marketing {
+  --accent: #e91e63;
+  --text-color-light: #333;
+  --text-color-dark: #f5f5f5;
+  --card-bg-light: #fff9f9;
+  --card-bg-dark: #1a1a1a;
+  --section-header-color: #ff4081;
+  --border-color-light: #f8bbd0;
+  --border-color-dark: #880e4f;
+}
+
+/* Override basic preview card styling */
+.template-marketing #cv-preview {
+  background-color: var(--card-bg-light);
+  color: var(--text-color-light);
+  font-family: 'Poppins', sans-serif;
+  padding: 20px;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 12px rgba(233, 30, 99, 0.1);
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .template-marketing #cv-preview {
+  background-color: var(--card-bg-dark);
+  color: var(--text-color-dark);
+}
+
+/* Header */
+.template-marketing #cv-header h1 {
+  color: var(--accent);
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 0.2em;
+}
+
+.template-marketing #cv-header p {
+  text-align: center;
+  margin: 0;
+  color: var(--text-color-light);
+}
+
+[data-theme="dark"] .template-marketing #cv-header p {
+  color: var(--text-color-dark);
+}
+
+/* Section Headings */
+.template-marketing .cv-section h3 {
+  color: var(--section-header-color);
+  border-left: 5px solid var(--accent);
+  padding-left: 10px;
+  margin-bottom: 0.3em;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+/* Tags (Skills, etc.) */
+.template-marketing .tag {
+  background: linear-gradient(135deg, #f06292, #ec407a);
+  color: white;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px;
+  margin: 3px;
+  display: inline-block;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: background 0.2s ease;
+}
+
+/* Link Styling */
+.template-marketing a {
+  color: var(--accent);
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Divider Styling */
+.template-marketing hr {
+  border: none;
+  border-top: 1px dashed var(--accent);
+  margin: 20px 0;
+}
+
+/* ===== Student Template Style ===== */
+
+.template-student {
+  font-family: 'Georgia', serif;
+  color: #002b36;
+}
+
+.template-student .cv-section {
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 16px;
+}
+
+.template-student .section-heading {
+  background-color: #ffffff;       /* White background like skill tags */
+  color: #008080;                  /* Teal text */
+  border: 1px solid #008080;
+  border-radius: 6px;
+  padding: 4px 10px;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease-in-out;
+}
+
+.template-student .cv-section p {
+  margin: 4px 0;
+  line-height: 1.6;
+}
+
+.template-student .highlight {
+  color: #f0c808; /* Yellow accent */
+  font-weight: bold;
+}
+.template-student .tag {
+  background-color: #ffffff;       /* White background */
+  color: #008080;                  /* Teal text */
+  border: 1px solid #008080;
+  padding: 4px 8px;
+  margin: 2px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  transition: all 0.2s ease-in-out;
+}
+
+.template-student .section-heading:hover {
+  background-color: #f0c808;       /* Yellow on hover like skill tags */
+  color: #002b36;                  /* Darker academic text */
+  border-color: #f0c808;
+}
+
+.template-student ul {
+  padding-left: 18px;
+}
+
+.template-student ul li {
+  margin-bottom: 4px;
+  list-style-type: disc;
+}
+
+.template-student #cv-preview {
+  background-color: #e6f7f7;
+  padding: 24px;
+  border-radius: 8px;
+}
+
+/* ===== Temp Template Style ===== */
+/* ===== Refined Temp Template Style ===== */
+.template-temp {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #fffefb;
+  color: #222;
+}
+
+.template-temp .cv-header {
+  text-align: center;
+  border-bottom: 2px solid #2196f3; /* vivid blue */
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.template-temp #cv-preview h1 {
+  color: #d32f2f;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
+.template-temp #cv-preview h2 {
+  color: #444;
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+.template-temp .cv-section {
+  margin-bottom: 24px;
+  border-left: 4px solid #2196f3; /* blue structure */
+  padding-left: 12px;
+  padding-bottom: 16px;
+}
+
+.template-temp .section-heading {
+  color: #d32f2f;                 /* red/orange text */
+  border: 1px solid #d32f2f;      /* red border */
+  border-radius: 6px;
+  padding: 4px 10px;
+  display: inline-block;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.4px;
+  margin-bottom: 8px;
+  background-color: #fff;
+}
+
+.template-temp .cv-section p {
+  margin: 4px 0;
+  line-height: 1.6;
+}
+
+.template-temp .tag {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #e53935;
+  padding: 4px 8px;
+  margin: 2px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  display: inline-block;
+}
+
+.template-temp .tag:hover {
+  background-color: #e53935;
+  color: #fff;
+  border-color: #e53935;
+}
