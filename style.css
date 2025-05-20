@@ -460,7 +460,8 @@ html[data-theme="dark"] #cv-preview section {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-#preview-skills span { /* Skill pills */
+/*
+#preview-skills span { 
   display: inline-block;
   background: var(--primary-action-color);
   color: var(--button-text-color);
@@ -743,30 +744,31 @@ h1.main-title,
 }
 
 
-/* ========== Base CV Spacing for All Templates ========== */
-/* === UNIVERSAL CV SECTION SPACING & HEADING CONTROL === */
+/*
+  ===== COMMENTED OUT: Original Global Heading Styles =====
+  .cv-section {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
 
-.cv-section {
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-}
+  .cv-section h2,
+  .cv-section .section-heading {
+    margin-bottom: 0.5rem;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
 
-.cv-section h2,
-.cv-section .section-heading {
-  margin-bottom: 0.5rem;
-  padding-bottom: 4px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* light divider line */
-}
+  html[data-theme="dark"] .cv-section h2,
+  html[data-theme="dark"] .cv-section .section-heading {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
-html[data-theme="dark"] .cv-section h2,
-html[data-theme="dark"] .cv-section .section-heading {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
+  .cv-section p,
+  .cv-section div {
+    margin-top: 0.5rem;
+  }
+*/
 
-.cv-section p,
-.cv-section div {
-  margin-top: 0.5rem;
-}
 /* ========== CV Template Styles ========== */
 
 /* --- Tech Template --- */
@@ -1468,16 +1470,15 @@ button.locked {
   font-weight: bold;
 }
 .template-student .tag {
-  background-color: #ffffff;       /* White background */
-  color: #008080;                  /* Teal text */
-  border: 1px solid #008080;
+ background-color: #d0e8ff; /* 🧊 Light blue for visibility */
+  color: #003366;            /* Deep readable blue text */
+  border: 1px solid #90c8ff;
   padding: 4px 8px;
   margin: 2px;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 500;
   display: inline-block;
-  transition: all 0.2s ease-in-out;
 }
 
 .template-student .section-heading:hover {
@@ -1556,13 +1557,14 @@ button.locked {
 }
 
 .template-temp .tag {
-  background-color: #ffebee;
-  color: #c62828;
-  border: 1px solid #e53935;
+ background-color: #d0e8ff; /* 🧊 Light blue for visibility */
+  color: #003366;            /* Deep readable blue text */
+  border: 1px solid #90c8ff;
   padding: 4px 8px;
   margin: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 0.85rem;
+  font-weight: 500;
   display: inline-block;
 }
 
@@ -1570,4 +1572,44 @@ button.locked {
   background-color: #e53935;
   color: #fff;
   border-color: #e53935;
+}
+
+/* === Shared Tag Style for All CV Templates === */
+.tag {
+  background-color: #d0e8ff;      /* Light blue background for visibility */
+  color: #003366;                 /* Deep blue text for contrast */
+  border: 1px solid #90c8ff;      /* Soft blue border */
+  padding: 4px 8px;
+  margin: 2px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+  transition: all 0.2s ease-in-out;
+}
+
+.tag:hover {
+  background-color: #a8d4ff;     /* Slightly deeper on hover */
+  color: #002244;
+  border-color: #80bfff;
+}
+
+#preview-skills span {
+  display: inline-block;
+  background-color: #d0e8ff;   /* 🌤️ Soft blue background */
+  color: #003366;              /* 🧠 Readable dark blue text */
+  border: 1px solid #90c8ff;
+  padding: 5px 10px;
+  margin: 4px 6px 0 0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@media print {
+  #preview-skills span {
+    background-color: #e6f0ff !important;
+    color: #000 !important;
+    border: 1px solid #444 !important;
+  }
 }
