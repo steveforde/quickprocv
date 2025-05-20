@@ -783,6 +783,14 @@ h1.main-title,
 .template-tech h3 {
   color: #00bfff;
 }
+
+.template-tech #preview-title,
+.template-tech #preview-contact {
+  color: #bbbbbb !important; /* Light gray for readability */
+}
+
+
+
 .template-tech a {
   color: #00bfff;
 }
