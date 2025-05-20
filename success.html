@@ -86,24 +86,24 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-  const params = new URLSearchParams(window.location.search);
-  const emailFromUrl = params.get('email');
-  const returnLink = document.getElementById('return-link');
-  let redirectUrl = 'main.html';
+      const params = new URLSearchParams(window.location.search);
+      const emailFromUrl = params.get('email');
+      const returnLink = document.getElementById('return-link');
+      let redirectUrl = 'main.html';
 
-  if (emailFromUrl && emailFromUrl.includes('@')) {
-    localStorage.setItem('userEmail', emailFromUrl);
-    redirectUrl = `main.html?email=${encodeURIComponent(emailFromUrl)}`;
-    if (returnLink) returnLink.href = redirectUrl;
-    console.log('[success.html] Email saved to localStorage:', emailFromUrl);
-  } else {
-    console.warn('[success.html] Email not in URL, fallback to main.html');
-  }
+      if (emailFromUrl && emailFromUrl.includes('@')) {
+        localStorage.setItem('userEmail', emailFromUrl);
+        localStorage.setItem('justUpgraded', 'true'); // ✅ For banner toast
+        redirectUrl = `main.html?email=${encodeURIComponent(emailFromUrl)}`;
+        if (returnLink) returnLink.href = redirectUrl;
+        console.log('[success.html] Email saved to localStorage:', emailFromUrl);
+      } else {
+        console.warn('[success.html] Email not in URL, fallback to main.html');
+      }
 
-  console.log(`[success.html] Redirecting to: ${redirectUrl} in 4 sec`);
-  setTimeout(() => window.location.href = redirectUrl, 4000);
-});
-
+      console.log(`[success.html] Redirecting to: ${redirectUrl} in 4 sec`);
+      setTimeout(() => window.location.href = redirectUrl, 4000);
+    });
   </script>
 </body>
 </html>

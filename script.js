@@ -51,13 +51,10 @@ const initialEmailOnLoad = localStorage.getItem('userEmail');
 console.log("[Initial State] LocalStorage userEmail on script load:", initialEmailOnLoad);
 
 
+    // already runs after that
 
 
-const email = localStorage.getItem('userEmail');
-if (!email) {
-  alert('Not logged in. Redirecting to login page.');
-  window.location.href = 'login.html';
-}
+
 // --- CORE UI UPDATE FUNCTIONS ---
 
 
@@ -217,6 +214,22 @@ async function checkProStatus() {
     const result = await response.json();
     if (result && typeof result.isPro === 'boolean') {
       isPro = result.isPro;
+
+      const toastEl = document.getElementById('pro-toast');
+
+    // ✅ Show toast only if just became Pro via Stripe redirect
+    if (isPro && emailSource === 'URL parameter' && toastEl) {
+     toastEl.style.display = 'block';
+      setTimeout(() => {
+     toastEl.style.opacity = '1';
+      }, 10);
+
+  setTimeout(() => {
+    toastEl.style.opacity = '0';
+    setTimeout(() => toastEl.style.display = 'none', 500);
+  }, 5000);
+}
+
       console.log(`✅ [checkProStatus] Pro status from backend: ${isPro}`);
     } else {
       console.warn("❓ [checkProStatus] Invalid response:", result);
@@ -361,7 +374,17 @@ saveFields.forEach(id => {
 
   await checkProStatus(); // Checks localStorage & URL param, then backend
   refreshAllProUI();      // Updates all UI based on isPro
+   
+ // ✅ Perform redirect AFTER email has been potentially saved
+   const confirmedEmail = localStorage.getItem('userEmail');
+   if (!confirmedEmail || confirmedEmail === 'null') {
+   console.warn('No confirmed email found. Redirecting...');
+   alert('Not logged in. Redirecting to login page.');
+   window.location.href = 'login.html';
+   return;
+}
   
+
 
 if (isPro) {
   unlockAIButtons(); // 👈 Make sure this is here

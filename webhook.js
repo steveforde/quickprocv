@@ -2,6 +2,8 @@ import express from 'express';
 import Stripe from 'stripe';
 import dotenv from 'dotenv';
 import supabase from './linkedin-server/supabaseClient.js';
+import sendEmail from './linkedin-server/email.js';
+
 
 dotenv.config({ path: './linkedin-server/.env' });
 
@@ -33,10 +35,25 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
     console.log('💰 Payment completed for:', email);
 
+    // ✅ Send confirmation email
+    try {
+      await sendEmail(
+        email,
+        'Welcome to QuickProCV Pro!',
+         `Hi there,\n\nThanks for purchasing Pro. You now have full access for 2 years!`,
+        `<p>Hi there,</p><p>Thanks for upgrading to <strong>Pro</strong>! 🎉<br>
+        You now have full access to all features on <a href="https://quickprocv.com">QuickProCV</a> for <strong>2 years</strong>.</p>`
+      );
+      console.log('📬 Confirmation email sent to:', email);
+    } catch (err) {
+      console.error('❌ Email sending failed:', err);
+    }
+
+    // ✅ Update Supabase
     const { error } = await supabase
       .from('users')
       .update({ is_pro: true })
-      .eq('email', email.toLowerCase().trim()); // Ensure match
+      .eq('email', email.toLowerCase().trim());
 
     if (error) {
       console.error('❌ Supabase update failed:', error.message);
@@ -47,7 +64,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     return res.status(200).send('Webhook processed');
   }
 
-  // Default: unhandled event
   res.status(200).send('Webhook received');
 });
 
@@ -55,5 +71,3 @@ const PORT = process.env.WEBHOOK_PORT || 3003;
 app.listen(PORT, () => {
   console.log(`✅ Stripe webhook server running at http://localhost:${PORT}`);
 });
-
-
