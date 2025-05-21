@@ -281,7 +281,7 @@ function startCheckout() {
 
   // ✅ This is the correct place for the console log
   console.log("[startCheckout] Email being sent to /create-checkout-session:", email);
-
+  console.log("IMPORTANT CHECK! Email going to payment helper is:", email);
   fetch('http://localhost:3000/create-checkout-session', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
