@@ -27,6 +27,12 @@
     <div class="form-column">
       <h1 class="main-title">QuickProCV</h1>
       <p id="welcome-msg">Welcome! Please log in.</p>
+       <div id="membership-status-section">
+        <p id="welcome-msg">Welcome!</p>
+       <p id="membership-expiry-message" style="display:none; font-weight: bold;"></p>
+      </div>
+
+
 
       <label for="photo-upload">Profile Photo:</label>
       <input type="file" id="photo-upload" accept="image/*" />
@@ -55,42 +61,42 @@
   <input type="url" id="portfolio" placeholder="Portfolio" />
 
   <label for="summary">Summary</label>
-  <textarea id="summary" placeholder="Summary"></textarea>
+  <textarea id="summary" placeholder=""></textarea>
   <button type="button" class="ai-button" disabled>
   Generate Summary <span class="lock-icon">🔒</span>
 </button>
 
   <label for="work">Work Experience</label>
-  <textarea id="work" placeholder="Work Experience"></textarea>
+  <textarea id="work" placeholder=""></textarea>
  <button type="button" class="ai-button" disabled>
   Generate Work Experience <span class="lock-icon">🔒</span>
 </button>
 
-  <label for="education">Education <span class="tooltip-icon" title="Pro tip – How to write student CVs">❓</span></label>
-  <textarea id="education" placeholder="Education"></textarea>
+  <label for="education">Education <span class="tooltip-icon" title="Pro tip – How to write student CVs"></span></label>
+  <textarea id="education" placeholder=""></textarea>
 
   <label for="projects">Projects</label>
-  <textarea id="projects" placeholder="Projects"></textarea>
+  <textarea id="projects" placeholder=""></textarea>
   <button type="button" class="ai-button" disabled>
   Generate Projects <span class="lock-icon">🔒</span>
   </button>
 
-  <label for="certifications">Certifications <span class="tooltip-icon" title="Pro tip – List most recent first">❓</span></label>
-  <textarea id="certifications" placeholder="Certifications"></textarea>
+  <label for="certifications">Certifications <span class="tooltip-icon" title="Pro tip – List most recent first"></span></label>
+  <textarea id="certifications" placeholder=""></textarea>
 
   <label for="languages">Languages</label>
-  <textarea id="languages" placeholder="Languages"></textarea>
+  <textarea id="languages" placeholder=""></textarea>
 
  
   <label for="skills">Skills</label>
-<span class="pro-tooltip" title="Pro users can generate skill sets based on job title">?</span>
+<span class="pro-tooltip" title="Pro users can generate skill sets based on job title"></span>
 <button type="button" class="ai-button" disabled>
   Generate skills <span class="lock-icon">🔒</span>
 </button>
-<textarea id="skills" placeholder="Skills"></textarea>
+<textarea id="skills" placeholder=""></textarea>
 
 <label for="hobbies">Hobbies</label>
-<textarea id="hobbies" placeholder="Hobbies"></textarea>
+<textarea id="hobbies" placeholder=""></textarea>
 
 
   <button type="submit">✨ Preview CV</button>

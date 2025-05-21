@@ -109,18 +109,30 @@ app.post('/api/check-pro', async (req, res) => {
   try {
     const { data, error } = await supabaseInstanceForRequest
       .from('users')
-      .select('is_pro')
+      // ✅ MODIFICATION HERE: Select 'is_pro' AND 'pro_expiry'
+      .select('is_pro, pro_expiry')
       .eq('email', normalizedEmail)
       .single();
 
     if (error) {
-      console.warn(`[AUTH.JS /api/check-pro] Supabase .single() error for "${normalizedEmail}": ${error.message}`);
-      return res.status(404).json({ error: 'User not found or issue fetching status.', isPro: false });
+      // If .single() doesn't find a row, it returns an error with code 'PGRST116'
+      // We can treat this as user not found for simplicity of pro check
+      if (error.code === 'PGRST116') {
+        console.warn(`[AUTH.JS /api/check-pro] User "${normalizedEmail}" not found.`);
+        return res.status(200).json({ isPro: false, pro_expiry: null }); // Return false and null expiry
+      }
+      console.error(`[AUTH.JS /api/check-pro] Supabase .single() error for "${normalizedEmail}":`, error.message);
+      return res.status(500).json({ error: 'Issue fetching status.', isPro: false });
     }
     
     const isProStatus = data.is_pro === true;
-    console.log(`[AUTH.JS /api/check-pro] User "${normalizedEmail}" found. DB 'is_pro': ${data.is_pro}. Parsed as: ${isProStatus}`);
-    res.json({ isPro: isProStatus });
+    console.log(`[AUTH.JS /api/check-pro] User "${normalizedEmail}" found. DB 'is_pro': ${data.is_pro}. DB 'pro_expiry': ${data.pro_expiry}. Parsed as: ${isProStatus}`);
+    
+    // ✅ MODIFICATION HERE: Include pro_expiry in the response
+    res.json({ 
+      isPro: isProStatus,
+      pro_expiry: data.pro_expiry // Pass the pro_expiry value to the frontend
+    });
 
   } catch (catchAllError) {
     console.error(`[AUTH.JS /api/check-pro] Unexpected outer catch error for "${normalizedEmail}": ${catchAllError.message}`);

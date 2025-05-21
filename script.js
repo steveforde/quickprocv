@@ -141,6 +141,85 @@ function updateWatermarkUI(templateName) {
   }
 }
 
+/**
+ * Updates the display for membership expiry date.
+ */
+/**
+ * Updates the display for membership expiry date.
+ */
+function updateMembershipExpiryUI() {
+  const expiryMessageEl = document.getElementById('membership-expiry-message');
+  if (!expiryMessageEl) {
+    console.warn("[updateMembershipExpiryUI] Target element #membership-expiry-message not found.");
+    return;
+  }
+
+  const proExpiryDateString = localStorage.getItem('proExpiryDate');
+  console.log(`[updateMembershipExpiryUI] proExpiryDateString from localStorage: ${proExpiryDateString}`);
+
+  // Check if user is Pro AND if an expiry date string exists
+  if (!isPro || !proExpiryDateString || proExpiryDateString === 'null') {
+    expiryMessageEl.style.display = 'none'; // Hide if not pro or no expiry date
+    expiryMessageEl.innerHTML = ''; // Clear content
+    console.log("[updateMembershipExpiryUI] Not Pro or no expiry date, hiding message.");
+    return;
+  }
+
+  const membershipEndDate = new Date(proExpiryDateString);
+  const now = new Date();
+  let message = '';
+
+  const timeLeftMs = membershipEndDate.getTime() - now.getTime();
+
+  console.log(`[updateMembershipExpiryUI] Time left in milliseconds: ${timeLeftMs}`);
+
+  if (timeLeftMs <= 0) {
+    message = "Your Pro membership has **expired**. Please renew to continue using all features.";
+    if (isPro) {
+        isPro = false;
+        refreshAllProUI();
+        console.log("[updateMembershipExpiryUI] Membership expired, setting isPro to false and refreshing UI.");
+    }
+  } else {
+    // Calculate remaining time more precisely for years, months, days
+    const totalDaysLeft = Math.floor(timeLeftMs / (1000 * 60 * 60 * 24));
+
+    const years = Math.floor(totalDaysLeft / 365);
+    let remainingDays = totalDaysLeft % 365;
+
+    const months = Math.floor(remainingDays / 30.44); // Using average days in a month for better approximation
+    remainingDays = Math.floor(remainingDays % 30.44); // Remaining days after accounting for months
+
+    let parts = [];
+
+    if (years > 0) {
+      parts.push(`**${years} year${years > 1 ? 's' : ''}**`);
+    }
+    if (months > 0) {
+      parts.push(`**${months} month${months > 1 ? 's' : ''}**`);
+    }
+    if (remainingDays > 0) {
+      parts.push(`**${remainingDays} day${remainingDays > 1 ? 's' : ''}**`);
+    }
+
+    if (parts.length === 0) {
+        message = "Your Pro membership has **less than a day** remaining.";
+    } else if (parts.length === 1) {
+        message = `Your Pro membership has ${parts[0]} remaining.`;
+    } else if (parts.length === 2) {
+        message = `Your Pro membership has ${parts[0]} and ${parts[1]} remaining.`;
+    } else { // parts.length === 3 (years, months, days)
+        message = `Your Pro membership has ${parts[0]}, ${parts[1]}, and ${parts[2]} remaining.`;
+    }
+  }
+
+  expiryMessageEl.style.display = 'block';
+  expiryMessageEl.innerHTML = message;
+  console.log(`[updateMembershipExpiryUI] Displayed message: "${message}"`);
+}
+
+
+
 // --- MAIN FUNCTION TO REFRESH ALL PRO-GATED UI ---
 /**
  * Updates all relevant UI elements based on the current global `isPro` status.
@@ -164,6 +243,9 @@ function refreshAllProUI() {
   const activeTemplateCard = document.querySelector('.template-card.active-template');
   const currentTemplateName = activeTemplateCard ? activeTemplateCard.dataset.template : '';
   updateWatermarkUI(currentTemplateName);
+
+  // ✅ ADD THIS LINE: Call the new function
+  updateMembershipExpiryUI();
 }
 
 
@@ -192,6 +274,8 @@ async function checkProStatus() {
 
   if (!email) {
     console.error("❌ [checkProStatus] No email found.");
+    // Ensure proExpiryDate is cleared if no email is found
+    localStorage.removeItem('proExpiryDate');
     return;
   }
 
@@ -208,6 +292,8 @@ async function checkProStatus() {
       const errData = await response.json().catch(() => ({ error: response.statusText }));
       console.error(`❌ [checkProStatus] API Error - Status: ${response.status}, Msg: ${errData.error || 'N/A'}`);
       isPro = false;
+      // Clear proExpiryDate on API error
+      localStorage.removeItem('proExpiryDate');
       return;
     }
 
@@ -215,29 +301,41 @@ async function checkProStatus() {
     if (result && typeof result.isPro === 'boolean') {
       isPro = result.isPro;
 
+      // ⭐⭐⭐ CRUCIAL ADDITION HERE ⭐⭐⭐
+      if (isPro && result.pro_expiry) { // Only store if user is Pro AND pro_expiry is provided
+        localStorage.setItem('proExpiryDate', result.pro_expiry);
+        console.log(`[checkProStatus] Stored proExpiryDate in localStorage: ${result.pro_expiry}`);
+      } else {
+        localStorage.removeItem('proExpiryDate'); // Clear if not Pro or no expiry provided
+        console.log("[checkProStatus] Not Pro or no pro_expiry received. Cleared proExpiryDate.");
+      }
+      // ⭐⭐⭐ END CRUCIAL ADDITION ⭐⭐⭐
+
       const toastEl = document.getElementById('pro-toast');
 
-    // ✅ Show toast only if just became Pro via Stripe redirect
-    if (isPro && emailSource === 'URL parameter' && toastEl) {
-     toastEl.style.display = 'block';
-      setTimeout(() => {
-     toastEl.style.opacity = '1';
-      }, 10);
+      // ✅ Show toast only if just became Pro via Stripe redirect
+      if (isPro && emailSource === 'URL parameter' && toastEl) {
+        toastEl.style.display = 'block';
+        setTimeout(() => {
+          toastEl.style.opacity = '1';
+        }, 10);
 
-  setTimeout(() => {
-    toastEl.style.opacity = '0';
-    setTimeout(() => toastEl.style.display = 'none', 500);
-  }, 5000);
-}
+        setTimeout(() => {
+          toastEl.style.opacity = '0';
+          setTimeout(() => toastEl.style.display = 'none', 500);
+        }, 5000);
+      }
 
-      console.log(`✅ [checkProStatus] Pro status from backend: ${isPro}`);
+      console.log(`✅ [checkProStatus] Pro status from backend: ${isPro}, Expiry: ${result.pro_expiry || 'N/A'}`);
     } else {
       console.warn("❓ [checkProStatus] Invalid response:", result);
       isPro = false;
+      localStorage.removeItem('proExpiryDate'); // Clear proExpiryDate on invalid response
     }
   } catch (err) {
     console.error(`❌ [checkProStatus] Network error: ${err.message}`);
     isPro = false;
+    localStorage.removeItem('proExpiryDate'); // Clear proExpiryDate on network error
   }
 }
 
