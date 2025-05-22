@@ -10,10 +10,9 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Top Bar -->
-   <div class="top-bar">
+  <div class="top-bar">
     <button id="theme-toggle">🌙 Dark Mode</button>
-    <button id="buy-pro-btn">Buy Pro</button>
+    <button id="buy-pro-btn">Buy Pro - €24.99 / 2 Years</button>
     <button id="logout-btn">Logout</button>
     </div>
     
@@ -21,9 +20,7 @@
   <label for="accent-picker">Select favourite colour</label>
   <input type="color" id="accent-picker" />
 </div>
-  <!-- Main Container -->
   <div class="container">
-    <!-- Left Form Column -->
     <div class="form-column">
       <h1 class="main-title">QuickProCV</h1>
       <p id="welcome-msg">Welcome! Please log in.</p>
@@ -46,29 +43,17 @@
   <input type="tel" id="phone" placeholder="Phone" />
   <input type="url" id="linkedin" placeholder="LinkedIn" />
 
-  <div id="linkedin-container">
-    <button type="button" id="linkedin-import" class="button primary">
-      🔗 Import from LinkedIn <span class="lock-icon" title="Pro users only">🔒</span>
-    </button>
-  </div>
-
-  <button type="button" class="ai-button" disabled>
-  Generate Cover Letter <span class="lock-icon">🔒</span>
-  </button>
-
-
-
   <input type="url" id="portfolio" placeholder="Portfolio" />
 
   <label for="summary">Summary</label>
   <textarea id="summary" placeholder=""></textarea>
-  <button type="button" class="ai-button" disabled>
+  <button type="button" class="ai-button" disabled id="generate-summary-button">
   Generate Summary <span class="lock-icon">🔒</span>
 </button>
 
   <label for="work">Work Experience</label>
   <textarea id="work" placeholder=""></textarea>
- <button type="button" class="ai-button" disabled>
+  <button type="button" class="ai-button" disabled id="generate-work-experience-button">
   Generate Work Experience <span class="lock-icon">🔒</span>
 </button>
 
@@ -77,9 +62,7 @@
 
   <label for="projects">Projects</label>
   <textarea id="projects" placeholder=""></textarea>
-  <button type="button" class="ai-button" disabled>
-  Generate Projects <span class="lock-icon">🔒</span>
-  </button>
+  
 
   <label for="certifications">Certifications <span class="tooltip-icon" title="Pro tip – List most recent first"></span></label>
   <textarea id="certifications" placeholder=""></textarea>
@@ -90,23 +73,36 @@
  
   <label for="skills">Skills</label>
 <span class="pro-tooltip" title="Pro users can generate skill sets based on job title"></span>
-<button type="button" class="ai-button" disabled>
-  Generate skills <span class="lock-icon">🔒</span>
-</button>
-<textarea id="skills" placeholder=""></textarea>
+
+<textarea id="skills"></textarea>
+
 
 <label for="hobbies">Hobbies</label>
 <textarea id="hobbies" placeholder=""></textarea>
 
 
+  <hr> <h3 class="section-heading">Cover Letter Details (AI Generated)</h3>
+  <p>Fill these details to generate a tailored cover letter.</p>
+
+  <label for="targetCompany">Target Company Name</label>
+  <input type="text" id="targetCompany" placeholder="e.g., Google, Microsoft" />
+
+  <label for="jobDescription">Job Description</label>
+  <textarea id="jobDescription" placeholder="Paste the job description here." rows="10"></textarea>
+
+  <label for="generatedCoverLetter">AI-Generated Cover Letter</label>
+  <textarea id="generatedCoverLetter" placeholder="AI-generated cover letter will appear here." rows="15"></textarea>
+
+  <button type="button" class="ai-button" disabled id="generate-cover-letter-button">
+  Generate Cover Letter <span class="lock-icon">🔒</span>
+  </button>
+
   <button type="submit">✨ Preview CV</button>
 </form>
 
-      <!-- Fake spacer button to preserve layout spacing -->
-       <div class="btn-placeholder"></div>
+      <div class="btn-placeholder"></div>
       </div>
 
-    <!-- Right Preview Column -->
     <div class="preview-column">
     <h2 class="template-options-title">Choose Your Template</h2>
   <div class="template-options">
@@ -128,7 +124,6 @@
 
 
 
-      <!-- CV Preview Area -->
       <div id="cv-preview" class="preview-section card template-tech">
         <img id="profile-photo" src="" alt="Profile Photo" style="display: none;" />
         <div id="cv-header">
@@ -163,7 +158,6 @@
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
