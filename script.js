@@ -343,7 +343,7 @@ function autofillTestData() {
   document.getElementById('name').value = 'Sarah Thompson';
   document.getElementById('email').value = 'sarah.thompson@example.com';
   document.getElementById('phone').value = '+353 87 123 4567';
-  document.getElementById('linkedin').value = 'https://www.linkedin.com/in/sarahthompson'; // KEPT LinkedIn autofill
+  document.getElementById('linkedin').value = 'https://www.linkedin.com/in/sarahthompson';
   document.getElementById('portfolio').value = 'https://sarahcodes.dev';
   document.getElementById('summary').value = `Experienced developer with 8+ years in full-stack development, leading teams and delivering scalable solutions. Passionate about clean code, mentorship, and continuous learning.`;
   document.getElementById('work').value = `Senior Engineer at TechCorp (2020–Present):\n- Led migration to microservices.\n- Mentored 4 junior developers.\n\nSoftware Engineer at DevSoft (2016–2020):\n- Built core features for e-commerce platform.`;
@@ -351,7 +351,7 @@ function autofillTestData() {
   document.getElementById('projects').value = `Open Source: Contributed to Vue.js\nFreelance: Built portfolio sites for 12 clients`;
   document.getElementById('certifications').value = `AWS Certified Solutions Architect\nScrum Master Certification`;
   document.getElementById('languages').value = `English (Fluent), German (Basic)`;
-  document.getElementById('skills').value = `JavaScript HTML CSS React Node.js MongoDB Git Docker`; // KEPT skills autofill
+  document.getElementById('skills').value = `JavaScript HTML CSS React Node.js MongoDB Git Docker`;
   document.getElementById('hobbies').value = `Hiking, Photography, Blogging`;
 
   // Autofill Cover Letter fields
@@ -422,7 +422,7 @@ const generateCoverLetterButton = document.getElementById('generate-cover-letter
 const jobTitleInput = document.getElementById('jobTitle');
 const summaryTextarea = document.getElementById('summary');
 const workExperienceTextarea = document.getElementById('work');
-const skillsTextarea = document.getElementById('skills'); // KEPT for manual input and potential context
+const skillsTextarea = document.getElementById('skills');
 
 // Add cover letter specific input/output elements
 const targetCompanyInput = document.getElementById('targetCompany');
@@ -490,7 +490,7 @@ if (generateWorkExperienceButton) {
     generateWorkExperienceButton.addEventListener('click', async () => {
         const currentWorkText = workExperienceTextarea.value;
         const jobTitle = jobTitleInput.value;
-        const skills = skillsTextarea.value; // Get skills for context
+        const skills = skillsTextarea.value;
 
         let prompt;
         if (currentWorkText.trim()) {
@@ -526,7 +526,7 @@ if (generateCoverLetterButton) {
     generateCoverLetterButton.addEventListener('click', async () => {
         const companyName = targetCompanyInput.value;
         const jobDesc = jobDescriptionTextarea.value;
-        const skills = skillsTextarea.value; // Get skills for context
+        const skills = skillsTextarea.value;
 
         if (!companyName.trim() || !jobDesc.trim()) {
             alert('Please enter the Target Company Name and paste the Job Description to generate a cover letter.');
@@ -549,10 +549,6 @@ if (generateCoverLetterButton) {
 } else {
     console.warn("Generate Cover Letter button not found. Ensure its ID is 'generate-cover-letter-button'.");
 }
-
-// REMOVED: Generate Projects button listener and logic
-// REMOVED: Generate Skills button listener and logic
-
 
 // Restore saved CV data
 const savedCV = JSON.parse(localStorage.getItem('cvData'));
@@ -631,6 +627,13 @@ if (autofillBtn) {
   autofillBtn.addEventListener('click', autofillTestData);
 } else { console.warn("Autofill button not found."); }
 
+// ADDED: Clear All button event listener
+const clearAllButton = document.getElementById('clear-all-btn');
+if (clearAllButton) {
+  clearAllButton.addEventListener('click', clearAllFields);
+} else { console.warn("Clear All button not found. Ensure its ID is 'clear-all-btn'."); }
+
+
 document.getElementById("logout-btn")?.addEventListener("click", async () => {
   await supabase.auth.signOut();
   localStorage.removeItem("userEmail");
@@ -640,41 +643,6 @@ document.getElementById("logout-btn")?.addEventListener("click", async () => {
 document.getElementById("buy-pro-btn")?.addEventListener("click", () => {
   startCheckout();
 });
-
-// REMOVED: All LinkedIn import button logic and event listener
-/*
-const linkedinImportButton = document.getElementById('linkedin-import');
-if (linkedinImportButton) {
-  linkedinImportButton.addEventListener('click', async () => {
-      if (!isPro) { alert('Please upgrade to Pro to use LinkedIn import.'); return; }
-      const linkedinUrlInput = document.getElementById('linkedin');
-      if (!linkedinUrlInput) { alert('LinkedIn URL input field not found.'); return; }
-      const url = linkedinUrlInput.value.trim();
-      if (!url || !url.includes('linkedin.com')) { alert('Please enter a valid LinkedIn profile URL.'); return; }
-      console.log(`[LinkedIn Import] Importing from: ${url}`);
-      try {
-          const response = await fetch('http://localhost:3000/api/linkedin-import', {
-              method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url })
-          });
-          if (!response.ok) {
-              const errData = await response.json().catch(() => ({ detail: "Import failed: " + response.statusText }));
-              throw new Error(errData.detail || "LinkedIn import request failed");
-          }
-          const data = await response.json();
-          if (data && data.full_name) {
-              document.getElementById('name').value = data.full_name || '';
-              document.getElementById('jobTitle').value = data.occupation || '';
-              const cvEmailField = document.getElementById('email');
-              if (cvEmailField && data.email) cvEmailField.value = data.email;
-              document.getElementById('summary').value = data.summary || '';
-              const cvFormForDispatch = document.getElementById('cv-form');
-              if (cvFormForDispatch) cvFormForDispatch.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-              alert('LinkedIn profile data imported successfully!');
-          } else { alert('Profile import successful but returned no main data.'); }
-      } catch (err) { console.error('❌ [LinkedIn Import] Error:', err); alert(`Error importing LinkedIn profile: ${err.message}`); }
-  });
-} else { console.warn("LinkedIn import button not found."); }
-*/
 
 document.querySelectorAll('.template-card').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -697,13 +665,12 @@ if (cvForm) {
       const emailVal = document.getElementById('email')?.value || '';
       const phoneVal = document.getElementById('phone')?.value || '';
       if (contactEl) contactEl.textContent = `${emailVal} | ${phoneVal}`;
-      // Use the linkedin input value directly for preview
-      const linkedinUrl = document.getElementById('linkedin')?.value || ''; // KEPT this
+      const linkedinUrl = document.getElementById('linkedin')?.value || '';
       const portfolioUrl = document.getElementById('portfolio')?.value || '';
       const linksEl = document.getElementById('preview-links');
       if (linksEl) {
           const linksHtml = [];
-          if (linkedinUrl) linksHtml.push(`<a href="${linkedinUrl}" target="_blank">LinkedIn</a>`); // KEPT this
+          if (linkedinUrl) linksHtml.push(`<a href="${linkedinUrl}" target="_blank">LinkedIn</a>`);
           if (portfolioUrl) linksHtml.push(`<a href="${portfolioUrl}" target="_blank">Portfolio</a>`);
           linksEl.innerHTML = linksHtml.join(' | ');
       }
@@ -720,7 +687,7 @@ if (cvForm) {
       const langsEl = document.getElementById('preview-languages');
       if (langsEl) langsEl.textContent = document.getElementById('languages')?.value || '';
       const hobbiesEl = document.getElementById('preview-hobbies');
-      if (hobbiesEl) hobbies.textContent = document.getElementById('hobbies')?.value || '';
+      if (hobbiesEl) hobbiesEl.textContent = document.getElementById('hobbies')?.value || '';
       const skillsValue = document.getElementById('skills')?.value || '';
       const skillsArray = skillsValue ? skillsValue.split(/[\s,;]+/).filter(s => s.trim() !== "") : [];
       const skillsEl = document.getElementById('preview-skills');
@@ -811,6 +778,43 @@ document.addEventListener('visibilitychange', async () => {
     refreshAllProUI();
   }
 });
+
+// Clear all fields function
+function clearAllFields() {
+    console.log("[clearAllFields] Clearing all CV form fields and local storage data.");
+
+    const formFields = [
+        'jobTitle', 'name', 'email', 'phone', 'linkedin', 'portfolio',
+        'summary', 'work', 'education', 'projects', 'certifications',
+        'languages', 'skills', 'hobbies',
+        'targetCompany', 'jobDescription', 'generatedCoverLetter'
+    ];
+
+    formFields.forEach(id => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.value = ''; // Clear text inputs and textareas
+            // For file input (profile photo), you might need to reset it differently
+            // if (id === 'photo-upload') { field.value = null; }
+        }
+    });
+
+    // Clear profile photo preview
+    const profileImg = document.getElementById('profile-photo');
+    if (profileImg) {
+        profileImg.src = '';
+        profileImg.style.display = 'none';
+    }
+
+    // Clear local storage for CV data
+    localStorage.removeItem('cvData');
+
+    // Trigger CV preview update to reflect empty fields
+    const cvForm = document.getElementById('cv-form');
+    if (cvForm) cvForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+    alert('All fields cleared!');
+}
 
 // Final closing of DOMContentLoaded and script.js logging
 });

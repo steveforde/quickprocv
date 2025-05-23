@@ -76,9 +76,15 @@
     }
 
     .card:hover {
-      transform: scale(1.03);
-      box-shadow: 0 12px 25px rgba(0, 123, 255, 0.3);
+      transform: scale(1.10);
+      transform: scale(1.10) translateY(-6px);
+      box-shadow: 0 16px 30px rgba(0, 123, 255, 0.35);
     }
+
+     .card {
+       transition: transform 0.25s cubic-bezier(0.4, 0.0, 0.2, 1), 
+                   box-shadow 0.25s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
 
     .card h3 {
       font-size: 1.4rem;
@@ -192,25 +198,43 @@
 
   <section class="features">
     <div class="card" data-aos="fade-up">
-      <h3>✨ Only €9.99 for 2 years</h3>
-      <p>Pay once and use QuickProCV for 2 years. No subscriptions, no hidden fees. Ever.</p>
+      <h3>✨ Only €24.99 for 2 years</h3>
+      <p>Affordable. Honest. Hassle-free.
+        Unlock everything QuickProCV has to offer with a single payment — no subscriptions, upsells, or hidden costs. Your access lasts a full 2 years, worry-free.</p>
     </div>
 
     <div class="card" data-aos="fade-down">
       <h3>🧠 AI Assistance Included</h3>
-      <p>Use built-in AI to generate bullet points, career summaries, and achievements instantly.</p>
+      <p>Smarter writing in seconds.
+        From bullet points to achievement phrasing, our built-in AI saves you hours by instantly generating impactful content tailored to your profession or industry.</p>
     </div>
 
     <div class="card" data-aos="fade-up">
       <h3>📄 Export Stunning PDF CVs</h3>
-      <p>Choose from multiple modern templates and export your CV instantly with one click.</p>
+      <p>Your CV, polished and professional.
+          Choose a modern template, customize your content, and export your resume as a clean, job-ready PDF with just one click — no design skills required</p>
     </div>
 
     <div class="card" data-aos="fade-down">
       <h3>🔄 Quarterly Updates</h3>
-      <p>New features and templates every quarter — all included.</p>
+      <p>We grow with your goals.
+        Enjoy new templates, AI improvements, and career-focused features every quarter — all included in your original payment. No extra charges, ever.</p>
     </div>
-  </section>
+
+    <!-- New Card 5 -->
+  <div class="card" data-aos="fade-up">
+    <h3>🔒 First impression</h3>
+    <p>QuickProCV helps you create a professional impression that stands out to recruiters and secures more interviews. Your next career move starts here</p>
+  </div>
+
+  <!-- New Card 6 -->
+  <div class="card" data-aos="fade-down">
+    <h3>💬 Cover Letter</h3>
+    <p>Our AI doesn’t just generate a generic cover letter — it creates one tailored to the exact job you want. Just enter the job description and company name, and QuickProCV delivers a professionally written, customized letter that aligns with your CV and grabs the recruiter's attention.</p>
+  </div>
+</section>
+
+
 
   <section class="testimonials-section">
     <div class="testimonial" data-aos="fade-up">
