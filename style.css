@@ -435,20 +435,6 @@ html[data-theme="dark"] #cv-preview section {
 
 
 
-
-/* All other templates - dark text */
-#cv-preview:not(.template-tech) #cv-watermark {
-  color: #333333;
-}
-
-/* Optional: prevent watermark from printing for Pro */
-@media print {
-  #cv-watermark {
-    display: block;
-  }
-}
-
-
 #profile-photo {
   width: 90px;
   height: 90px;
@@ -744,6 +730,8 @@ h1.main-title,
 }
 
 
+
+
 /*
   ===== COMMENTED OUT: Original Global Heading Styles =====
   .cv-section {
@@ -772,37 +760,154 @@ h1.main-title,
 /* ========== CV Template Styles ========== */
 
 /* --- Tech Template --- */
+/* --- TECH TEMPLATE STYLING --- */
 .template-tech {
-  background-color: #1a1a1a !important; /* Keep important if necessary for specificity */
-  color: #f9f9f9 !important;
   font-family: 'Inter', sans-serif;
-  padding: 40px; /* This styles the preview when tech template is active */
+  background-color: #1a1a1a;
+  color: #e4e4e4;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
 }
-.template-tech h1,
-.template-tech h2,
+
+.template-tech h2, .template-tech h3 {
+  color: #00aaff;
+  border-bottom: 1px solid #00aaff;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.template-tech h2 {
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .template-tech h3 {
-  color: #00bfff;
+  font-size: 1.2rem;
 }
 
-.template-tech #preview-title,
-.template-tech #preview-contact {
-  color: #bbbbbb !important; /* Light gray for readability */
+.template-tech .skill-badge {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 6px 10px;
+  margin: 4px 4px 0 0;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
+.template-tech .skill-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px #00bfff;
+}
 
+.template-tech #preview-title {
+  color: #ffffff !important; /* Use the same light grey as the main text, or choose another light color like #f0f0f0 */
+}
+
+.template-tech .preview-section {
+  background-color: #121212;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 123, 255, 0.2);
+}
 
 .template-tech a {
   color: #00bfff;
-}
-.template-tech p,
-.template-tech span {
-  color: #f1f1f1;
-}
-.template-tech #cv-watermark {
-  color: #ffffff;
-  opacity: 0.3;
+  text-decoration: underline;
 }
 
+
+
+.template-tech #preview-contact {
+  color: #cccccc;
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+
+.template-tech a {
+  color: #00bfff;
+  font-weight: 500;
+  text-decoration: underline;
+}
+
+#preview-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin: 0.25rem 0 0.75rem;
+  color: var(--text-color, #333); /* Fallback for light theme */
+}
+
+/* Optional: override for dark mode */
+[data-theme="dark"] #preview-title {
+  color: #e0e0e0;
+}
+
+
+.template-tech #preview-contact {
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+/* --- PRINT MODE --- */
+@media print {
+  .template-tech {
+    background-color: white !important;
+    color: black !important;
+    box-shadow: none !important;
+  
+  }
+  @media print {
+  .template-tech #preview-title {
+    color: #000 !important;
+  }
+}
+
+
+
+/* On screen: light semi-transparent watermark */
+#cv-watermark {
+  color: rgb(255, 255, 255) !important;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 10px;
+  display: block;
+}
+
+@media print {
+  #cv-watermark {
+    color: black !important;
+  }
+}
+
+
+
+  .template-tech h2, .template-tech h3 {
+    color: black !important;
+    border-color: #000 !important;
+  }
+
+  .template-tech .skill-badge {
+    background-color: transparent !important;
+    color: black !important;
+    border: 1px solid #000;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+  }
+
+
+
+  .preview-section button,
+  .preview-section input,
+  .preview-section .theme-toggle,
+  .preview-section .download-btn {
+    display: none !important;
+  }
+}
 /* MARKETING CV STYLE */
 .template-marketing {
   background-color: #fff8f5; /* light peachy background */
@@ -823,9 +928,7 @@ h1.main-title,
   color: #00aa00;
 }
 
-.template-marketing #cv-watermark {
-  color: rgba(0, 0, 0, 0.2);
-}
+
 
 /* Dark mode version of marketing template */
 html[data-theme="dark"] .template-marketing {
@@ -844,9 +947,6 @@ html[data-theme="dark"] .template-marketing a {
   color: #88ff88;
 }
 
-html[data-theme="dark"] .template-marketing #cv-watermark {
-  color: rgba(255, 255, 255, 0.2);
-}
 html[data-theme="dark"] .template-marketing {
   background-color: #3a2f2c;
 }
@@ -944,9 +1044,7 @@ html[data-theme="dark"] .template-business a {
   color: #007acc;
 }
 
-.template-student #cv-watermark {
-  color: rgba(0, 0, 0, 0.1);
-}
+
 
 /* DARK MODE */
 html[data-theme="dark"] .template-student {
@@ -965,9 +1063,7 @@ html[data-theme="dark"] .template-student a {
   color: #4fc3f7;
 }
 
-html[data-theme="dark"] .template-student #cv-watermark {
-  color: rgba(255, 255, 255, 0.1);
-}
+
 
 .template-temp {
   background-color: #fefefe;
@@ -987,13 +1083,11 @@ html[data-theme="dark"] .template-student #cv-watermark {
   padding-bottom: 4px;
 }
 
-.template-temp a {
+.template-tech a {
   color: var(--primary-action-color); /* was #e67e22 */
 }
 
-.template-temp #cv-watermark {
-  color: rgba(0, 0, 0, 0.15);
-}
+
 
 /* DARK MODE */
 html[data-theme="dark"] .template-temp {
@@ -1014,11 +1108,6 @@ html[data-theme="dark"] .template-temp .section-heading {
 html[data-theme="dark"] .template-temp a {
   color: var(--primary-action-color); /* unified */
 }
-
-html[data-theme="dark"] .template-temp #cv-watermark {
-  color: rgba(255, 255, 255, 0.1);
-}
-
 
 .cv-section {
   margin-top: 2rem;

@@ -84,19 +84,17 @@ function styleTemplateCardsUI() {
   });
 }
 
-// Update CV watermark visibility
 function updateWatermarkUI(templateName) {
   const watermark = document.getElementById('cv-watermark');
   if (!watermark) return;
 
-  if (templateName === 'tech' && !isPro) {
-    watermark.style.display = 'block';
-  } else if (!isPro) {
-    watermark.style.display = 'block';
+  if (!isPro) {
+    watermark.style.display = 'block'; // Show for free users
   } else {
-    watermark.style.display = 'none';
+    watermark.style.display = 'none';  // Hide for Pro users
   }
 }
+
 
 // Update membership expiry display
 function updateMembershipExpiryUI() {
@@ -171,6 +169,7 @@ function updateMembershipExpiryUI() {
 // Main function to refresh all Pro-gated UI
 function refreshAllProUI() {
   console.log(`🔄 [refreshAllProUI] Refreshing UI. isPro: ${isPro}`);
+  document.body.classList.toggle('free-user', !isPro);
 
   const welcomeMsg = document.getElementById('welcome-msg');
   const currentStoredEmail = localStorage.getItem('userEmail');
@@ -186,7 +185,7 @@ function refreshAllProUI() {
 
   const activeTemplateCard = document.querySelector('.template-card.active-template');
   const currentTemplateName = activeTemplateCard ? activeTemplateCard.dataset.template : '';
-  updateWatermarkUI(currentTemplateName);
+  
 
   unlockAIButtons(); // Call the AI button unlock function (now more selective)
   updateMembershipExpiryUI(); // Call the membership expiry function
@@ -403,6 +402,7 @@ saveFields.forEach(id => {
 
   await checkProStatus();
   refreshAllProUI();
+  updateWatermarkUI(currentTemplate);
 
 const confirmedEmail = localStorage.getItem('userEmail');
 if (!confirmedEmail || confirmedEmail === 'null') {
@@ -609,6 +609,7 @@ if (logoutButton) {
     console.log("[Logout] Logging out...");
     localStorage.removeItem('userEmail');
     isPro = false;
+    document.body.classList.add('free-user');
     refreshAllProUI();
     alert('Logged out successfully.');
     window.location.href = 'login.html';

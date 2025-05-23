@@ -33,7 +33,7 @@ app.post('/create-checkout-session', async (req, res) => {
       mode: 'payment',
       line_items: [
         {
-          price: 'price_1RMV5SQRh7jNBCuP5iKOZuuF', // ✅ Your actual Stripe Price ID
+          price: process.env.STRIPE_PRICE_ID, // ✅ Your actual Stripe Price ID
           quantity: 1,
         },
       ],
