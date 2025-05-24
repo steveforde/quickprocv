@@ -37,9 +37,14 @@
       <button type="button" id="autofill-btn" class="button primary">⚡ Autofill Test CV</button>
       <button type="button" id="clear-all-btn" class="button secondary">🧹 Clear All</button>
 
+      <div id="completion-tracker-container">
+       <label for="completion-progress">Completion Progress</label>
+       <progress id="completion-progress" value="0" max="100"></progress>
+       <span id="completion-percentage">0%</span>
+      </div>
 
 
-     <form id="cv-form">
+  <form id="cv-form">
   <input type="text" id="jobTitle" placeholder="Job Title" />
   <input type="text" id="name" placeholder="Full Name" />
   <input type="email" id="email" placeholder="Email" />

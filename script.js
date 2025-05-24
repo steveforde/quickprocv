@@ -5,6 +5,8 @@ console.log("Script.js starting execution.");
 const premiumTemplates = ['marketing', 'business', 'classic', 'student', 'temp'];
 let isPro = false;
 
+
+
 // --- AI Buttons Helper Function ---
 // This function selectively unlocks AI buttons for Pro users and handles non-AI buttons.
 function unlockAIButtons() {
@@ -359,6 +361,7 @@ function autofillTestData() {
 
   const cvForm = document.getElementById('cv-form');
   if (cvForm) cvForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  updateCompletionProgress();
 }
 
 // --- DOMContentLoaded: Main Initialization and Event Listener Setup ---
@@ -378,6 +381,42 @@ window.onafterprint = () => {
     preview.classList.remove('print-mode-tech');
   }
 };
+
+
+
+ const trackedFields = [
+    'name', 'jobTitle', 'email', 'phone', 'linkedin',
+    'portfolio', 'summary', 'work', 'education',
+    'skills', 'projects', 'certifications'
+  ];
+
+function updateCompletionProgress() {
+ 
+
+  const filled = trackedFields.filter(id => {
+    const el = document.getElementById(id);
+    return el && el.value.trim() !== '';
+  });
+
+  const percentage = Math.round((filled.length / trackedFields.length) * 100);
+
+  const progress = document.getElementById('completion-progress');
+  const percentText = document.getElementById('completion-percentage');
+
+  if (progress && percentText) {
+    progress.value = percentage;
+    percentText.textContent = `${percentage}%`;
+  }
+}
+
+// Track completion progress
+trackedFields.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', updateCompletionProgress);
+  }
+});
+
 
 const saveFields = [
   'name', 'jobTitle', 'email', 'phone', 'linkedin',
@@ -403,14 +442,9 @@ saveFields.forEach(id => {
   await checkProStatus();
   refreshAllProUI();
   updateWatermarkUI(currentTemplate);
+  updateCompletionProgress(); // 👈 add this right here
 
-const confirmedEmail = localStorage.getItem('userEmail');
-if (!confirmedEmail || confirmedEmail === 'null') {
-  console.warn('No confirmed email found. Redirecting...');
-  alert('Not logged in. Redirecting to login page.');
-  window.location.href = 'login.html';
-  return;
-}
+
 
 // --- AI Button Listeners and Logic (UPDATED SECTION) ---
 // Get AI button elements by their unique IDs
@@ -558,6 +592,7 @@ if (savedCV) {
     if (field) field.value = value;
   }
   document.getElementById('cv-form')?.dispatchEvent(new Event('submit'));
+  updateCompletionProgress(); // Make sure progress bar reflects restored data
 }
 
 // Initial AI button state setup
@@ -769,6 +804,22 @@ if (templateOptionsDiv) {
 window.addEventListener('pageshow', async (event) => {
   console.log(`🌀 pageshow fired (persisted: ${event.persisted}) — rechecking status & refreshing UI`);
   await checkProStatus();
+
+const confirmedEmail = localStorage.getItem('userEmail');
+const pageNeedingLogin = ['main.html'];
+
+if (pageNeedingLogin.includes(currentPage)) {
+  if (!confirmedEmail || confirmedEmail === 'null') {
+    console.warn('[Guard] No confirmed email found on main.html. Redirecting...');
+    alert('Not logged in. Redirecting to login page.');
+    window.location.href = 'login.html';
+    return;
+  } else {
+    console.log('[Guard] User confirmed on main.html:', confirmedEmail);
+  }
+}
+
+
   refreshAllProUI();
 });
 
@@ -797,6 +848,7 @@ function clearAllFields() {
             field.value = ''; // Clear text inputs and textareas
             // For file input (profile photo), you might need to reset it differently
             // if (id === 'photo-upload') { field.value = null; }
+            
         }
     });
 
@@ -813,6 +865,8 @@ function clearAllFields() {
     // Trigger CV preview update to reflect empty fields
     const cvForm = document.getElementById('cv-form');
     if (cvForm) cvForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    
+    updateCompletionProgress();
 
     alert('All fields cleared!');
 }

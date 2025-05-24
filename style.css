@@ -4,11 +4,11 @@
   --accent: #007bff; /* Consider phasing this out if --primary-action-color is its replacement */
   --card: #ffffff;   /* Consider renaming to --card-bg-light for clarity */
   --text: #000000;   /* Consider renaming to --text-color-light for clarity */
-  --bg: #f4f4f4;     /* Consider renaming to --page-bg-light for clarity */
+  --bg: #649dd2; /* Nice soft blue */   /* Consider renaming to --page-bg-light for clarity */
 
   /* Light Mode Specific Variables */
   --text-color-light: #333333;
-  --card-bg-light: #ffffff;
+  --card-bg-light: #ffffffee;;
   --page-bg-light: #f4f4f4; /* Added for consistency */
   --border-color-light: #cccccc; /* Added from previous suggestions */
 
@@ -883,8 +883,6 @@ h1.main-title,
   }
 }
 
-
-
   .template-tech h2, .template-tech h3 {
     color: black !important;
     border-color: #000 !important;
@@ -1711,5 +1709,29 @@ button.locked {
   }
 }
 
+#completion-tracker-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+#completion-progress {
+  width: 200px;
+  height: 12px;
+  border-radius: 8px;
+  appearance: none;
+}
+
+#completion-progress::-webkit-progress-bar {
+  background-color: #eee;
+  border-radius: 8px;
+}
+
+#completion-progress::-webkit-progress-value {
+  background-color: var(--accent, #007bff);
+  border-radius: 8px;
+}
 
 
