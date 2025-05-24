@@ -90,6 +90,8 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease; /* For theme switch */
 }
 
+
+
 .top-bar {
   display: flex;
   justify-content: space-between; /* Push color picker left, buttons right */
@@ -1711,5 +1713,33 @@ button.locked {
   }
 }
 
+/* --- Style the Clear All button to be a fixed blue --- */
 
+#clear-all-btn {
+  background-color: #007bff; /* A standard, strong blue - CHANGE IF NEEDED */
+  color: #ffffff;           /* White text */
+  border-color: #007bff;   /* Match the background */
+  /* Add any other properties you need to 'reset' */
+}
 
+/* --- Optional: Style the hover state too --- */
+
+#clear-all-btn:hover {
+  background-color: #0056b3; /* A slightly darker blue for hover */
+  border-color: #0056b3;
+  color: #ffffff;           /* Keep text white */
+}
+
+/* --- Optional: Style the active/click state --- */
+#clear-all-btn:active {
+    background-color: #004085; /* An even darker blue */
+    border-color: #004085;
+    color: #ffffff;
+}
+
+/* Make contact info (email/phone) white in dark mode for specific templates */
+html[data-theme='dark'] .template-business #preview-contact,
+html[data-theme='dark'] .template-student #preview-contact,
+html[data-theme='dark'] .template-temp #preview-contact {
+  color: #ffffff; /* Force text to be white */
+}

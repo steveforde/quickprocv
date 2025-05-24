@@ -5,51 +5,76 @@ console.log("Script.js starting execution.");
 const premiumTemplates = ['marketing', 'business', 'classic', 'student', 'temp'];
 let isPro = false;
 
-// --- AI Buttons Helper Function ---
-// This function selectively unlocks AI buttons for Pro users and handles non-AI buttons.
 function unlockAIButtons() {
   console.log("[unlockAIButtons] Running with isPro:", isPro);
-  
-  // Select only the AI buttons that are INTENDED to have AI functionality (Summary, Work Exp, Cover Letter)
-  const aiButtonsForAI = document.querySelectorAll(
-      '#generate-summary-button, #generate-work-experience-button, #generate-cover-letter-button'
-  ); 
-  console.log("[unlockAIButtons] Found", aiButtonsForAI.length, "AI buttons with IDs for AI functionality.");
+  const aiButtons = document.querySelectorAll('.ai-button');
+  console.log("[unlockAIButtons] Found", aiButtons.length, "AI buttons");
 
-  aiButtonsForAI.forEach(btn => {
+  aiButtons.forEach(btn => {
     btn.disabled = false;
     btn.classList.remove('locked');
     btn.title = "Generate with AI";
 
+    // ✅ Remove the lock icon inside the button if it exists
     const lockIcon = btn.querySelector('.lock-icon');
     if (lockIcon) {
       lockIcon.remove();
-      console.log("[unlockAIButtons] Lock icon removed for AI button.");
+      console.log("[unlockAIButtons] Lock icon removed.");
     }
   });
 
-  // Handle all other buttons with class 'ai-button' (Projects, Skills)
-  // These should *not* be unlocked by AI logic, but remain consistent disabled/locked appearance.
-  document.querySelectorAll('button.ai-button:not([id^="generate-"])').forEach(btn => {
-      btn.disabled = true; // Keep them disabled
-      btn.classList.add('locked');
-      btn.title = "Feature not available"; 
-      
-      // Ensure they have a lock icon if applicable (e.g., if one wasn't in HTML initially)
-      let lockIcon = btn.querySelector('.lock-icon');
-      if (!lockIcon) {
-          lockIcon = document.createElement('span');
-          lockIcon.className = 'lock-icon';
-          lockIcon.textContent = ' 🔒';
-          btn.appendChild(lockIcon);
-      }
-      lockIcon.style.display = 'inline';
-  });
+  // ✅ Also update LinkedIn button
+  const linkedinBtn = document.getElementById('linkedin-import');
+  if (linkedinBtn) {
+    linkedinBtn.disabled = false;
+    linkedinBtn.classList.remove('locked');
+    linkedinBtn.title = "Import from LinkedIn";
 
-  // LinkedIn Import button is now completely removed from HTML, so no JS handling here.
+    // Remove any embedded lock icon span
+    const lockSpan = linkedinBtn.querySelector('.lock-icon');
+    if (lockSpan) lockSpan.remove();
+
+    // Clean any accidental emoji
+    linkedinBtn.textContent = "🔗 Import from LinkedIn";
+  }
 }
 
-// Style template cards based on Pro status
+// Log initial state
+console.log("[Initial State] isPro:", isPro);
+const initialEmailOnLoad = localStorage.getItem('userEmail');
+console.log("[Initial State] LocalStorage userEmail on script load:", initialEmailOnLoad);
+
+// --- CORE UI UPDATE FUNCTIONS ---
+
+/**
+ * Updates the LinkedIn import button's state and appearance.
+ */
+function updateLinkedInAccessUI() {
+  const linkedinButton = document.getElementById('linkedin-import');
+  if (!linkedinButton) return;
+
+  // Get or create the lock icon span
+  let lockIcon = linkedinButton.querySelector('.lock-icon');
+  if (!lockIcon) {
+    lockIcon = document.createElement('span');
+    lockIcon.className = 'lock-icon';
+    lockIcon.textContent = ' 🔒';
+    linkedinButton.appendChild(lockIcon);
+  }
+
+  if (!isPro) {
+    linkedinButton.disabled = true;
+    linkedinButton.classList.add('locked');
+    linkedinButton.title = "Upgrade to Pro to use LinkedIn import";
+    lockIcon.style.display = 'inline';
+  } else {
+    linkedinButton.disabled = false;
+    linkedinButton.classList.remove('locked');
+    linkedinButton.title = "Import from LinkedIn";
+    lockIcon.style.display = 'none';
+  }
+}
+
 function styleTemplateCardsUI() {
   document.querySelectorAll('.template-card').forEach(card => {
     const tpl = card.dataset.template;
@@ -62,6 +87,7 @@ function styleTemplateCardsUI() {
         lockIcon = document.createElement('span');
         lockIcon.className = 'template-lock-icon lock-icon';
         lockIcon.innerHTML = '&#128274;';
+        lockIcon.style.marginLeft = '5px';
         card.appendChild(lockIcon);
       }
     }
@@ -76,6 +102,7 @@ function styleTemplateCardsUI() {
       if (lockIcon) lockIcon.style.display = 'none';
     }
 
+    // ✅ Highlight active template
     if (tpl === currentTemplate) {
       card.classList.add('active-template');
     } else {
@@ -84,19 +111,25 @@ function styleTemplateCardsUI() {
   });
 }
 
+/**
+ * Updates the visibility of the CV watermark.
+ */
 function updateWatermarkUI(templateName) {
   const watermark = document.getElementById('cv-watermark');
   if (!watermark) return;
 
-  if (!isPro) {
-    watermark.style.display = 'block'; // Show for free users
+  if (templateName === 'tech' && !isPro) {
+    watermark.style.display = 'block';
+  } else if (!isPro) {
+    watermark.style.display = 'block';
   } else {
-    watermark.style.display = 'none';  // Hide for Pro users
+    watermark.style.display = 'none';
   }
 }
 
-
-// Update membership expiry display
+/**
+ * Updates the display for membership expiry date.
+ */
 function updateMembershipExpiryUI() {
   const expiryMessageEl = document.getElementById('membership-expiry-message');
   if (!expiryMessageEl) {
@@ -107,9 +140,10 @@ function updateMembershipExpiryUI() {
   const proExpiryDateString = localStorage.getItem('proExpiryDate');
   console.log(`[updateMembershipExpiryUI] proExpiryDateString from localStorage: ${proExpiryDateString}`);
 
+  // Check if user is Pro AND if an expiry date string exists
   if (!isPro || !proExpiryDateString || proExpiryDateString === 'null') {
-    expiryMessageEl.style.display = 'none';
-    expiryMessageEl.innerHTML = '';
+    expiryMessageEl.style.display = 'none'; // Hide if not pro or no expiry date
+    expiryMessageEl.innerHTML = ''; // Clear content
     console.log("[updateMembershipExpiryUI] Not Pro or no expiry date, hiding message.");
     return;
   }
@@ -130,13 +164,14 @@ function updateMembershipExpiryUI() {
         console.log("[updateMembershipExpiryUI] Membership expired, setting isPro to false and refreshing UI.");
     }
   } else {
+    // Calculate remaining time more precisely for years, months, days
     const totalDaysLeft = Math.floor(timeLeftMs / (1000 * 60 * 60 * 24));
 
     const years = Math.floor(totalDaysLeft / 365);
     let remainingDays = totalDaysLeft % 365;
 
-    const months = Math.floor(remainingDays / 30.44);
-    remainingDays = Math.floor(remainingDays % 30.44);
+    const months = Math.floor(remainingDays / 30.44); // Using average days in a month for better approximation
+    remainingDays = Math.floor(remainingDays % 30.44); // Remaining days after accounting for months
 
     let parts = [];
 
@@ -156,7 +191,7 @@ function updateMembershipExpiryUI() {
         message = `Your Pro membership has ${parts[0]} remaining.`;
     } else if (parts.length === 2) {
         message = `Your Pro membership has ${parts[0]} and ${parts[1]} remaining.`;
-    } else {
+    } else { // parts.length === 3 (years, months, days)
         message = `Your Pro membership has ${parts[0]}, ${parts[1]}, and ${parts[2]} remaining.`;
     }
   }
@@ -166,10 +201,12 @@ function updateMembershipExpiryUI() {
   console.log(`[updateMembershipExpiryUI] Displayed message: "${message}"`);
 }
 
-// Main function to refresh all Pro-gated UI
+// --- MAIN FUNCTION TO REFRESH ALL PRO-GATED UI ---
+/**
+ * Updates all relevant UI elements based on the current global `isPro` status.
+ */
 function refreshAllProUI() {
   console.log(`🔄 [refreshAllProUI] Refreshing UI. isPro: ${isPro}`);
-  document.body.classList.toggle('free-user', !isPro);
 
   const welcomeMsg = document.getElementById('welcome-msg');
   const currentStoredEmail = localStorage.getItem('userEmail');
@@ -181,21 +218,24 @@ function refreshAllProUI() {
     }
   }
 
+  updateLinkedInAccessUI();
   styleTemplateCardsUI();
 
   const activeTemplateCard = document.querySelector('.template-card.active-template');
   const currentTemplateName = activeTemplateCard ? activeTemplateCard.dataset.template : '';
-  
+  updateWatermarkUI(currentTemplateName);
 
-  unlockAIButtons(); // Call the AI button unlock function (now more selective)
-  updateMembershipExpiryUI(); // Call the membership expiry function
+  // ✅ ADD THIS LINE: Call the new function
+  updateMembershipExpiryUI();
 }
 
-// Check Pro status from backend
+// --- Core Functions (checkProStatus, switchTemplate, etc.) ---
+
 async function checkProStatus() {
   let email = localStorage.getItem('userEmail');
   let emailSource = 'localStorage';
 
+  // ✅ Always check URL param first — it should override anything in localStorage
   const params = new URLSearchParams(window.location.search);
   const emailFromUrl = params.get('email');
 
@@ -206,13 +246,14 @@ async function checkProStatus() {
     localStorage.setItem('userEmail', email);
     if (window.history.replaceState) {
       const cleanURL = window.location.pathname + window.location.hash;
-      window.history.replaceState({}, document.title, cleanURL);
+      window.history.replaceState({}, document.title, cleanURL); // Clean the URL
       console.log("[checkProStatus] Cleaned email from URL.");
     }
   }
 
   if (!email) {
     console.error("❌ [checkProStatus] No email found.");
+    // Ensure proExpiryDate is cleared if no email is found
     localStorage.removeItem('proExpiryDate');
     return;
   }
@@ -230,6 +271,7 @@ async function checkProStatus() {
       const errData = await response.json().catch(() => ({ error: response.statusText }));
       console.error(`❌ [checkProStatus] API Error - Status: ${response.status}, Msg: ${errData.error || 'N/A'}`);
       isPro = false;
+      // Clear proExpiryDate on API error
       localStorage.removeItem('proExpiryDate');
       return;
     }
@@ -238,16 +280,19 @@ async function checkProStatus() {
     if (result && typeof result.isPro === 'boolean') {
       isPro = result.isPro;
 
-      if (isPro && result.pro_expiry) {
+      // ⭐⭐⭐ CRUCIAL ADDITION HERE ⭐⭐⭐
+      if (isPro && result.pro_expiry) { // Only store if user is Pro AND pro_expiry is provided
         localStorage.setItem('proExpiryDate', result.pro_expiry);
         console.log(`[checkProStatus] Stored proExpiryDate in localStorage: ${result.pro_expiry}`);
       } else {
-        localStorage.removeItem('proExpiryDate');
+        localStorage.removeItem('proExpiryDate'); // Clear if not Pro or no expiry provided
         console.log("[checkProStatus] Not Pro or no pro_expiry received. Cleared proExpiryDate.");
       }
+      // ⭐⭐⭐ END CRUCIAL ADDITION ⭐⭐⭐
 
       const toastEl = document.getElementById('pro-toast');
 
+      // ✅ Show toast only if just became Pro via Stripe redirect
       if (isPro && emailSource === 'URL parameter' && toastEl) {
         toastEl.style.display = 'block';
         setTimeout(() => {
@@ -264,16 +309,16 @@ async function checkProStatus() {
     } else {
       console.warn("❓ [checkProStatus] Invalid response:", result);
       isPro = false;
-      localStorage.removeItem('proExpiryDate');
+      localStorage.removeItem('proExpiryDate'); // Clear proExpiryDate on invalid response
     }
   } catch (err) {
     console.error(`❌ [checkProStatus] Network error: ${err.message}`);
     isPro = false;
-    localStorage.removeItem('proExpiryDate');
+    localStorage.removeItem('proExpiryDate'); // Clear proExpiryDate on network error
   }
 }
 
-let currentTemplate = 'tech';
+let currentTemplate = 'tech'; // or your default
 
 function switchTemplate(templateName) {
   if (premiumTemplates.includes(templateName) && !isPro) {
@@ -281,7 +326,7 @@ function switchTemplate(templateName) {
     return;
   }
 
-  currentTemplate = templateName;
+  currentTemplate = templateName; // ✅ store current selection
 
   const preview = document.getElementById('cv-preview');
   if (!preview) return;
@@ -289,7 +334,7 @@ function switchTemplate(templateName) {
   preview.className = 'preview-section card';
   preview.classList.add(`template-${templateName}`);
 
-  styleTemplateCardsUI();
+  styleTemplateCardsUI(); // ✅ call to restyle buttons after switch
   updateWatermarkUI(templateName);
 }
 
@@ -308,6 +353,7 @@ function startCheckout() {
     return;
   }
 
+  // ✅ This is the correct place for the console log
   console.log("[startCheckout] Email being sent to /create-checkout-session:", email);
   console.log("IMPORTANT CHECK! Email going to payment helper is:", email);
   fetch('http://localhost:3000/create-checkout-session', {
@@ -350,12 +396,8 @@ function autofillTestData() {
   document.getElementById('projects').value = `Open Source: Contributed to Vue.js\nFreelance: Built portfolio sites for 12 clients`;
   document.getElementById('certifications').value = `AWS Certified Solutions Architect\nScrum Master Certification`;
   document.getElementById('languages').value = `English (Fluent), German (Basic)`;
-  document.getElementById('skills').value = `JavaScript HTML CSS React Node.js MongoDB Git Docker`;
+  document.getElementById('skills').value = `JavaScript HTML CSS React Node.js MongoDB Git Docker`; // Adjusted skills input for robust splitting
   document.getElementById('hobbies').value = `Hiking, Photography, Blogging`;
-
-  // Autofill Cover Letter fields
-  document.getElementById('targetCompany').value = 'AI Solutions Inc.';
-  document.getElementById('jobDescription').value = `Seeking a highly motivated and experienced Software Engineer to join our innovative team. Responsibilities include full-stack development, cloud architecture, and mentoring junior staff.`;
 
   const cvForm = document.getElementById('cv-form');
   if (cvForm) cvForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
@@ -363,374 +405,275 @@ function autofillTestData() {
 
 // --- DOMContentLoaded: Main Initialization and Event Listener Setup ---
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log("🚀 DOM fully loaded and parsed. Initializing main page.");
+  console.log("🚀 DOM fully loaded and parsed. Initializing main page...");
 
-window.onbeforeprint = () => {
-  const preview = document.getElementById('cv-preview');
-  if (preview && preview.classList.contains('template-tech')) {
-    preview.classList.add('print-mode-tech');
-  }
-};
+  // Add temporary print-mode class to force dark styling in print
+  window.onbeforeprint = () => {
+    const preview = document.getElementById('cv-preview');
+    if (preview && preview.classList.contains('template-tech')) {
+      preview.classList.add('print-mode-tech');
+    }
+  };
 
-window.onafterprint = () => {
-  const preview = document.getElementById('cv-preview');
-  if (preview) {
-    preview.classList.remove('print-mode-tech');
-  }
-};
+  window.onafterprint = () => {
+    const preview = document.getElementById('cv-preview');
+    if (preview) {
+      preview.classList.remove('print-mode-tech');
+    }
+  };
 
-const saveFields = [
-  'name', 'jobTitle', 'email', 'phone', 'linkedin',
-  'portfolio', 'summary', 'work', 'projects', 'education', 'certifications',
-  'languages', 'skills', 'hobbies',
-  'targetCompany', 'jobDescription', 'generatedCoverLetter'
-];
+  // ❌❌❌ NESTED LISTENER REMOVED FROM HERE ❌❌❌
 
-saveFields.forEach(id => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.addEventListener('input', () => {
-      const data = {};
-      saveFields.forEach(fid => {
-        const f = document.getElementById(fid);
-        if (f) data[fid] = f.value;
+  const saveFields = [
+    'name', 'jobTitle', 'email', 'phone', 'linkedin', 'portfolio',
+    'summary', 'work', 'projects', 'education', 'certifications',
+    'languages', 'skills', 'hobbies'
+  ];
+
+  saveFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => {
+        const data = {};
+        saveFields.forEach(fid => {
+          const f = document.getElementById(fid);
+          if (f) data[fid] = f.value;
+        });
+        localStorage.setItem('cvData', JSON.stringify(data));
       });
-      localStorage.setItem('cvData', JSON.stringify(data));
-    });
-  }
-});
-
-  await checkProStatus();
-  refreshAllProUI();
-  updateWatermarkUI(currentTemplate);
-
-const confirmedEmail = localStorage.getItem('userEmail');
-if (!confirmedEmail || confirmedEmail === 'null') {
-  console.warn('No confirmed email found. Redirecting...');
-  alert('Not logged in. Redirecting to login page.');
-  window.location.href = 'login.html';
-  return;
-}
-
-// --- AI Button Listeners and Logic (UPDATED SECTION) ---
-// Get AI button elements by their unique IDs
-const generateSummaryButton = document.getElementById('generate-summary-button');
-const generateWorkExperienceButton = document.getElementById('generate-work-experience-button');
-const generateCoverLetterButton = document.getElementById('generate-cover-letter-button');
-
-// Get input fields for AI generation context
-const jobTitleInput = document.getElementById('jobTitle');
-const summaryTextarea = document.getElementById('summary');
-const workExperienceTextarea = document.getElementById('work');
-const skillsTextarea = document.getElementById('skills');
-
-// Add cover letter specific input/output elements
-const targetCompanyInput = document.getElementById('targetCompany');
-const jobDescriptionTextarea = document.getElementById('jobDescription');
-const generatedCoverLetterTextarea = document.getElementById('generatedCoverLetter');
-
-
-// Function to call AI backend
-async function callAIGenerate(prompt, targetTextarea) {
-  if (!isPro) { // isPro is a global variable updated by checkProStatus
-    alert('This AI feature is only available to Pro users. Upgrade to unlock.');
-    return;
-  }
-
-  targetTextarea.value = "Generating content with AI...";
-  targetTextarea.disabled = true;
-  targetTextarea.style.opacity = 0.5;
-
-  try {
-    const response = await fetch('http://localhost:3000/api/ai/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Backend AI Error: ${response.status} - ${errorData.error || 'Unknown error'}`);
     }
+  });
 
-    const data = await response.json();
-    if (data && data.result) {
-      targetTextarea.value = data.result;
+  await checkProStatus(); // Checks localStorage & URL param, then backend
+  refreshAllProUI(); // Updates all UI based on isPro
+
+  const currentPage = window.location.pathname.split('/').pop();
+
+  if (['main.html'].includes(currentPage)) {
+    const confirmedEmail = localStorage.getItem('userEmail');
+    if (!confirmedEmail || confirmedEmail === 'null') {
+      console.warn('[Guard] No confirmed email found. Redirecting...');
+      alert('Not logged in. Redirecting to login page.');
+      window.location.href = 'login.html';
+      return;
     } else {
-      targetTextarea.value = "AI generation failed: No result received.";
+      console.log('[Guard] User confirmed on main.html:', confirmedEmail);
     }
-
-  } catch (error) {
-    console.error("Error calling AI backend:", error);
-    targetTextarea.value = `Error: ${error.message}`;
-  } finally {
-    targetTextarea.disabled = false;
-    targetTextarea.style.opacity = 1;
   }
-}
 
-// --- AI Button Event Listeners (Refined for Summary, Work Exp, Cover Letter) ---
-
-// Generate Summary
-if (generateSummaryButton) {
-    generateSummaryButton.addEventListener('click', async () => {
-        const prompt = `Write a concise and professional summary for a CV based on the following information:
-Job Title: ${jobTitleInput.value || 'N/A'}
-Work Experience Highlights: ${workExperienceTextarea.value || 'N/A'}
-Skills: ${skillsTextarea.value || 'N/A'}
-Keep it under 150 words.`;
-        await callAIGenerate(prompt, summaryTextarea);
+  if (isPro) {
+    unlockAIButtons(); // 👈 Make sure this is here
+  } else {
+    // fallback for free users
+    document.querySelectorAll('.ai-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        alert('This AI feature is only available to Pro users. Upgrade to unlock.');
+      });
     });
-} else {
-    console.warn("Generate Summary button not found. Ensure its ID is 'generate-summary-button'.");
-}
-
-// Generate Work Experience
-if (generateWorkExperienceButton) {
-    generateWorkExperienceButton.addEventListener('click', async () => {
-        const currentWorkText = workExperienceTextarea.value;
-        const jobTitle = jobTitleInput.value;
-        const skills = skillsTextarea.value;
-
-        let prompt;
-        if (currentWorkText.trim()) {
-            prompt = `Rewrite the following work experience for a CV. For each entry, format it as:
-            "Job Title at Company Name (Years - Years):
-            - [Bullet point 1 focused on achievement]
-            - [Bullet point 2 focused on achievement]
-            - [Bullet point 3 focused on achievement]"
-            
-            Focus on achievements and quantifiable results. Ensure Company Name and Years are included as specified if extractable from the text.
-            User's Job Title: ${jobTitle || 'N/A'}
-            Relevant Skills: ${skills || 'N/A'}
-            Existing Work Experience:
-            ${currentWorkText}`;
-        } else {
-            prompt = `Generate a few work experience entries for a CV. For each entry, format it as:
-            "Job Title at Company Name (Start Year - End Year):
-            - [Bullet point 1 focused on achievement]
-            - [Bullet point 2 focused on achievement]
-            - [Bullet point 3 focused on achievement]"
-
-            Generate entries for a ${jobTitle || 'general professional'} role. Include realistic company names and years. Focus on achievements and quantifiable results.
-            Relevant Skills: ${skills || 'N/A'}`;
-        }
-        await callAIGenerate(prompt, workExperienceTextarea);
-    });
-} else {
-    console.warn("Generate Work Experience button not found. Ensure its ID is 'generate-work-experience-button'.");
-}
-
-// Generate Cover Letter
-if (generateCoverLetterButton) {
-    generateCoverLetterButton.addEventListener('click', async () => {
-        const companyName = targetCompanyInput.value;
-        const jobDesc = jobDescriptionTextarea.value;
-        const skills = skillsTextarea.value;
-
-        if (!companyName.trim() || !jobDesc.trim()) {
-            alert('Please enter the Target Company Name and paste the Job Description to generate a cover letter.');
-            return;
-        }
-
-        const prompt = `Write a professional and concise cover letter for the position of ${jobTitleInput.value || 'a candidate'} at ${companyName}.
-        Highlight how the following experiences and skills align with the provided job description.
-        CV Summary: ${summaryTextarea.value || 'N/A'}
-        Work Experience Highlights: ${workExperienceTextarea.value || 'N/A'}
-        Key Skills: ${skills || 'N/A'}
-        
-        Job Description:
-        ${jobDesc}
-        
-        Keep it to one page, addressing the company directly. Start with "Dear Hiring Manager,".`;
-
-        await callAIGenerate(prompt, generatedCoverLetterTextarea);
-    });
-} else {
-    console.warn("Generate Cover Letter button not found. Ensure its ID is 'generate-cover-letter-button'.");
-}
-
-// Restore saved CV data
-const savedCV = JSON.parse(localStorage.getItem('cvData'));
-if (savedCV) {
-  for (const [key, value] of Object.entries(savedCV)) {
-    const field = document.getElementById(key);
-    if (field) field.value = value;
   }
-  document.getElementById('cv-form')?.dispatchEvent(new Event('submit'));
-}
 
-// Initial AI button state setup
-// The unlockAIButtons() function will be called by refreshAllProUI()
-// based on the isPro status retrieved by checkProStatus().
+  const savedCV = JSON.parse(localStorage.getItem('cvData'));
+  if (savedCV) {
+    for (const [key, value] of Object.entries(savedCV)) {
+      const field = document.getElementById(key);
+      if (field) field.value = value;
+    }
+    document.getElementById('cv-form')?.dispatchEvent(new Event('submit'));
+  }
 
-// Theme Toggle
-const htmlEl = document.documentElement;
-const themeToggleBtn = document.getElementById('theme-toggle');
+  // Theme Toggle
+  const htmlEl = document.documentElement;
+  const themeToggleBtn = document.getElementById('theme-toggle');
 
-function applyTheme(theme) {
-  htmlEl.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
-  themeToggleBtn.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
-}
+  function applyTheme(theme) {
+    htmlEl.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    themeToggleBtn.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+  }
 
-// Load theme on page load
-const savedTheme = localStorage.getItem('theme') || 'light';
-applyTheme(savedTheme);
+  // Load theme on page load
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  applyTheme(savedTheme);
 
-// Toggle theme on click
-themeToggleBtn.addEventListener('click', () => {
-  const newTheme = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  applyTheme(newTheme);
-});
-
-// Accent Color Picker Setup
-const accentPicker = document.getElementById('accent-picker');
-
-if (accentPicker) {
-  const defaultAccent = '#007bff';
-  const savedAccent = localStorage.getItem('accentColor') || defaultAccent;
-
-  document.documentElement.style.setProperty('--accent', savedAccent); // Corrected: use savedAccent here
-  accentPicker.value = savedAccent;
-
-  accentPicker.addEventListener('input', (e) => {
-    const newColor = e.target.value;
-    document.documentElement.style.setProperty('--accent', newColor);
-    localStorage.setItem('accentColor', newColor);
-    console.log('[Accent Picker] Changed to:', newColor);
-  });
-}
-
-// Logout Button
-const logoutButton = document.getElementById('logout-btn');
-if (logoutButton) {
-  logoutButton.addEventListener('click', () => {
-    console.log("[Logout] Logging out...");
-    localStorage.removeItem('userEmail');
-    isPro = false;
-    document.body.classList.add('free-user');
-    refreshAllProUI();
-    alert('Logged out successfully.');
-    window.location.href = 'login.html';
-  });
-} else { console.warn("Logout button not found."); }
-
-// Buy Pro Button
-const buyProButton = document.getElementById('buy-pro-btn');
-if (buyProButton) {
-  buyProButton.addEventListener('click', startCheckout);
-} else { console.warn("Buy Pro button (id='buy-pro-btn') not found."); }
-
-// Autofill Button
-const autofillBtn = document.getElementById('autofill-btn');
-if (autofillBtn) {
-  autofillBtn.addEventListener('click', autofillTestData);
-} else { console.warn("Autofill button not found."); }
-
-// ADDED: Clear All button event listener
-const clearAllButton = document.getElementById('clear-all-btn');
-if (clearAllButton) {
-  clearAllButton.addEventListener('click', clearAllFields);
-} else { console.warn("Clear All button not found. Ensure its ID is 'clear-all-btn'."); }
-
-
-document.getElementById("logout-btn")?.addEventListener("click", async () => {
-  await supabase.auth.signOut();
-  localStorage.removeItem("userEmail");
-  window.location.href = "login.html";
-});
-
-document.getElementById("buy-pro-btn")?.addEventListener("click", () => {
-  startCheckout();
-});
-
-document.querySelectorAll('.template-card').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const tpl = btn.dataset.template;
-    switchTemplate(tpl);
-  });
-});
-
-// CV Form Submit Listener
-const cvForm = document.getElementById('cv-form');
-if (cvForm) {
-  cvForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      console.log("[CV Form] Previewing CV...");
-      const nameEl = document.getElementById('preview-name');
-      if (nameEl) nameEl.textContent = document.getElementById('name')?.value || '';
-      const titleEl = document.getElementById('preview-title');
-      if (titleEl) titleEl.textContent = document.getElementById('jobTitle')?.value || '';
-      const contactEl = document.getElementById('preview-contact');
-      const emailVal = document.getElementById('email')?.value || '';
-      const phoneVal = document.getElementById('phone')?.value || '';
-      if (contactEl) contactEl.textContent = `${emailVal} | ${phoneVal}`;
-      const linkedinUrl = document.getElementById('linkedin')?.value || '';
-      const portfolioUrl = document.getElementById('portfolio')?.value || '';
-      const linksEl = document.getElementById('preview-links');
-      if (linksEl) {
-          const linksHtml = [];
-          if (linkedinUrl) linksHtml.push(`<a href="${linkedinUrl}" target="_blank">LinkedIn</a>`);
-          if (portfolioUrl) linksHtml.push(`<a href="${portfolioUrl}" target="_blank">Portfolio</a>`);
-          linksEl.innerHTML = linksHtml.join(' | ');
-      }
-      const summaryEl = document.getElementById('preview-summary');
-      if (summaryEl) summaryEl.textContent = document.getElementById('summary')?.value || '';
-      const workEl = document.getElementById('preview-work');
-      if (workEl) workEl.innerHTML = convertToBullets(document.getElementById('work')?.value || '');
-      const projectsEl = document.getElementById('preview-projects');
-      if (projectsEl) projectsEl.innerHTML = convertToBullets(document.getElementById('projects')?.value || '');
-      const educationEl = document.getElementById('preview-education');
-      if (educationEl) educationEl.textContent = document.getElementById('education')?.value || '';
-      const certsEl = document.getElementById('preview-certifications');
-      if (certsEl) certsEl.textContent = document.getElementById('certifications')?.value || '';
-      const langsEl = document.getElementById('preview-languages');
-      if (langsEl) langsEl.textContent = document.getElementById('languages')?.value || '';
-      const hobbiesEl = document.getElementById('preview-hobbies');
-      if (hobbiesEl) hobbiesEl.textContent = document.getElementById('hobbies')?.value || '';
-      const skillsValue = document.getElementById('skills')?.value || '';
-      const skillsArray = skillsValue ? skillsValue.split(/[\s,;]+/).filter(s => s.trim() !== "") : [];
-      const skillsEl = document.getElementById('preview-skills');
-      if (skillsEl) skillsEl.innerHTML = skillsArray.map(s => `<span class="skill-badge">${s.trim()}</span>`).join('');
-  });
-} else { console.warn("CV Form not found."); }
-
-const downloadPdfBtn = document.getElementById('download-pdf');
-if (downloadPdfBtn) {
-  downloadPdfBtn.addEventListener('click', () => {
-    window.print();
-  });
-}
-
-// Profile Photo Upload Listener
-const photoUploadInput = document.getElementById('photo-upload');
-if (photoUploadInput) {
-  photoUploadInput.addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      const profileImg = document.getElementById('profile-photo');
-      if (!file || !profileImg) return;
-      console.log(`[Photo Upload] File selected: ${file.name}`);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-          profileImg.src = e.target.result;
-          profileImg.style.display = 'block';
-          console.log("[Photo Upload] Preview updated.");
-      };
-      reader.readAsDataURL(file);
-  });
-} else { console.warn("Photo upload input element not found."); }
-
-// Template Card Click Listener (Delegation)
-const templateOptionsDiv = document.querySelector('.template-options');
-if (templateOptionsDiv) {
-  templateOptionsDiv.addEventListener('click', (event) => {
-    const target = event.target.closest('.template-card');
-    if (!target || target.classList.contains('locked-template')) return;
-    const templateName = target.dataset.template;
-    switchTemplate(templateName);
+  // Toggle theme on click
+  themeToggleBtn.addEventListener('click', () => {
+    const newTheme = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
   });
 
+  // Accent Color Picker Setup (Fixing double declaration issue)
+  const accentPicker = document.getElementById('accent-picker');
+
+  if (accentPicker) {
+    const defaultAccent = '#007bff';
+    const savedAccent = localStorage.getItem('accentColor') || defaultAccent;
+
+    // Set the saved color on page load
+    document.documentElement.style.setProperty('--accent', savedAccent);
+    accentPicker.value = savedAccent;
+
+    // Listen to all changes including slider drag
+    accentPicker.addEventListener('input', (e) => {
+      const newColor = e.target.value;
+      document.documentElement.style.setProperty('--accent', newColor);
+      localStorage.setItem('accentColor', newColor);
+      console.log('[Accent Picker] Changed to:', newColor);
+    });
+  }
+
+  // Logout Button
+  const logoutButton = document.getElementById('logout-btn');
+  if (logoutButton) {
+    logoutButton.addEventListener('click', () => {
+      console.log("[Logout] Logging out...");
+      localStorage.removeItem('userEmail');
+      isPro = false;
+      refreshAllProUI();
+      alert('Logged out successfully.');
+      window.location.href = 'login.html';
+    });
+  } else { console.warn("Logout button not found."); }
+
+  // Buy Pro Button
+  const buyProButton = document.getElementById('buy-pro-btn');
+  if (buyProButton) {
+    buyProButton.addEventListener('click', startCheckout);
+  } else { console.warn("Buy Pro button (id='buy-pro-btn') not found."); }
+
+  // Autofill Button
+  const autofillBtn = document.getElementById('autofill-btn');
+  if (autofillBtn) {
+    autofillBtn.addEventListener('click', autofillTestData);
+  } else { console.warn("Autofill button not found."); }
+
+  document.getElementById("logout-btn")?.addEventListener("click", async () => {
+    // await supabase.auth.signOut(); // Keep or remove based on whether you use Supabase auth
+    localStorage.removeItem("userEmail");
+    window.location.href = "login.html"; // or your login route
+  });
+
+  document.getElementById("buy-pro-btn")?.addEventListener("click", () => {
+    startCheckout(); // assuming you already defined this function
+  });
+
+  // LinkedIn Import Button
+  const linkedinImportButton = document.getElementById('linkedin-import');
+  if (linkedinImportButton) {
+    linkedinImportButton.addEventListener('click', async () => {
+        if (!isPro) { alert('Please upgrade to Pro to use LinkedIn import.'); return; }
+        const linkedinUrlInput = document.getElementById('linkedin');
+        if (!linkedinUrlInput) { alert('LinkedIn URL input field not found.'); return; }
+        const url = linkedinUrlInput.value.trim();
+        if (!url || !url.includes('linkedin.com')) { alert('Please enter a valid LinkedIn profile URL.'); return; }
+        console.log(`[LinkedIn Import] Importing from: ${url}`);
+        try {
+            const response = await fetch('http://localhost:3000/api/linkedin-import', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url })
+            });
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({ detail: "Import failed: " + response.statusText }));
+                throw new Error(errData.detail || "LinkedIn import request failed");
+            }
+            const data = await response.json();
+            if (data && data.full_name) {
+                document.getElementById('name').value = data.full_name || '';
+                document.getElementById('jobTitle').value = data.occupation || '';
+                const cvEmailField = document.getElementById('email');
+                if (cvEmailField && data.email) cvEmailField.value = data.email;
+                document.getElementById('summary').value = data.summary || '';
+                const cvFormForDispatch = document.getElementById('cv-form');
+                if (cvFormForDispatch) cvFormForDispatch.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                alert('LinkedIn profile data imported successfully!');
+            } else { alert('Profile import successful but returned no main data.'); }
+        } catch (err) { console.error('❌ [LinkedIn Import] Error:', err); alert(`Error importing LinkedIn profile: ${err.message}`); }
+    });
+  } else { console.warn("LinkedIn import button not found."); }
+
+  document.querySelectorAll('.template-card').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tpl = btn.dataset.template;
+      switchTemplate(tpl);
+    });
+  });
+
+  // CV Form Submit Listener
+  const cvForm = document.getElementById('cv-form');
+  if (cvForm) {
+    cvForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        console.log("[CV Form] Previewing CV...");
+        const nameEl = document.getElementById('preview-name');
+        if (nameEl) nameEl.textContent = document.getElementById('name')?.value || '';
+        const titleEl = document.getElementById('preview-title');
+        if (titleEl) titleEl.textContent = document.getElementById('jobTitle')?.value || '';
+        const contactEl = document.getElementById('preview-contact');
+        const emailVal = document.getElementById('email')?.value || '';
+        const phoneVal = document.getElementById('phone')?.value || '';
+        if (contactEl) contactEl.textContent = `${emailVal} | ${phoneVal}`;
+        const linkedinUrl = document.getElementById('linkedin')?.value || '';
+        const portfolioUrl = document.getElementById('portfolio')?.value || '';
+        const linksEl = document.getElementById('preview-links');
+        if (linksEl) {
+            const linksHtml = [];
+            if (linkedinUrl) linksHtml.push(`<a href="${linkedinUrl}" target="_blank">LinkedIn</a>`);
+            if (portfolioUrl) linksHtml.push(`<a href="${portfolioUrl}" target="_blank">Portfolio</a>`);
+            linksEl.innerHTML = linksHtml.join(' | ');
+        }
+        const summaryEl = document.getElementById('preview-summary');
+        if (summaryEl) summaryEl.textContent = document.getElementById('summary')?.value || '';
+        const workEl = document.getElementById('preview-work');
+        if (workEl) workEl.innerHTML = convertToBullets(document.getElementById('work')?.value || '');
+        const projectsEl = document.getElementById('preview-projects');
+        if (projectsEl) projectsEl.innerHTML = convertToBullets(document.getElementById('projects')?.value || '');
+        const educationEl = document.getElementById('preview-education');
+        if (educationEl) educationEl.textContent = document.getElementById('education')?.value || '';
+        const certsEl = document.getElementById('preview-certifications');
+        if (certsEl) certsEl.textContent = document.getElementById('certifications')?.value || '';
+        const langsEl = document.getElementById('preview-languages');
+        if (langsEl) langsEl.textContent = document.getElementById('languages')?.value || '';
+        const hobbiesEl = document.getElementById('preview-hobbies');
+        if (hobbiesEl) hobbiesEl.textContent = document.getElementById('hobbies')?.value || '';
+        const skillsValue = document.getElementById('skills')?.value || '';
+        const skillsArray = skillsValue ? skillsValue.split(/[\s,;]+/).filter(s => s.trim() !== "") : [];
+        const skillsEl = document.getElementById('preview-skills');
+        if (skillsEl) skillsEl.innerHTML = skillsArray.map(s => `<span class="skill-badge">${s.trim()}</span>`).join('');
+    });
+  } else { console.warn("CV Form not found."); }
+
+  const downloadPdfBtn = document.getElementById('download-pdf');
+  if (downloadPdfBtn) {
+    downloadPdfBtn.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
+  // Profile Photo Upload Listener
+  const photoUploadInput = document.getElementById('photo-upload');
+  if (photoUploadInput) {
+    photoUploadInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        const profileImg = document.getElementById('profile-photo');
+        if (!file || !profileImg) return;
+        console.log(`[Photo Upload] File selected: ${file.name}`);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            profileImg.src = e.target.result;
+            profileImg.style.display = 'block';
+            console.log("[Photo Upload] Preview updated.");
+        };
+        reader.readAsDataURL(file);
+    });
+  } else { console.warn("Photo upload input element not found."); }
+
+  // Template Card Click Listener (Delegation)
+  const templateOptionsDiv = document.querySelector('.template-options');
+  if (templateOptionsDiv) {
+    templateOptionsDiv.addEventListener('click', (event) => {
+      const target = event.target.closest('.template-card');
+      if (!target || target.classList.contains('locked-template')) return;
+      const templateName = target.dataset.template;
+      switchTemplate(templateName);
+    });
   } else { console.warn("Template options container not found."); }
 
   // Initial Template Selection
@@ -738,7 +681,7 @@ if (templateOptionsDiv) {
   const defaultTemplateButton = document.querySelector(`.template-card[data-template="${defaultTemplate}"]`);
   if (defaultTemplateButton) {
     console.log(`[Initialization] Setting default template to: ${defaultTemplate}`);
-    if (!defaultTemplateButton.classList.contains('locked-template')) {
+    if (!defaultTemplateButton.classList.contains('locked-template')) { // Only switch if not locked
         switchTemplate(defaultTemplate);
     } else {
         console.warn(`Default template '${defaultTemplate}' is locked. Not switching initially.`);
@@ -762,10 +705,85 @@ if (templateOptionsDiv) {
         updateWatermarkUI(defaultTemplate);
     }
   }
+   
+  // --- Attach AI Skills Button Listener ---
+    console.log("DEBUG: Trying to attach Generate Skills button listener...");
+    const generateSkillsButton = document.getElementById('generate-skills-btn');
+    console.log("DEBUG: Result of getElementById('generate-skills-btn'):", generateSkillsButton);
+
+    if (generateSkillsButton) {
+        console.log("DEBUG: Generate Skills Button FOUND! Attaching listener...");
+        generateSkillsButton.addEventListener('click', generateSkillsAI);
+        console.log("DEBUG: Listener ATTACHED to Generate Skills button.");
+    } else {
+        console.error("DEBUG: Generate Skills button was NOT found. Listener NOT attached.");
+    }
+    // --- End Attach AI Skills Button Listener ---
+     
+    // --- Attach AI Work Experience Button Listener ---
+    console.log("DEBUG: Trying to attach Generate Work Experience button listener...");
+    const generateWorkButton = document.getElementById('generate-work-experience-button');
+    console.log("DEBUG: Result of getElementById('generate-work-experience-button'):", generateWorkButton);
+
+    if (generateWorkButton) {
+        console.log("DEBUG: Generate Work Experience Button FOUND! Attaching listener...");
+        generateWorkButton.addEventListener('click', generateWorkExperienceAI);
+        console.log("DEBUG: Listener ATTACHED to Generate Work Experience button.");
+    } else {
+        console.error("DEBUG: Generate Work Experience button was NOT found. Listener NOT attached.");
+    }
+    // --- End Attach AI Work Experience Button Listener ---
+
+     // --- Attach AI Cover Letter Button Listener ---
+    console.log("DEBUG: Trying to attach Generate Cover Letter button listener...");
+    const generateCoverLetterButton = document.getElementById('generate-cover-letter-button');
+    console.log("DEBUG: Result of getElementById('generate-cover-letter-button'):", generateCoverLetterButton);
+
+    if (generateCoverLetterButton) {
+        console.log("DEBUG: Generate Cover Letter Button FOUND! Attaching listener...");
+        generateCoverLetterButton.addEventListener('click', generateCoverLetterAI);
+        console.log("DEBUG: Listener ATTACHED to Generate Cover Letter button.");
+    } else {
+        console.error("DEBUG: Generate Cover Letter button was NOT found. Listener NOT attached.");
+    }
+    // --- End Attach AI Cover Letter Button Listener ---
+
+    // --- Attach AI Summary Button Listener ---
+    console.log("DEBUG: Trying to attach Generate Summary button listener...");
+    const generateSummaryButton = document.getElementById('generate-summary-button');
+    console.log("DEBUG: Result of getElementById('generate-summary-button'):", generateSummaryButton);
+
+    if (generateSummaryButton) {
+        console.log("DEBUG: Generate Summary Button FOUND! Attaching listener...");
+        generateSummaryButton.addEventListener('click', generateSummaryAI);
+        console.log("DEBUG: Listener ATTACHED to Generate Summary button.");
+    } else {
+        console.error("DEBUG: Generate Summary button was NOT found. Listener NOT attached.");
+    }
+    // --- End Attach AI Summary Button Listener ---
+
+  // ⭐⭐⭐ CODE ADDED HERE ⭐⭐⭐
+  // --- Attach Clear All Button Listener ---
+  console.log("DEBUG: Trying to attach Clear All button listener...");
+  const clearAllButton = document.getElementById('clear-all-btn');
+  console.log("DEBUG: Result of getElementById('clear-all-btn'):", clearAllButton);
+
+  if (clearAllButton) {
+      console.log("DEBUG: Button FOUND! Attaching listener...");
+      clearAllButton.addEventListener('click', clearAllFields); // Make sure clearAllFields is defined!
+      console.log("DEBUG: Listener ATTACHED to Clear All button.");
+  } else {
+      console.error("DEBUG: Clear All button was NOT found. Listener NOT attached.");
+  }
+  // --- End Attach Clear All Button Listener ---
+  // ⭐⭐⭐ END OF ADDED CODE ⭐⭐⭐
 
   console.log("🏁 Main page initialization complete.");
+  console.log("Script.js finished initial execution pass."); // Moved this log inside for clarity
 
-// Global Event Listeners (pageshow, visibilitychange)
+}); // <-- This closes the big DOMContentLoaded function
+
+// --- Global Event Listeners (pageshow, visibilitychange) ---
 window.addEventListener('pageshow', async (event) => {
   console.log(`🌀 pageshow fired (persisted: ${event.persisted}) — rechecking status & refreshing UI`);
   await checkProStatus();
@@ -780,43 +798,418 @@ document.addEventListener('visibilitychange', async () => {
   }
 });
 
-// Clear all fields function
-function clearAllFields() {
-    console.log("[clearAllFields] Clearing all CV form fields and local storage data.");
-
-    const formFields = [
-        'jobTitle', 'name', 'email', 'phone', 'linkedin', 'portfolio',
-        'summary', 'work', 'education', 'projects', 'certifications',
-        'languages', 'skills', 'hobbies',
-        'targetCompany', 'jobDescription', 'generatedCoverLetter'
-    ];
-
-    formFields.forEach(id => {
-        const field = document.getElementById(id);
-        if (field) {
-            field.value = ''; // Clear text inputs and textareas
-            // For file input (profile photo), you might need to reset it differently
-            // if (id === 'photo-upload') { field.value = null; }
-        }
-    });
-
-    // Clear profile photo preview
-    const profileImg = document.getElementById('profile-photo');
-    if (profileImg) {
-        profileImg.src = '';
-        profileImg.style.display = 'none';
+// ==================================================================
+// --- Generate Skills AI Function (Updated for Real Backend) ---
+// ==================================================================
+async function generateSkillsAI() {
+    console.log("[generateSkillsAI] Clicked.");
+    if (!isPro) {
+        alert('AI Skill Generation is a Pro feature. Please upgrade.');
+        return;
     }
 
-    // Clear local storage for CV data
-    localStorage.removeItem('cvData');
+    // --- Get Context ---
+    const jobTitle = document.getElementById('jobTitle')?.value || '';
+    const summary = document.getElementById('summary')?.value || '';
+    const skillsField = document.getElementById('skills');
+    const skillsButton = document.getElementById('generate-skills-btn');
 
-    // Trigger CV preview update to reflect empty fields
-    const cvForm = document.getElementById('cv-form');
-    if (cvForm) cvForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    if (!skillsField || !skillsButton) {
+        console.error("Skills field or button not found!");
+        return;
+    }
 
-    alert('All fields cleared!');
+    if (!jobTitle && !summary) {
+        alert("Please fill in at least the Job Title or Summary to generate relevant skills.");
+        return;
+    }
+
+    // --- Provide visual feedback ---
+    const originalButtonHTML = skillsButton.innerHTML;
+    skillsButton.innerHTML = "✨ Generating...";
+    skillsField.value = "Contacting AI for skills, please wait...";
+    skillsField.disabled = true;
+    skillsButton.disabled = true;
+
+    try {
+        // --- CONSTRUCT THE PROMPT ---
+        const promptText = `Based on the Job Title "${jobTitle}" and this summary "${summary}", list 10 to 15 key technical and soft skills. Present them as a single line, separated only by spaces. For example: JavaScript React Node.js Teamwork Communication`;
+        console.log("[generateSkillsAI] Sending prompt to backend...");
+
+        // --- MAKE THE REAL AI CALL ---
+        const response = await fetch('http://localhost:3000/api/ai/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: promptText })
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({ error: `Request failed: ${response.statusText}` }));
+            throw new Error(errData.error || `Backend request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // --- UPDATE THE FIELD ---
+        if (data && data.result) {
+            skillsField.value = data.result;
+            console.log("[generateSkillsAI] Skills generated successfully.");
+        } else {
+            throw new Error("Received an invalid response from the AI backend.");
+        }
+
+    } catch (error) {
+        console.error("❌ [generateSkillsAI] Error:", error);
+        skillsField.value = `Failed to generate skills: ${error.message}. Please try again.`;
+        alert(`An error occurred while generating skills: ${error.message}`);
+    } finally {
+        // --- Restore button and field ---
+        skillsField.disabled = false;
+        skillsButton.disabled = false;
+        skillsButton.innerHTML = `✨ Generate Skills <span class="lock-icon">🔒</span>`; // Reset
+
+        if (isPro) {
+            skillsButton.innerHTML = `✨ Generate Skills`;
+            const lockIcon = skillsButton.querySelector('.lock-icon');
+            if(lockIcon) lockIcon.remove();
+        } else {
+             skillsButton.disabled = true;
+        }
+    }
 }
 
-// Final closing of DOMContentLoaded and script.js logging
-});
-console.log("Script.js finished initial execution pass.");
+// ======================================================================
+// --- Generate Cover Letter AI Function (Updated for Real Backend) ---
+// ======================================================================
+async function generateCoverLetterAI() {
+    console.log("[generateCoverLetterAI] Clicked.");
+    if (!isPro) {
+        alert('AI Cover Letter Generation is a Pro feature. Please upgrade.');
+        return;
+    }
+
+    // --- Get Context ---
+    const name = document.getElementById('name')?.value || 'Your Name';
+    const jobTitle = document.getElementById('jobTitle')?.value || 'Applicant';
+    const summary = document.getElementById('summary')?.value || '';
+    const work = document.getElementById('work')?.value || '';
+    const skills = document.getElementById('skills')?.value || '';
+    const targetCompany = document.getElementById('targetCompany')?.value;
+    const jobDescription = document.getElementById('jobDescription')?.value;
+    const coverLetterField = document.getElementById('generatedCoverLetter');
+    const coverLetterButton = document.getElementById('generate-cover-letter-button');
+
+    if (!coverLetterField || !coverLetterButton) {
+        console.error("Cover Letter field or button not found!");
+        return;
+    }
+
+    if (!targetCompany || !jobDescription) {
+        alert("Please fill in both the Target Company Name and the Job Description to generate a cover letter.");
+        return;
+    }
+     if (!name || !jobTitle) {
+        alert("Please ensure your Name and current/target Job Title are filled in the CV section.");
+        return;
+    }
+
+    // --- Provide visual feedback ---
+    const originalButtonHTML = coverLetterButton.innerHTML;
+    coverLetterButton.innerHTML = "✨ Generating...";
+    coverLetterField.value = "Crafting your cover letter, this might take a moment...";
+    coverLetterField.disabled = true;
+    coverLetterButton.disabled = true;
+
+    try {
+        // --- CONSTRUCT THE PROMPT ---
+        const promptText = `Write a professional and engaging cover letter from ${name} for the ${jobTitle} position at ${targetCompany}. Use the provided CV details (Summary: "${summary}", Work Experience: "${work}", Skills: "${skills}") to highlight suitability. Tailor the letter specifically to this Job Description: "${jobDescription}". The tone should be enthusiastic but professional. Structure it into 3-4 paragraphs and end with a standard closing.`;
+        console.log("[generateCoverLetterAI] Sending prompt to backend...");
+
+        // --- MAKE THE REAL AI CALL ---
+        const response = await fetch('http://localhost:3000/api/ai/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: promptText })
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({ error: `Request failed: ${response.statusText}` }));
+            throw new Error(errData.error || `Backend request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // --- UPDATE THE FIELD ---
+        if (data && data.result) {
+            coverLetterField.value = data.result;
+            console.log("[generateCoverLetterAI] Cover Letter generated successfully.");
+        } else {
+            throw new Error("Received an invalid response from the AI backend.");
+        }
+
+    } catch (error) {
+        console.error("❌ [generateCoverLetterAI] Error:", error);
+        coverLetterField.value = `Failed to generate cover letter: ${error.message}. Please try again.`;
+        alert(`An error occurred while generating cover letter: ${error.message}`);
+    } finally {
+        // --- Restore button and field ---
+        coverLetterField.disabled = false;
+        coverLetterButton.disabled = false;
+        coverLetterButton.innerHTML = `Generate Cover Letter <span class="lock-icon">🔒</span>`; // Reset
+
+        if (isPro) {
+            coverLetterButton.innerHTML = `Generate Cover Letter`;
+            const lockIcon = coverLetterButton.querySelector('.lock-icon');
+            if(lockIcon) lockIcon.remove();
+        } else {
+             coverLetterButton.disabled = true;
+        }
+    }
+}
+
+
+// ==========================================================================
+// --- Generate Work Experience AI Function (Uses Existing Company Names) ---
+// ==========================================================================
+async function generateWorkExperienceAI() {
+    console.log("[generateWorkExperienceAI] Clicked (Enhance Mode).");
+    if (!isPro) {
+        alert('AI Work Experience Generation is a Pro feature. Please upgrade.');
+        return;
+    }
+
+    // --- Get Context ---
+    const jobTitle = document.getElementById('jobTitle')?.value || 'Developer';
+    const workField = document.getElementById('work');
+    const workButton = document.getElementById('generate-work-experience-button');
+
+    if (!workField || !workButton) {
+        console.error("Work Experience field or button not found!");
+        return;
+    }
+
+    const existingWork = workField.value.trim(); // Get existing text
+
+    // --- NEW: Check if there's text to work with ---
+    if (!existingWork) {
+        alert("Please type your Company Names (one per line) into the Work Experience box first, then click 'Generate'.");
+        return;
+    }
+
+    // --- NEW: Extract company names ---
+    const companyNames = existingWork.split('\n').filter(line => line.trim() !== '');
+    if (companyNames.length === 0) {
+         alert("Couldn't find any company names in the Work Experience box. Please type them one per line.");
+        return;
+    }
+    const companiesString = companyNames.join(', '); // Join for the prompt
+
+     if (!jobTitle) {
+        alert("Please fill in at least the Job Title to generate relevant work experience.");
+        return;
+    }
+
+    // --- Provide visual feedback ---
+    const originalButtonHTML = workButton.innerHTML;
+    workButton.innerHTML = "✨ Enhancing..."; // Updated text
+    workField.disabled = true;
+    workButton.disabled = true;
+
+    try {
+        // --- CONSTRUCT THE NEW PROMPT ---
+        const promptText = `For a CV with the job title "${jobTitle}", generate detailed work experience entries **only** for these companies: ${companiesString}. For each company, invent a plausible date range (within the last 10 years, ensuring logical order if multiple) and provide 3-4 bullet points detailing typical responsibilities and achievements. Format each entry clearly for a CV (using '-' for bullets) and ensure a blank line separates the entries.`;
+        console.log("[generateWorkExperienceAI] Sending prompt to backend (Enhance Mode):", promptText);
+
+        // --- MAKE THE REAL AI CALL ---
+        const response = await fetch('http://localhost:3000/api/ai/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: promptText })
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({ error: `Request failed: ${response.statusText}` }));
+            throw new Error(errData.error || `Backend request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // --- UPDATE THE FIELD ---
+        if (data && data.result) {
+            workField.value = data.result; // Overwrite with enhanced text
+            console.log("[generateWorkExperienceAI] Work Experience enhanced successfully.");
+        } else {
+            throw new Error("Received an invalid response from the AI backend.");
+        }
+
+    } catch (error) {
+        console.error("❌ [generateWorkExperienceAI] Error:", error);
+        workField.value = `Failed to generate work experience: ${error.message}. Please try again.`;
+        alert(`An error occurred while generating work experience: ${error.message}`);
+    } finally {
+        // --- Restore button and field ---
+        workField.disabled = false;
+        workButton.disabled = false;
+        workButton.innerHTML = `Generate Work Experience <span class="lock-icon">🔒</span>`; // Reset
+
+        if (isPro) {
+            workButton.innerHTML = `Generate Work Experience`;
+            const lockIcon = workButton.querySelector('.lock-icon');
+            if(lockIcon) lockIcon.remove();
+        } else {
+             workButton.disabled = true;
+        }
+    }
+}
+
+
+// --- Generate Summary AI Function (Updated for Real Backend) ---
+async function generateSummaryAI() {
+    console.log("[generateSummaryAI] Clicked.");
+    if (!isPro) {
+        alert('AI Summary Generation is a Pro feature. Please upgrade.');
+        return;
+    }
+
+    // --- Get Context ---
+    const jobTitle = document.getElementById('jobTitle')?.value || '';
+    const work = document.getElementById('work')?.value || '';
+    const skills = document.getElementById('skills')?.value || '';
+    const summaryField = document.getElementById('summary');
+    const summaryButton = document.getElementById('generate-summary-button');
+
+    if (!summaryField || !summaryButton) {
+        console.error("Summary field or button not found!");
+        return;
+    }
+
+    if (!jobTitle && !work) {
+        alert("Please fill in at least the Job Title or Work Experience to generate a relevant summary.");
+        return;
+    }
+
+    // --- Provide visual feedback ---
+    const originalButtonHTML = summaryButton.innerHTML;
+    summaryButton.innerHTML = "✨ Generating...";
+    summaryField.value = "Contacting AI, please wait..."; // Updated message
+    summaryField.disabled = true;
+    summaryButton.disabled = true;
+
+    try {
+        // --- CONSTRUCT THE PROMPT ---
+        const promptText = `Generate a concise and professional 2-3 sentence CV summary for a ${jobTitle}. Incorporate key aspects from the following work experience: "${work}" and mention some of these skills: "${skills}". Focus on impact and suitability for a similar role.`;
+        console.log("[generateSummaryAI] Sending prompt to backend:", promptText);
+
+        // --- MAKE THE REAL AI CALL (via your backend) ---
+        const response = await fetch('http://localhost:3000/api/ai/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: promptText }) // Send the prompt
+        });
+
+        if (!response.ok) {
+            // Try to get error message from backend, or use status text
+            const errData = await response.json().catch(() => ({ error: `Request failed: ${response.statusText}` }));
+            throw new Error(errData.error || `Backend request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        // --- UPDATE THE FIELD ---
+        if (data && data.result) {
+            summaryField.value = data.result; // Use the AI result
+            console.log("[generateSummaryAI] Summary generated successfully.");
+        } else {
+            throw new Error("Received an invalid response from the AI backend.");
+        }
+
+    } catch (error) {
+        console.error("❌ [generateSummaryAI] Error:", error);
+        summaryField.value = `Failed to generate summary: ${error.message}. Please try again.`;
+        alert(`An error occurred while generating summary: ${error.message}`);
+    } finally {
+        // --- Restore button and field ---
+        summaryField.disabled = false;
+        summaryButton.disabled = false;
+        summaryButton.innerHTML = `Generate Summary <span class="lock-icon">🔒</span>`; // Reset
+
+        // Re-apply Pro state
+        if (isPro) {
+            summaryButton.innerHTML = `Generate Summary`;
+            const lockIcon = summaryButton.querySelector('.lock-icon');
+            if(lockIcon) lockIcon.remove();
+        } else {
+             summaryButton.disabled = true;
+        }
+    }
+}
+
+
+// --- Function to Clear All Fields ---
+function clearAllFields() {
+  console.log("[clearAllFields] Clearing all CV form fields and local storage data.");
+
+  // List all the IDs of your form fields
+  const formFields = [
+    'jobTitle', 'name', 'email', 'phone', 'linkedin', 'portfolio',
+    'summary', 'work', 'education', 'projects', 'certifications',
+    'languages', 'skills', 'hobbies',
+    'targetCompany', 'jobDescription', 'generatedCoverLetter'
+  ];
+
+  // Loop through each ID and clear the corresponding field
+  formFields.forEach(id => {
+    const field = document.getElementById(id);
+    if (field) {
+      // This works for most <input> and <textarea> elements
+      field.value = '';
+    } else {
+      console.warn(`Field with ID '${id}' not found.`);
+    }
+  });
+
+  // Clear the profile photo
+  const profileImg = document.getElementById('profile-photo');
+  if (profileImg) {
+    profileImg.src = ''; // Or set to a default placeholder image
+    profileImg.style.display = 'none';
+  } else {
+      console.warn("Profile photo element not found.");
+  }
+
+  // Clear any saved data from local storage
+  localStorage.removeItem('cvData');
+  console.log("Local storage 'cvData' cleared.");
+
+  // Trigger an update (Using 'input' is often safer than 'submit' for previews)
+  const cvForm = document.getElementById('cv-form');
+  if (cvForm) {
+      console.log("Dispatching 'input' event on cv-form for preview update.");
+      cvForm.dispatchEvent(new Event('input', { bubbles: true }));
+  } else {
+      console.warn("CV Form with ID 'cv-form' not found.");
+  }
+
+  // Call your progress update function (make sure it's defined!)
+  if (typeof updateCompletionProgress === 'function') {
+      updateCompletionProgress();
+  } else {
+      console.warn("updateCompletionProgress() function is not defined.");
+  }
+
+  // Let the user know it's done
+  alert('All fields have been cleared!');
+}
+
+// ❌❌❌ FINAL DOMContentLoaded LISTENER REMOVED FROM HERE ❌❌❌
+
+// --- You need to define this function somewhere ---
+// Example:
+/*
+function updateCompletionProgress() {
+  console.log("Updating completion progress...");
+  // Add your actual progress update logic here
+}
+*/
+
+// ❌❌❌ REMOVED LOG THAT WAS OUTSIDE DOMContentLoaded ❌❌❌
