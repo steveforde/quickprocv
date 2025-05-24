@@ -3,89 +3,71 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import Stripe from 'stripe';
-import bodyParser from 'body-parser'; // Make sure bodyParser is installed: npm install body-parser
-import sendEmail from './linkedin-server/email.js'; // ✅ Email module
-import { createClient } from '@supabase/supabase-js'; // <--- ADDED IMPORT
+import bodyParser from 'body-parser';
+import sendEmail from './linkedin-server/email.js';
+import { createClient } from '@supabase/supabase-js';
+import OpenAI from 'openai'; // ✅ Corrected OpenAI import for ESM
 
-dotenv.config({ path: './linkedin-server/.env' }); // Ensure correct path to .env file
+dotenv.config({ path: './linkedin-server/.env' });
 
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-// <--- ADDED SUPABASE INITIALIZATION LINES
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Use SERVICE_ROLE_KEY for backend database writes
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// IMPORTANT: Ensure SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are correctly set in your .env
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('CRITICAL ERROR: Supabase URL or Service Role Key is missing in .env file.');
-  process.exit(1); // Exit the process if critical env vars are missing
+  process.exit(1);
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
-// --- END ADDED SUPABASE INITIALIZATION ---
 
-app.use(cors()); // CORS should generally be before body parsers for most routes
+app.use(cors());
 
-// IMPORTANT: This route needs the raw request body for Stripe signature verification.
-// body-parser.raw() should be applied directly to this route, BEFORE any global express.json()
+
 app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
 
   try {
-    // req.body is a Buffer here, which is what Stripe expects for verification
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     console.error('❌ Webhook verification failed:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Convert the raw body (Buffer) to a JSON object AFTER verification
-  // This is needed to access event.data.object properly
   const eventJson = JSON.parse(req.body.toString());
 
   if (event.type === 'checkout.session.completed') {
-    // Access session data from the parsed JSON object
     const session = eventJson.data.object;
     const email = session.customer_details ? session.customer_details.email : null;
 
     if (!email) {
-        console.error('❌ Webhook received, but no customer email found in session.');
-        return res.status(400).send('No customer email found.');
+      console.error('❌ Webhook received, but no customer email found in session.');
+      return res.status(400).send('No customer email found.');
     }
 
     console.log('✅ Payment complete for:', email);
 
-    // Calculate expiry date: 2 years from now
     const expiryDate = new Date();
     expiryDate.setFullYear(expiryDate.getFullYear() + 2);
 
-    console.log(`[Stripe Webhook] Calculated expiryDate: ${expiryDate.toISOString()}`);
-    console.log(`[Stripe Webhook] Attempting to update user: ${email} with is_pro: true and pro_expiry: ${expiryDate.toISOString()}`);
-
     try {
-        // --- SUPABASE UPDATE LOGIC ---
-        const { data, error } = await supabase
-            .from('users') // Your Supabase table name
-            .update({
-                is_pro: true,
-                pro_expiry: expiryDate.toISOString() // Store as ISO string for timestamptz
-            })
-            .eq('email', email.toLowerCase().trim()); // Match by email
+      const { data, error } = await supabase
+        .from('users')
+        .update({
+          is_pro: true,
+          pro_expiry: expiryDate.toISOString()
+        })
+        .eq('email', email.toLowerCase().trim());
 
-        if (error) {
-            console.error(`❌ [Stripe Webhook] Supabase update error for ${email}:`, error.message, error.details);
-            // It's good practice to send a non-200 status back to Stripe if database update fails
-            // Stripe will then retry sending the webhook event.
-            return res.status(500).send('Database update failed.');
-        } else {
-            console.log(`✨ [Stripe Webhook] User ${email} marked as Pro with expiry ${expiryDate.toISOString()} - Supabase update successful.`);
-        }
-        // --- END SUPABASE UPDATE LOGIC ---
+      if (error) {
+        console.error(`❌ [Stripe Webhook] Supabase update error for ${email}:`, error.message);
+        return res.status(500).send('Database update failed.');
+      }
 
-      // Send confirmation email
       await sendEmail(
         email,
         'QuickProCV Pro Access (2 Years)',
@@ -94,20 +76,39 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
       );
       console.log('📧 Email sent to:', email);
     } catch (err) {
-      console.error('❌ Email or Supabase update error:', err.message); // Updated error log
+      console.error('❌ Email or Supabase update error:', err.message);
     }
   } else {
-      console.log(`ℹ️ [Stripe Webhook] Unhandled event type ${event.type}`);
+    console.log(`ℹ️ [Stripe Webhook] Unhandled event type ${event.type}`);
   }
 
-
-  // Always respond with a 200 to Stripe to acknowledge receipt of the event
   res.status(200).json({ received: true });
 });
 
-// Apply express.json() AFTER the webhook endpoint, as the webhook needs the raw body.
-// This will parse JSON for all *other* routes.
 app.use(express.json());
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+app.post('/api/ai/generate', async (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt || typeof prompt !== 'string') {
+    return res.status(400).json({ error: 'Prompt is required and must be a string.' });
+  }
+
+  try {
+    const chatResponse = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: prompt }]
+    });
+
+    const result = chatResponse.choices[0]?.message?.content?.trim() || '';
+    res.json({ result });
+  } catch (err) {
+    console.error('❌ AI generation failed:', err.message);
+    res.status(500).json({ error: 'AI generation failed.' });
+  }
+});
 
 app.get('/', (req, res) => {
   res.send('QuickProCV API is live');
@@ -120,14 +121,13 @@ app.post('/create-checkout-session', async (req, res) => {
       mode: 'payment',
       line_items: [
         {
-          price: 'price_1RMV5SQRh7jNBCuP5iKOZuuF', // 🔁 Replace with your real Stripe Price ID
+          price: 'price_1RMV5SQRh7jNBCuP5iKOZuuF',
           quantity: 1,
         },
       ],
-      // Corrected success_url to pass email back to frontend
       success_url: `http://localhost:5500/main.html?payment_success=true&email=${encodeURIComponent(req.body.email)}`,
       cancel_url: 'http://localhost:5500/main.html?payment_cancelled=true',
-      customer_email: req.body.email, // Pass customer email to Stripe session
+      customer_email: req.body.email,
     });
 
     res.json({ url: session.url });
@@ -136,6 +136,39 @@ app.post('/create-checkout-session', async (req, res) => {
     res.status(500).json({ error: 'Stripe session failed' });
   }
 });
+
+app.post('/api/save-letter', async (req, res) => {
+  const { user_email, job_title, company, job_description, content } = req.body;
+
+  if (!user_email || !content) {
+    return res.status(400).json({ error: 'Missing required fields.' });
+  }
+
+  try {
+    const { error } = await supabase.from('cover_letters').insert([
+      {
+        user_email: user_email.toLowerCase().trim(),
+        job_title,
+        company,
+        job_description,
+        content,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+
+    if (error) {
+      console.error('❌ Supabase insert error:', error.message);
+      return res.status(500).json({ error: 'Failed to save letter.' });
+    }
+
+    console.log(`✅ Cover letter saved for ${user_email}`);
+    res.status(200).json({ message: 'Letter saved successfully.' });
+  } catch (err) {
+    console.error('❌ Save letter error:', err.message);
+    res.status(500).json({ error: 'Unexpected server error.' });
+  }
+});
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

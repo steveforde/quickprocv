@@ -368,6 +368,25 @@ function autofillTestData() {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("🚀 DOM fully loaded and parsed. Initializing main page.");
 
+  const params = new URLSearchParams(window.location.search);
+const emailFromUrl = params.get('email');
+
+if (emailFromUrl && emailFromUrl !== 'null' && emailFromUrl.includes('@')) {
+  console.log(`💬 Returned from Stripe with email: ${emailFromUrl}`);
+  localStorage.setItem('userEmail', emailFromUrl);
+
+  // Clean URL to remove ?email=...
+  if (window.history.replaceState) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  // Recheck Pro status + update UI
+  await checkProStatus();
+  refreshAllProUI();
+  updateMembershipExpiryUI();
+}
+
+
 window.onbeforeprint = () => {
   const preview = document.getElementById('cv-preview');
   if (preview && preview.classList.contains('template-tech')) {
@@ -822,6 +841,42 @@ if (pageNeedingLogin.includes(currentPage)) {
 
   refreshAllProUI();
 });
+
+
+const saveCoverLetterBtn = document.getElementById('save-cover-letter-btn');
+
+if (saveCoverLetterBtn) {
+  saveCoverLetterBtn.addEventListener('click', async () => {
+    const user_email = localStorage.getItem('userEmail');
+    const job_title = document.getElementById('jobTitle')?.value || '';
+    const company = document.getElementById('targetCompany')?.value || '';
+    const job_description = document.getElementById('jobDescription')?.value || '';
+    const content = document.getElementById('generatedCoverLetter')?.value || '';
+
+    if (!content.trim()) {
+      alert("Cover letter is empty.");
+      return;
+    }
+
+    const response = await fetch('http://localhost:3000/api/save-letter', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_email, job_title, company, job_description, content }),
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      alert('✅ Letter saved!');
+      console.log('✅ Saved to server:', data);
+    } else {
+      alert('❌ Failed to save: ' + data.error);
+      console.error('❌ Save error:', data.error);
+    }
+  });
+}
+
+
+
 
 document.addEventListener('visibilitychange', async () => {
   if (document.visibilityState === 'visible' && window.location.pathname.includes('main.html')) {
