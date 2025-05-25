@@ -1743,3 +1743,28 @@ html[data-theme='dark'] .template-student #preview-contact,
 html[data-theme='dark'] .template-temp #preview-contact {
   color: #ffffff; /* Force text to be white */
 }
+
+#completion-tracker-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+}
+
+#completion-progress {
+  width: 200px;
+  height: 12px;
+  border-radius: 8px;
+  appearance: none;
+}
+
+#completion-progress::-webkit-progress-bar {
+  background-color: #eee;
+  border-radius: 8px;
+}
+
+#completion-progress::-webkit-progress-value {
+  background-color: var(--accent, #007bff);
+  border-radius: 8px;
+}

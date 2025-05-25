@@ -111,6 +111,7 @@
       alert('Login successful!');
       localStorage.clear(); // ✅ Clear out previous user before storing new one
       localStorage.setItem('userEmail', email); // ✅ Store fresh login email
+      localStorage.setItem('supabaseUserToken', result.data.session.access_token); 
       window.location.href = 'main.html';
     }
   } catch (err) {

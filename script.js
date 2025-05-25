@@ -5,6 +5,36 @@ console.log("Script.js starting execution.");
 const premiumTemplates = ['marketing', 'business', 'classic', 'student', 'temp'];
 let isPro = false;
 
+
+// --- 👇 START: MOVED COMPLETION TRACKER GLOBALS ---
+const trackedFields = [
+    'name', 'jobTitle', 'email', 'phone', 'linkedin',
+    'portfolio', 'summary', 'work', 'education',
+    'skills', 'projects', 'certifications'
+];
+
+function updateCompletionProgress() {
+    // Ensure trackedFields is accessible here (it is, as it's global)
+    const filled = trackedFields.filter(id => {
+        const el = document.getElementById(id);
+        return el && el.value.trim() !== '';
+    });
+
+    const percentage = trackedFields.length > 0 ? Math.round((filled.length / trackedFields.length) * 100) : 0;
+
+    const progressElement = document.getElementById('completion-progress');
+    const percentTextElement = document.getElementById('completion-percentage');
+
+    if (progressElement && percentTextElement) {
+        progressElement.value = percentage;
+        percentTextElement.textContent = `${percentage}%`;
+    } else {
+        // console.warn("Completion progress HTML elements not found.");
+    }
+}
+// --- 👆 END: MOVED COMPLETION TRACKER GLOBALS ---
+
+
 function unlockAIButtons() {
   console.log("[unlockAIButtons] Running with isPro:", isPro);
   const aiButtons = document.querySelectorAll('.ai-button');
@@ -126,6 +156,52 @@ function updateWatermarkUI(templateName) {
     watermark.style.display = 'none';
   }
 }
+
+// Add this new function to script.js
+// Add this new function to script.js
+async function initiateTokenPurchase() {
+    console.log("[initiateTokenPurchase] User wants to buy more tokens.");
+    const token = localStorage.getItem('supabaseUserToken');
+
+    if (!token) {
+        alert('You must be logged in to make a purchase. Please log in again.');
+        return;
+    }
+
+    // Optional: You could show some general loading state on the page here
+    // e.g., document.getElementById('some-loading-spinner').style.display = 'block';
+
+    try {
+        const response = await fetch('http://localhost:3000/api/create-token-purchase-session', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Failed to create Stripe checkout session.');
+        }
+
+        if (data.url) {
+            console.log("[initiateTokenPurchase] Redirecting to Stripe:", data.url);
+            window.location.href = data.url; // Redirect user to Stripe
+        } else {
+            throw new Error('No checkout URL received from server.');
+        }
+
+    } catch (error) {
+        console.error("❌ [initiateTokenPurchase] Error:", error);
+        alert(`Could not start the purchase process: ${error.message}`);
+    } finally {
+        // Optional: Hide general loading state here
+        // e.g., document.getElementById('some-loading-spinner').style.display = 'none';
+    }
+}
+
 
 /**
  * Updates the display for membership expiry date.
@@ -406,7 +482,24 @@ function autofillTestData() {
 // --- DOMContentLoaded: Main Initialization and Event Listener Setup ---
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("🚀 DOM fully loaded and parsed. Initializing main page...");
+   console.log("--- DOMContentLoaded START after redirect ---");
+  console.log("Initial userEmail from localStorage on load:", localStorage.getItem('userEmail'));
+  console.log("Initial supabaseUserToken from localStorage on load:", localStorage.getItem('supabaseUserToken'));
+  // --- END OF ADDED LINES ---
+   const currentUrlParams = new URLSearchParams(window.location.search);
 
+    if (currentUrlParams.has('tokens_purchased_session_id')) {
+        console.log("[PaymentFeedback] Tokens purchased successfully detected.");
+        alert("Purchase successful! Your 50 additional AI generations have been added to your limit for the current monthly cycle.");
+        // Clean the URL to prevent the message from showing up again on refresh
+        window.history.replaceState(null, '', window.location.pathname + window.location.hash); 
+    } else if (currentUrlParams.has('tokens_purchase_cancelled')) {
+        console.log("[PaymentFeedback] Token purchase cancelled detected.");
+        alert("Your purchase of additional AI generations was cancelled. You can try again if you wish.");
+        window.history.replaceState(null, '', window.location.pathname + window.location.hash);
+    }
+
+  console.log("🚀 DOM fully loaded and parsed. Initializing main page..."); 
   // Add temporary print-mode class to force dark styling in print
   window.onbeforeprint = () => {
     const preview = document.getElementById('cv-preview');
@@ -421,6 +514,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       preview.classList.remove('print-mode-tech');
     }
   };
+
+  // Inside your document.addEventListener('DOMContentLoaded', async () => { ... });
+
+ 
+
+   console.log("[CompletionTracker] Attaching input listeners to tracked fields...");
+  trackedFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', updateCompletionProgress);
+    } else {
+      console.warn(`[CompletionTracker] Field with ID '${id}' not found for progress tracking.`);
+    }
+  });
+  // --- End Completion Progress Tracker ---
+
 
   // ❌❌❌ NESTED LISTENER REMOVED FROM HERE ❌❌❌
 
@@ -446,6 +555,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await checkProStatus(); // Checks localStorage & URL param, then backend
   refreshAllProUI(); // Updates all UI based on isPro
+  updateCompletionProgress();
 
   const currentPage = window.location.pathname.split('/').pop();
 
@@ -799,16 +909,27 @@ document.addEventListener('visibilitychange', async () => {
 });
 
 // ==================================================================
-// --- Generate Skills AI Function (Updated for Real Backend) ---
+// --- Generate Skills AI Function (Updated to Send Auth Token) ---
 // ==================================================================
 async function generateSkillsAI() {
     console.log("[generateSkillsAI] Clicked.");
+
+    // --- 👇 START: ADDED TOKEN RETRIEVAL AND CHECK ---
+    const token = localStorage.getItem('supabaseUserToken');
+    if (!token) {
+        alert('Authentication token not found. Please log in again.');
+        console.error("[generateSkillsAI] No supabaseUserToken found in localStorage.");
+        const skillsButton = document.getElementById('generate-skills-btn');
+        if(skillsButton) skillsButton.disabled = true;
+        return; 
+    }
+    // --- 👆 END: ADDED TOKEN RETRIEVAL AND CHECK ---
+
     if (!isPro) {
         alert('AI Skill Generation is a Pro feature. Please upgrade.');
         return;
     }
 
-    // --- Get Context ---
     const jobTitle = document.getElementById('jobTitle')?.value || '';
     const summary = document.getElementById('summary')?.value || '';
     const skillsField = document.getElementById('skills');
@@ -824,7 +945,6 @@ async function generateSkillsAI() {
         return;
     }
 
-    // --- Provide visual feedback ---
     const originalButtonHTML = skillsButton.innerHTML;
     skillsButton.innerHTML = "✨ Generating...";
     skillsField.value = "Contacting AI for skills, please wait...";
@@ -832,41 +952,52 @@ async function generateSkillsAI() {
     skillsButton.disabled = true;
 
     try {
-        // --- CONSTRUCT THE PROMPT ---
         const promptText = `Based on the Job Title "${jobTitle}" and this summary "${summary}", list 10 to 15 key technical and soft skills. Present them as a single line, separated only by spaces. For example: JavaScript React Node.js Teamwork Communication`;
         console.log("[generateSkillsAI] Sending prompt to backend...");
 
-        // --- MAKE THE REAL AI CALL ---
         const response = await fetch('http://localhost:3000/api/ai/generate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // <-- ✨✨ SEND THE TOKEN HERE ✨✨
+            },
             body: JSON.stringify({ prompt: promptText })
         });
 
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({ error: `Request failed: ${response.statusText}` }));
-            throw new Error(errData.error || `Backend request failed with status ${response.status}`);
-        }
-
         const data = await response.json();
 
-        // --- UPDATE THE FIELD ---
+        if (!response.ok) {
+            const errorMessage = data.error || `Backend request failed with status ${response.status}: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
+
         if (data && data.result) {
             skillsField.value = data.result;
             console.log("[generateSkillsAI] Skills generated successfully.");
         } else {
-            throw new Error("Received an invalid response from the AI backend.");
+            throw new Error("Received an invalid or empty response from the AI backend.");
         }
 
-    } catch (error) {
-        console.error("❌ [generateSkillsAI] Error:", error);
-        skillsField.value = `Failed to generate skills: ${error.message}. Please try again.`;
-        alert(`An error occurred while generating skills: ${error.message}`);
-    } finally {
-        // --- Restore button and field ---
+   } catch (error) {
+        console.error("❌ [generateSkillsAI] Error:", error); // Corrected log name
+        // Check if the error message indicates the limit was reached
+        if (error.message && error.message.includes('You have reached your monthly limit')) {
+            if (confirm("You've reached your monthly AI generation limit for Skills. Would you like to purchase 50 additional generations for €6.99?")) { // Corrected message
+                initiateTokenPurchase(); 
+            } else {
+                // User clicked "Cancel"
+                if (skillsField) skillsField.value = "Monthly AI generation limit reached. You can purchase more tokens to continue generating skills."; // Use skillsField
+            }
+        } else {
+            // Handle other types of errors
+            if (skillsField) skillsField.value = `Failed to generate skills. Error: ${error.message}. Please try again.`; // Use skillsField
+            alert(`An error occurred while generating skills: ${error.message}`); // Corrected message
+        }
+    } // sThis is
+     finally {
         skillsField.disabled = false;
         skillsButton.disabled = false;
-        skillsButton.innerHTML = `✨ Generate Skills <span class="lock-icon">🔒</span>`; // Reset
+        skillsButton.innerHTML = `✨ Generate Skills <span class="lock-icon">🔒</span>`; 
 
         if (isPro) {
             skillsButton.innerHTML = `✨ Generate Skills`;
@@ -878,22 +1009,130 @@ async function generateSkillsAI() {
     }
 }
 
+async function generateSummaryAI() {
+    console.log("[generateSummaryAI] Clicked.");
+
+    const token = localStorage.getItem('supabaseUserToken');
+    if (!token) {
+        alert('Authentication token not found. Please log in again.');
+        console.error("[generateSummaryAI] No supabaseUserToken found in localStorage.");
+        const summaryButton = document.getElementById('generate-summary-button');
+        if(summaryButton) summaryButton.disabled = true;
+        return; 
+    }
+
+    if (!isPro) {
+        alert('AI Summary Generation is a Pro feature. Please upgrade.');
+        return;
+    }
+
+    const jobTitle = document.getElementById('jobTitle')?.value || '';
+    const work = document.getElementById('work')?.value || '';
+    const skills = document.getElementById('skills')?.value || '';
+    const summaryField = document.getElementById('summary');
+    const summaryButton = document.getElementById('generate-summary-button');
+
+    if (!summaryField || !summaryButton) {
+        console.error("[generateSummaryAI] Summary field or button not found!");
+        return;
+    }
+
+    if (!jobTitle && !work) {
+        alert("Please fill in at least the Job Title or Work Experience to generate a relevant summary.");
+        return;
+    }
+
+    const originalButtonHTML = summaryButton.innerHTML;
+    summaryButton.innerHTML = "✨ Generating...";
+    summaryField.value = "Contacting AI, please wait...";
+    summaryField.disabled = true;
+    summaryButton.disabled = true;
+
+    try {
+        const promptText = `Generate a concise and professional 2-3 sentence CV summary for a ${jobTitle}. Incorporate key aspects from the following work experience: "${work}" and mention some of these skills: "${skills}". Focus on impact and suitability for a similar role.`;
+        console.log("[generateSummaryAI] Sending prompt to backend:", promptText);
+
+        const response = await fetch('http://localhost:3000/api/ai/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ prompt: promptText })
+        });
+
+        const data = await response.json(); 
+
+        if (!response.ok) {
+            const errorMessage = data.error || `Backend request failed with status ${response.status}: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
+
+        if (data && data.result) {
+            summaryField.value = data.result;
+            console.log("[generateSummaryAI] Summary generated successfully.");
+        } else {
+            throw new Error("Received an invalid or empty response from the AI backend.");
+        }
+
+    } catch (error) {
+        console.error("❌ [generateSummaryAI] Error:", error);
+        if (error.message && error.message.includes('You have reached your monthly limit')) {
+            if (confirm("You've reached your monthly AI generation limit for Summary. Would you like to purchase 50 additional generations for €6.99?")) {
+                initiateTokenPurchase(); 
+            } else {
+                if (summaryField) summaryField.value = "Monthly AI generation limit reached. You can purchase more tokens to continue generating summaries.";
+            }
+        } else {
+            if (summaryField) summaryField.value = `Failed to generate summary. Error: ${error.message}. Please try again.`;
+            alert(`An error occurred while generating summary: ${error.message}`);
+        }
+    } finally {
+        if (summaryField) summaryField.disabled = false;
+        if (summaryButton) {
+            summaryButton.disabled = false;
+            summaryButton.innerHTML = `Generate Summary <span class="lock-icon">🔒</span>`; 
+            if (isPro) {
+                summaryButton.innerHTML = `Generate Summary`;
+                const lockIcon = summaryButton.querySelector('.lock-icon');
+                if(lockIcon) lockIcon.remove();
+            } else {
+                 summaryButton.disabled = true;
+            }
+        }
+    }
+}
+
+
+
+
 // ======================================================================
-// --- Generate Cover Letter AI Function (Updated for Real Backend) ---
+// --- Generate Cover Letter AI Function (Updated to Send Auth Token) ---
 // ======================================================================
 async function generateCoverLetterAI() {
     console.log("[generateCoverLetterAI] Clicked.");
+
+    // --- 👇 START: ADDED TOKEN RETRIEVAL AND CHECK ---
+    const token = localStorage.getItem('supabaseUserToken');
+    if (!token) {
+        alert('Authentication token not found. Please log in again.');
+        console.error("[generateCoverLetterAI] No supabaseUserToken found in localStorage.");
+        const coverLetterButton = document.getElementById('generate-cover-letter-button');
+        if(coverLetterButton) coverLetterButton.disabled = true;
+        return; 
+    }
+    // --- 👆 END: ADDED TOKEN RETRIEVAL AND CHECK ---
+
     if (!isPro) {
         alert('AI Cover Letter Generation is a Pro feature. Please upgrade.');
         return;
     }
 
-    // --- Get Context ---
     const name = document.getElementById('name')?.value || 'Your Name';
     const jobTitle = document.getElementById('jobTitle')?.value || 'Applicant';
     const summary = document.getElementById('summary')?.value || '';
     const work = document.getElementById('work')?.value || '';
-    const skills = document.getElementById('skills')?.value || '';
+    const skills = document.getElementById('skills')?.value || ''; // Also get skills for cover letter context
     const targetCompany = document.getElementById('targetCompany')?.value;
     const jobDescription = document.getElementById('jobDescription')?.value;
     const coverLetterField = document.getElementById('generatedCoverLetter');
@@ -913,7 +1152,6 @@ async function generateCoverLetterAI() {
         return;
     }
 
-    // --- Provide visual feedback ---
     const originalButtonHTML = coverLetterButton.innerHTML;
     coverLetterButton.innerHTML = "✨ Generating...";
     coverLetterField.value = "Crafting your cover letter, this might take a moment...";
@@ -921,41 +1159,53 @@ async function generateCoverLetterAI() {
     coverLetterButton.disabled = true;
 
     try {
-        // --- CONSTRUCT THE PROMPT ---
         const promptText = `Write a professional and engaging cover letter from ${name} for the ${jobTitle} position at ${targetCompany}. Use the provided CV details (Summary: "${summary}", Work Experience: "${work}", Skills: "${skills}") to highlight suitability. Tailor the letter specifically to this Job Description: "${jobDescription}". The tone should be enthusiastic but professional. Structure it into 3-4 paragraphs and end with a standard closing.`;
         console.log("[generateCoverLetterAI] Sending prompt to backend...");
 
-        // --- MAKE THE REAL AI CALL ---
         const response = await fetch('http://localhost:3000/api/ai/generate', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // <-- ✨✨ SEND THE TOKEN HERE ✨✨
+            },
             body: JSON.stringify({ prompt: promptText })
         });
 
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({ error: `Request failed: ${response.statusText}` }));
-            throw new Error(errData.error || `Backend request failed with status ${response.status}`);
-        }
-
         const data = await response.json();
 
-        // --- UPDATE THE FIELD ---
+        if (!response.ok) {
+            const errorMessage = data.error || `Backend request failed with status ${response.status}: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
+
         if (data && data.result) {
             coverLetterField.value = data.result;
             console.log("[generateCoverLetterAI] Cover Letter generated successfully.");
         } else {
-            throw new Error("Received an invalid response from the AI backend.");
+            throw new Error("Received an invalid or empty response from the AI backend.");
         }
 
-    } catch (error) {
-        console.error("❌ [generateCoverLetterAI] Error:", error);
-        coverLetterField.value = `Failed to generate cover letter: ${error.message}. Please try again.`;
-        alert(`An error occurred while generating cover letter: ${error.message}`);
-    } finally {
-        // --- Restore button and field ---
+   } catch (error) {
+        console.error("❌ [generateCoverLetterAI] Error:", error); // Corrected log name
+        // Check if the error message indicates the limit was reached
+        if (error.message && error.message.includes('You have reached your monthly limit')) {
+            if (confirm("You've reached your monthly AI generation limit for Cover Letter. Would you like to purchase 50 additional generations for €6.99?")) { // Corrected message
+                initiateTokenPurchase(); 
+            } else {
+                // User clicked "Cancel"
+                if (coverLetterField) coverLetterField.value = "Monthly AI generation limit reached. You can purchase more tokens to continue generating cover letters."; // Use coverLetterField
+            }
+        } else {
+            // Handle other types of errors
+            if (coverLetterField) coverLetterField.value = `Failed to generate cover letter. Error: ${error.message}. Please try again.`; // Use coverLetterField
+            alert(`An error occurred while generating cover letter: ${error.message}`); // Corrected message
+        }
+    } // <-- This closes the catch
+
+     finally {
         coverLetterField.disabled = false;
         coverLetterButton.disabled = false;
-        coverLetterButton.innerHTML = `Generate Cover Letter <span class="lock-icon">🔒</span>`; // Reset
+        coverLetterButton.innerHTML = `Generate Cover Letter <span class="lock-icon">🔒</span>`; 
 
         if (isPro) {
             coverLetterButton.innerHTML = `Generate Cover Letter`;
@@ -968,184 +1218,7 @@ async function generateCoverLetterAI() {
 }
 
 
-// ==========================================================================
-// --- Generate Work Experience AI Function (Uses Existing Company Names) ---
-// ==========================================================================
-async function generateWorkExperienceAI() {
-    console.log("[generateWorkExperienceAI] Clicked (Enhance Mode).");
-    if (!isPro) {
-        alert('AI Work Experience Generation is a Pro feature. Please upgrade.');
-        return;
-    }
-
-    // --- Get Context ---
-    const jobTitle = document.getElementById('jobTitle')?.value || 'Developer';
-    const workField = document.getElementById('work');
-    const workButton = document.getElementById('generate-work-experience-button');
-
-    if (!workField || !workButton) {
-        console.error("Work Experience field or button not found!");
-        return;
-    }
-
-    const existingWork = workField.value.trim(); // Get existing text
-
-    // --- NEW: Check if there's text to work with ---
-    if (!existingWork) {
-        alert("Please type your Company Names (one per line) into the Work Experience box first, then click 'Generate'.");
-        return;
-    }
-
-    // --- NEW: Extract company names ---
-    const companyNames = existingWork.split('\n').filter(line => line.trim() !== '');
-    if (companyNames.length === 0) {
-         alert("Couldn't find any company names in the Work Experience box. Please type them one per line.");
-        return;
-    }
-    const companiesString = companyNames.join(', '); // Join for the prompt
-
-     if (!jobTitle) {
-        alert("Please fill in at least the Job Title to generate relevant work experience.");
-        return;
-    }
-
-    // --- Provide visual feedback ---
-    const originalButtonHTML = workButton.innerHTML;
-    workButton.innerHTML = "✨ Enhancing..."; // Updated text
-    workField.disabled = true;
-    workButton.disabled = true;
-
-    try {
-        // --- CONSTRUCT THE NEW PROMPT ---
-        const promptText = `For a CV with the job title "${jobTitle}", generate detailed work experience entries **only** for these companies: ${companiesString}. For each company, invent a plausible date range (within the last 10 years, ensuring logical order if multiple) and provide 3-4 bullet points detailing typical responsibilities and achievements. Format each entry clearly for a CV (using '-' for bullets) and ensure a blank line separates the entries.`;
-        console.log("[generateWorkExperienceAI] Sending prompt to backend (Enhance Mode):", promptText);
-
-        // --- MAKE THE REAL AI CALL ---
-        const response = await fetch('http://localhost:3000/api/ai/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: promptText })
-        });
-
-        if (!response.ok) {
-            const errData = await response.json().catch(() => ({ error: `Request failed: ${response.statusText}` }));
-            throw new Error(errData.error || `Backend request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // --- UPDATE THE FIELD ---
-        if (data && data.result) {
-            workField.value = data.result; // Overwrite with enhanced text
-            console.log("[generateWorkExperienceAI] Work Experience enhanced successfully.");
-        } else {
-            throw new Error("Received an invalid response from the AI backend.");
-        }
-
-    } catch (error) {
-        console.error("❌ [generateWorkExperienceAI] Error:", error);
-        workField.value = `Failed to generate work experience: ${error.message}. Please try again.`;
-        alert(`An error occurred while generating work experience: ${error.message}`);
-    } finally {
-        // --- Restore button and field ---
-        workField.disabled = false;
-        workButton.disabled = false;
-        workButton.innerHTML = `Generate Work Experience <span class="lock-icon">🔒</span>`; // Reset
-
-        if (isPro) {
-            workButton.innerHTML = `Generate Work Experience`;
-            const lockIcon = workButton.querySelector('.lock-icon');
-            if(lockIcon) lockIcon.remove();
-        } else {
-             workButton.disabled = true;
-        }
-    }
-}
-
-
-// --- Generate Summary AI Function (Updated for Real Backend) ---
-async function generateSummaryAI() {
-    console.log("[generateSummaryAI] Clicked.");
-    if (!isPro) {
-        alert('AI Summary Generation is a Pro feature. Please upgrade.');
-        return;
-    }
-
-    // --- Get Context ---
-    const jobTitle = document.getElementById('jobTitle')?.value || '';
-    const work = document.getElementById('work')?.value || '';
-    const skills = document.getElementById('skills')?.value || '';
-    const summaryField = document.getElementById('summary');
-    const summaryButton = document.getElementById('generate-summary-button');
-
-    if (!summaryField || !summaryButton) {
-        console.error("Summary field or button not found!");
-        return;
-    }
-
-    if (!jobTitle && !work) {
-        alert("Please fill in at least the Job Title or Work Experience to generate a relevant summary.");
-        return;
-    }
-
-    // --- Provide visual feedback ---
-    const originalButtonHTML = summaryButton.innerHTML;
-    summaryButton.innerHTML = "✨ Generating...";
-    summaryField.value = "Contacting AI, please wait..."; // Updated message
-    summaryField.disabled = true;
-    summaryButton.disabled = true;
-
-    try {
-        // --- CONSTRUCT THE PROMPT ---
-        const promptText = `Generate a concise and professional 2-3 sentence CV summary for a ${jobTitle}. Incorporate key aspects from the following work experience: "${work}" and mention some of these skills: "${skills}". Focus on impact and suitability for a similar role.`;
-        console.log("[generateSummaryAI] Sending prompt to backend:", promptText);
-
-        // --- MAKE THE REAL AI CALL (via your backend) ---
-        const response = await fetch('http://localhost:3000/api/ai/generate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prompt: promptText }) // Send the prompt
-        });
-
-        if (!response.ok) {
-            // Try to get error message from backend, or use status text
-            const errData = await response.json().catch(() => ({ error: `Request failed: ${response.statusText}` }));
-            throw new Error(errData.error || `Backend request failed with status ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        // --- UPDATE THE FIELD ---
-        if (data && data.result) {
-            summaryField.value = data.result; // Use the AI result
-            console.log("[generateSummaryAI] Summary generated successfully.");
-        } else {
-            throw new Error("Received an invalid response from the AI backend.");
-        }
-
-    } catch (error) {
-        console.error("❌ [generateSummaryAI] Error:", error);
-        summaryField.value = `Failed to generate summary: ${error.message}. Please try again.`;
-        alert(`An error occurred while generating summary: ${error.message}`);
-    } finally {
-        // --- Restore button and field ---
-        summaryField.disabled = false;
-        summaryButton.disabled = false;
-        summaryButton.innerHTML = `Generate Summary <span class="lock-icon">🔒</span>`; // Reset
-
-        // Re-apply Pro state
-        if (isPro) {
-            summaryButton.innerHTML = `Generate Summary`;
-            const lockIcon = summaryButton.querySelector('.lock-icon');
-            if(lockIcon) lockIcon.remove();
-        } else {
-             summaryButton.disabled = true;
-        }
-    }
-}
-
-
-// --- Function to Clear All Fields ---
+    // --- Function to Clear All Fields ---
 function clearAllFields() {
   console.log("[clearAllFields] Clearing all CV form fields and local storage data.");
 
@@ -1201,6 +1274,131 @@ function clearAllFields() {
   alert('All fields have been cleared!');
 }
 
+
+// ==========================================================================
+// --- Generate Work Experience AI Function (Updated to Send Auth Token) ---
+// ==========================================================================
+async function generateWorkExperienceAI() {
+    console.log("[generateWorkExperienceAI] Clicked (Enhance Mode).");
+
+    // --- 👇 START: ADDED TOKEN RETRIEVAL AND CHECK ---
+    const token = localStorage.getItem('supabaseUserToken'); // Get token from localStorage
+    if (!token) {
+        alert('Authentication token not found. Please log in again.');
+        console.error("[generateWorkExperienceAI] No supabaseUserToken found in localStorage.");
+        const workButton = document.getElementById('generate-work-experience-button');
+        if(workButton) workButton.disabled = true; // Example: disable button
+        return; 
+    }
+    // --- 👆 END: ADDED TOKEN RETRIEVAL AND CHECK ---
+
+    if (!isPro) { // Still keep your Pro check
+        alert('AI Work Experience Generation is a Pro feature. Please upgrade.');
+        return;
+    }
+
+    // --- Get Context ---
+    const jobTitle = document.getElementById('jobTitle')?.value || 'Developer';
+    const workField = document.getElementById('work');
+    const workButton = document.getElementById('generate-work-experience-button');
+
+    if (!workField || !workButton) {
+        console.error("Work Experience field or button not found!");
+        return;
+    }
+
+    const existingWork = workField.value.trim(); 
+    if (!existingWork) {
+        alert("Please type your Company Names (one per line) into the Work Experience box first, then click 'Generate'.");
+        return;
+    }
+    const companyNames = existingWork.split('\n').filter(line => line.trim() !== '');
+    if (companyNames.length === 0) {
+         alert("Couldn't find any company names in the Work Experience box. Please type them one per line.");
+        return;
+    }
+    const companiesString = companyNames.join(', ');
+
+     if (!jobTitle) {
+        alert("Please fill in at least the Job Title to generate relevant work experience.");
+        return;
+    }
+
+    // --- Provide visual feedback ---
+    const originalButtonHTML = workButton.innerHTML;
+    workButton.innerHTML = "✨ Enhancing..."; 
+    workField.disabled = true;
+    workButton.disabled = true;
+
+    try {
+        const promptText = `For a CV with the job title "${jobTitle}", generate detailed work experience entries **only** for these companies: ${companiesString}. For each company, invent a plausible date range (within the last 10 years, ensuring logical order if multiple) and provide 3-4 bullet points detailing typical responsibilities and achievements. Format each entry clearly for a CV (using '-' for bullets) and ensure a blank line separates the entries.`;
+        console.log("[generateWorkExperienceAI] Sending prompt to backend (Enhance Mode):", promptText);
+
+        const response = await fetch('http://localhost:3000/api/ai/generate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // <-- ✨✨ SEND THE TOKEN HERE ✨✨
+            },
+            body: JSON.stringify({ prompt: promptText })
+        });
+
+        const data = await response.json(); 
+
+        if (!response.ok) {
+            const errorMessage = data.error || `Backend request failed with status ${response.status}: ${response.statusText}`;
+            throw new Error(errorMessage);
+        }
+
+        if (data && data.result) {
+            workField.value = data.result; 
+            console.log("[generateWorkExperienceAI] Work Experience enhanced successfully.");
+        } else {
+            throw new Error("Received an invalid or empty response from the AI backend.");
+        }
+
+    } catch (error) {
+        console.error("❌ [generateWorkExperienceAI] Error:", error);
+
+        // Check if the error message indicates the limit was reached
+        if (error.message && error.message.includes('You have reached your monthly limit')) {
+            if (confirm("You've reached your monthly AI generation limit for Work Experience. Would you like to purchase 50 additional generations for €6.99?")) {
+                // If user clicks "OK", call the function to start the purchase
+                initiateTokenPurchase(); 
+            } else {
+                // User clicked "Cancel"
+                workField.value = "Monthly AI generation limit reached. You can purchase more tokens to continue generating work experience entries.";
+                // You could choose to show an alert here too, or just update the field.
+                // alert("Monthly AI generation limit reached for Work Experience."); 
+            }
+        } else {
+            // Handle other types of errors
+            workField.value = `Failed to generate work experience: ${error.message}. Please try again.`;
+            alert(`An error occurred while generating work experience: ${error.message}`);
+        }
+      }
+        finally {
+        workField.disabled = false;
+        workButton.disabled = false;
+        workButton.innerHTML = `Generate Work Experience <span class="lock-icon">🔒</span>`; 
+
+        if (isPro) {
+            workButton.innerHTML = `Generate Work Experience`;
+            const lockIcon = workButton.querySelector('.lock-icon');
+            if(lockIcon) lockIcon.remove();
+        } else {
+             workButton.disabled = true;
+        }
+    }
+  }
+
+
+
+
+
+
+
+
 // ❌❌❌ FINAL DOMContentLoaded LISTENER REMOVED FROM HERE ❌❌❌
 
 // --- You need to define this function somewhere ---
@@ -1209,7 +1407,7 @@ function clearAllFields() {
 function updateCompletionProgress() {
   console.log("Updating completion progress...");
   // Add your actual progress update logic here
-}
+
 */
 
 // ❌❌❌ REMOVED LOG THAT WAS OUTSIDE DOMContentLoaded ❌❌❌
