@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/png" href="assets/branding/logo-qpro.png">
   <title>Login – QuickProCV</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -16,6 +17,24 @@
       justify-content: center;
       height: 100vh;
     }
+   
+   .branding-logo {
+  text-align: center; /* This will center the logo if it's not full width */
+  padding: 20px 0;    /* Add some vertical spacing around the logo */
+  /* You might want to add a background to this div if needed, 
+     or adjust its position relative to the header/features */
+}
+
+.branding-logo img {
+  max-width: 80%;  /* Ensures the logo scales down on smaller screens if its container is small */
+  width: 200px;     /* <<<< SET YOUR DESIRED WIDTH HERE. Adjust this value as needed. */
+  height: auto;     /* Maintains the image's aspect ratio */
+  display: block;   /* Makes margin: auto work for centering */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
 
     h1 {
       margin-top: -60px;
@@ -79,14 +98,16 @@
 </head>
 <body>
   <h1>QuickProCV</h1>
-
+ <div class="branding-logo">
+  <img src="assets/branding/logo.png" alt="Q-Pro Logo">
+  </div>
   <div class="login-box">
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
     <button id="login-btn">Login</button>
     <p>Don't have an account? <a href="register.html">Register</a></p>
   </div>
-
+  
   <div class="back-link">
     <a href="landing.html">← Back to Landing Page</a>
   </div>

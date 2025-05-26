@@ -1,4 +1,3 @@
-// linkedin-server/email.js
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 
@@ -12,13 +11,25 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export default async function sendEmail(to, subject, text, html = '') {
+export default async function sendEmail(to, subject, text = '', userHtml = '') {
   const mailOptions = {
     from: `QuickProCV <${process.env.GMAIL_USER}>`,
     to,
     subject,
     text,
-    html,
+    html: `
+      <div style="font-family: Arial, sans-serif; padding: 10px;">
+        <img src="cid:qprologo" alt="Q-Pro" style="height: 50px; margin-bottom: 15px;" />
+        ${userHtml}
+      </div>
+    `,
+    attachments: [
+      {
+        filename: 'logo-qpro.png',
+        path: './assets/branding/logo-qpro.png',
+        cid: 'qprologo'
+      }
+    ]
   };
 
   try {
@@ -30,5 +41,6 @@ export default async function sendEmail(to, subject, text, html = '') {
     throw err;
   }
 }
+
 
 

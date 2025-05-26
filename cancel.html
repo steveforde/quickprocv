@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="assets/branding/logo-qpro.png">
   <title>Payment Cancelled</title>
   <style>
     body {
@@ -13,6 +14,22 @@
       height: 100vh;
       margin: 0; /* Good practice */
     }
+
+       .branding-logo {
+  text-align: center; /* This will center the logo if it's not full width */
+  padding: 20px 0;    /* Add some vertical spacing around the logo */
+  /* You might want to add a background to this div if needed, 
+     or adjust its position relative to the header/features */
+}
+
+.branding-logo img {
+  max-width: 80%;  /* Ensures the logo scales down on smaller screens if its container is small */
+  width: 200px;     /* <<<< SET YOUR DESIRED WIDTH HERE. Adjust this value as needed. */
+  height: auto;     /* Maintains the image's aspect ratio */
+  display: block;   /* Makes margin: auto work for centering */
+  margin-left: auto;
+  margin-right: auto;
+}
     .message {
       background: white;
       padding: 2rem;
@@ -40,6 +57,9 @@
   </style>
 </head>
 <body>
+   <div class="branding-logo">
+  <img src="assets/branding/logo.png" alt="Q-Pro Logo">
+</div>
   <div class="message">
     <h1>❌ Payment Cancelled</h1>
     <p>You cancelled the payment. No changes were made.</p>

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/png" href="assets/branding/logo-qpro.png">
   <title>Welcome to QuickProCV</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
@@ -14,6 +15,25 @@
       padding: 0;
       color: #222;
     }
+
+    /* Add this inside your <style> tags in landing.html */
+
+.branding-logo {
+  text-align: center; /* This will center the logo if it's not full width */
+  padding: 20px 0;    /* Add some vertical spacing around the logo */
+  /* You might want to add a background to this div if needed, 
+     or adjust its position relative to the header/features */
+}
+
+.branding-logo img {
+  max-width: 80%;  /* Ensures the logo scales down on smaller screens if its container is small */
+  width: 200px;     /* <<<< SET YOUR DESIRED WIDTH HERE. Adjust this value as needed. */
+  height: auto;     /* Maintains the image's aspect ratio */
+  display: block;   /* Makes margin: auto work for centering */
+  margin-left: auto;
+  margin-right: auto;
+}
+
 
     header {
       background-color: #007bff;
@@ -193,9 +213,12 @@
   <header>
     <button id="theme-toggle">🌙 Dark Mode</button>
     <h1>QuickProCV</h1>
+     <div class="branding-logo">
+     <img src="assets/branding/logo.png" alt="Q-Pro Logo">
+    </div>
     <p>Build a job-winning CV in minutes. One-time payment, 2 year access.</p>
   </header>
-
+ 
   <section class="features">
     <div class="card" data-aos="fade-up">
       <h3>✨ Only €24.99 for 2 years</h3>
