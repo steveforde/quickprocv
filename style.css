@@ -1768,3 +1768,32 @@ html[data-theme='dark'] .template-temp #preview-contact {
   background-color: var(--accent, #007bff);
   border-radius: 8px;
 }
+
+#backToTop {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: var(--accent, #007bff);
+  color: white;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+  /* ⭐ Perfect centering */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Optional hover effect */
+  transition: background-color 0.3s ease;
+}
+
+#backToTop:hover {
+  background-color: #0056b3;
+}
+

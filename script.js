@@ -531,6 +531,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   // --- End Completion Progress Tracker ---
 
 
+  // Show/hide the Back to Top button
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('backToTop');
+  if (btn) {
+    btn.style.display = window.scrollY > 300 ? 'block' : 'none';
+  }
+});
+
+// Scroll smoothly to the top
+document.getElementById('backToTop')?.addEventListener('click', () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+
   // ❌❌❌ NESTED LISTENER REMOVED FROM HERE ❌❌❌
 
   const saveFields = [
