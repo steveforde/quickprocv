@@ -966,7 +966,10 @@ async function generateSkillsAI() {
     skillsButton.disabled = true;
 
     try {
-        const promptText = `Based on the Job Title "${jobTitle}" and this summary "${summary}", list 10 to 15 key technical and soft skills. Present them as a single line, separated only by spaces. For example: JavaScript React Node.js Teamwork Communication`;
+        const promptText = `Based on the job title "${jobTitle}" and the CV summary: "${summary}", generate a list of 12–15 key skills for a professional CV. Include a balanced mix of technical and soft skills where appropriate.
+
+        Format the output as a single line, separated by spaces. Avoid commas. Examples of valid output:
+        JavaScript React Node.js Leadership Teamwork Communication Problem-solving Time Management Git HTML CSS Agile Docker MongoDB`;
         console.log("[generateSkillsAI] Sending prompt to backend...");
 
         const response = await fetch('http://localhost:3000/api/ai/generate', {
@@ -1022,7 +1025,9 @@ async function generateSkillsAI() {
         }
     }
 }
-
+// ======================================================================
+// --- Generate Summary AI Function (Updated to Send Auth Token) ---
+// ======================================================================
 async function generateSummaryAI() {
     console.log("[generateSummaryAI] Clicked.");
 
@@ -1063,7 +1068,8 @@ async function generateSummaryAI() {
     summaryButton.disabled = true;
 
     try {
-        const promptText = `Generate a concise and professional 2-3 sentence CV summary for a ${jobTitle}. Incorporate key aspects from the following work experience: "${work}" and mention some of these skills: "${skills}". Focus on impact and suitability for a similar role.`;
+        const promptText = `Write a powerful and tailored 2-3 sentence professional summary for a CV. The person is applying for a ${jobTitle} role. Use this work experience: "${work}" and mention relevant skills: "${skills}". Highlight achievements, results, years of experience (if available), and suitability for the role. The tone should be confident, results-driven, and career-focused.`;
+
         console.log("[generateSummaryAI] Sending prompt to backend:", promptText);
 
         const response = await fetch('http://localhost:3000/api/ai/generate', {
@@ -1173,7 +1179,14 @@ async function generateCoverLetterAI() {
     coverLetterButton.disabled = true;
 
     try {
-        const promptText = `Write a professional and engaging cover letter from ${name} for the ${jobTitle} position at ${targetCompany}. Use the provided CV details (Summary: "${summary}", Work Experience: "${work}", Skills: "${skills}") to highlight suitability. Tailor the letter specifically to this Job Description: "${jobDescription}". The tone should be enthusiastic but professional. Structure it into 3-4 paragraphs and end with a standard closing.`;
+       const promptText = `Write a professional and enthusiastic cover letter for a candidate named ${name}, applying for the position of ${jobTitle} at ${targetCompany}. 
+
+      Use the following background:
+      - Summary: "${summary}"
+      - Skills: "${skills}"
+      - Work Experience: "${work}"
+
+      The tone should be confident, friendly, and tailored to the following job description: "${jobDescription}". Structure the letter in 3–4 short paragraphs with a clear closing. Do not use generic filler text.`;
         console.log("[generateCoverLetterAI] Sending prompt to backend...");
 
         const response = await fetch('http://localhost:3000/api/ai/generate', {
@@ -1345,7 +1358,14 @@ async function generateWorkExperienceAI() {
     workButton.disabled = true;
 
     try {
-        const promptText = `For a CV with the job title "${jobTitle}", generate detailed work experience entries **only** for these companies: ${companiesString}. For each company, invent a plausible date range (within the last 10 years, ensuring logical order if multiple) and provide 3-4 bullet points detailing typical responsibilities and achievements. Format each entry clearly for a CV (using '-' for bullets) and ensure a blank line separates the entries.`;
+        const promptText = `Generate detailed work experience entries for a CV. The candidate’s job title is "${jobTitle}". Use only these company names: ${companiesString}. 
+
+        For each company:
+      - Invent a realistic job title if not provided (e.g., Software Developer, Marketing Associate).
+      - Include a date range within the last 10 years (e.g., 2019 – 2022).
+      - Write 3 to 4 bullet points using concise, professional phrasing.
+      - Focus on key responsibilities and measurable achievements.
+      - Use hyphens (-) for bullet formatting and leave one blank line between companies.`;
         console.log("[generateWorkExperienceAI] Sending prompt to backend (Enhance Mode):", promptText);
 
         const response = await fetch('http://localhost:3000/api/ai/generate', {

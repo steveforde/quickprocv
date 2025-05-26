@@ -6,11 +6,12 @@
   <link rel="icon" type="image/png" href="assets/branding/logo-qpro.png">
   <title>Register – QuickProCV</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css"/> <style>
+  <link rel="stylesheet" href="style.css"/> 
+  <style>
     body {
       font-family: 'Inter', sans-serif;
-      background-color: var(--page-bg-light); /* Using CSS Variable */
-      color: var(--text-color-light);    /* Using CSS Variable */
+      background-color: var(--page-bg-light);
+      color: var(--text-color-light);
       margin: 0;
       display: flex;
       flex-direction: column;
@@ -22,34 +23,32 @@
     }
 
     .branding-logo {
-      text-align: center; /* This will center the logo if it's not full width */
-      padding: 20px 0;    /* Add some vertical spacing around the logo */
-       /* You might want to add a background to this div if needed, 
-       or adjust its position relative to the header/features */
-      }
+      text-align: center;
+      padding: 20px 0;
+    }
 
     .branding-logo img {
-      max-width: 80%;  /* Ensures the logo scales down on smaller screens if its container is small */
-     width: 200px;     /* <<<< SET YOUR DESIRED WIDTH HERE. Adjust this value as needed. */
-       height: auto;     /* Maintains the image's aspect ratio */
-     display: block;   /* Makes margin: auto work for centering */
-     margin-left: auto;
-       margin-right: auto;
-      }
+      max-width: 80%;
+      width: 200px;
+      height: auto;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
     .header-title {
       margin-bottom: 30px;
       font-size: 2.5rem;
-      color: var(--accent-color-dynamic); /* Using CSS Variable */
+      color: var(--accent-color-dynamic);
       text-align: center;
     }
 
     .auth-box {
-      background: var(--card-bg-light); /* Using CSS Variable */
+      background: var(--card-bg-light);
       padding: 30px 40px;
       border-radius: 12px;
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-      max-width: 450px; /* Made slightly wider */
+      max-width: 450px;
       width: 100%;
       box-sizing: border-box;
     }
@@ -60,8 +59,6 @@
         margin-bottom: 25px;
         font-weight: 600;
     }
-    /* Assuming input styles are in style.css or add class="form-input" */
-    /* Button style will come from general 'button' rule in style.css */
     .auth-box p {
       text-align: center;
       margin-top: 20px;
@@ -87,6 +84,7 @@
   </div>
   <div class="auth-box">
     <h2>Create Account</h2>
+    <input type="text" id="name" class="form-input" placeholder="Full Name" required />
     <input type="email" id="email" class="form-input" placeholder="Email" required />
     <input type="password" id="password" class="form-input" placeholder="Password" required />
     <button id="register-btn">Register</button>
@@ -98,54 +96,55 @@
   </div>
 
   <script>
-    document.getElementById('register-btn').addEventListener('click', async () => {
-      const emailInput = document.getElementById('email');
-      const passwordInput = document.getElementById('password');
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
+   document.getElementById('register-btn').addEventListener('click', async () => {
+    console.log('Register button clicked at: ' + new Date().toLocaleTimeString()); 
 
-      // Client-side validation
-      if (!email || !password) {
-        alert('Please enter both email and password.');
-        return;
-      }
-      if (!email.includes('@') || !email.includes('.')) { // Basic email check
-        alert('Please enter a valid email address.');
-        return;
-      }
-      if (password.length < 6) { // Example password policy
-        alert('Password must be at least 6 characters long.');
-        return;
-      }
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
 
-      console.log(`[Register.html] Attempting registration for: ${email}`);
+    const full_name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
-      try {
-        const response = await fetch('http://localhost:3002/api/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-  
-        const result = await response.json(); // Try to parse JSON always
-  
-        if (!response.ok) {
-          console.error('[Register.html] Registration failed from backend:', response.status, result.error);
-          alert('Registration failed: ' + (result.error || 'An unknown error occurred. Please try again.'));
-        } else {
-          // Registration was successful according to the backend
-          // The backend /api/register ALREADY handles inserting into your public.users table.
-          console.log('[Register.html] Registration successful:', result.message);
-          alert('Registration successful! Please proceed to login.');
-          window.location.href = 'login.html'; // Redirect to LOGIN page
-        }
-      } catch (err) {
-        // Catches network errors (e.g., auth.js server not running) or if response.json() fails
-        console.error('[Register.html] Registration fetch/network error or JSON parse error:', err);
-        alert('Register error: Failed to connect or server returned an invalid response. Please try again.');
+    if (!full_name || !email || !password) {
+      alert('Please enter full name, email and password.');
+      return;
+    }
+    if (!email.includes('@') || !email.includes('.')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters long.');
+      return;
+    }
+
+    console.log(`[Register.html] Attempting registration for: ${email}`);
+
+    try {
+      const response = await fetch('http://localhost:3002/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ full_name, email, password })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('[Register.html] Registration failed from backend:', response.status, result.error);
+        alert('Registration failed: ' + (result.error || 'An unknown error occurred. Please try again.'));
+      } else {
+        console.log('[Register.html] Registration successful:', result.message);
+        alert('Registration successful! Please proceed to login.');
+        window.location.href = 'login.html';
       }
-    });
+    } catch (err) {
+      console.error('[Register.html] Registration fetch/network error or JSON parse error:', err);
+      alert('Register error: Failed to connect or server returned an invalid response. Please try again.');
+    }
+  });
   </script>
-  
+
 </body>
 </html>

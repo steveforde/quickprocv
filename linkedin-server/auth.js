@@ -4,8 +4,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import supabaseGlobalInstance from './supabaseClient.js';
-import sendEmail from './email.js';
-import generateHtmlTemplate from './emailTemplates/generateHtmlTemplate.js';
+import sendEmail from './email.js'; // ✅ At the top if not already
+import generateHtmlTemplate from './emailTemplates/baseHtml.js';
 
 dotenv.config({ path: './linkedin-server/.env' });
 
@@ -15,7 +15,8 @@ app.use(express.json());
 
 app.post('/api/register', async (req, res) => {
   const { email, password, full_name } = req.body;
-  console.log('📩 [AUTH.JS /api/register] Attempting to register:', email);
+  console.log('📩 [AUTH /register] Registering:', email);
+
   try {
     const { data: userData, error: signupError } = await supabaseGlobalInstance.auth.admin.createUser({
       email,
@@ -24,36 +25,44 @@ app.post('/api/register', async (req, res) => {
     });
 
     if (signupError) {
-      console.error(`❌ [AUTH.JS /api/register] Supabase auth.admin.createUser error for ${email}:`, signupError.message);
+      console.error(`❌ [AUTH /register] Supabase createUser error:`, signupError.message);
       return res.status(400).json({ error: signupError.message });
     }
 
     const userId = userData.user.id;
-    console.log(`✅ [AUTH.JS /api/register] Supabase auth user created for ${email}. UID: ${userId}`);
+    console.log(`✅ [AUTH /register] Supabase user created: ${userId}`);
 
     const { error: insertError } = await supabaseGlobalInstance
       .from('users')
       .insert([{ 
-        id: userId, 
-        email: email.toLowerCase().trim(), 
-        full_name: full_name || '', 
+        id: userId,
+        email: email.toLowerCase().trim(),
+        full_name: full_name || '',
         is_pro: false 
       }]);
 
     if (insertError) {
-      console.error(`❌ [AUTH.JS /api/register] Error inserting user profile for ${email} (UID: ${userId}):`, insertError.message);
-      return res.status(500).json({ error: 'User authentication created, but profile data insert failed: ' + insertError.message });
+      console.error(`❌ [AUTH /register] Error inserting user profile:`, insertError.message);
+      return res.status(500).json({ error: 'User created, but DB insert failed: ' + insertError.message });
     }
 
+    // ✅ Send Welcome Email
     const welcomeMessage = `Thanks for joining QuickProCV! You can now start creating professional CVs and cover letters with AI assistance.`;
-    await sendEmail(email, '🎉 Welcome!', '', generateHtmlTemplate(`Welcome, ${full_name}`, welcomeMessage), full_name);
+    console.log("📨 Sending welcome email...");
+    await sendEmail(
+      email,
+      '🎉 Welcome to QuickProCV!',
+      '',
+      generateHtmlTemplate(`Welcome, ${full_name || 'there'}!`, welcomeMessage),
+      full_name
+    );
+    console.log(`✅ Welcome email sent to ${email}`);
 
-    console.log(`✅ [AUTH.JS /api/register] User profile created and welcome email sent to ${email}.`);
-    res.json({ message: 'User registered successfully. Please login.', id: userId });
+    res.json({ message: 'User registered successfully.', id: userId });
 
   } catch (err) {
-    console.error(`❌ [AUTH.JS /api/register] Unexpected error during registration for ${email}:`, err);
-    res.status(500).json({ error: 'An unexpected error occurred during registration.' });
+    console.error(`❌ [AUTH /register] Unexpected error:`, err);
+    res.status(500).json({ error: 'An unexpected error occurred.' });
   }
 });
 

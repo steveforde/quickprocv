@@ -18,6 +18,12 @@ const transporter = nodemailer.createTransport({
 export default async function sendEmail(to, subject, text = '', messageHtml = '', userName = '') {
   const html = messageHtml || generateHtmlTemplate(subject, text, userName);
 
+  // 🔍 ADD DEBUG LOGS HERE
+  console.log("📤 Sending to:", to);
+  console.log("📨 Subject:", subject);
+  console.log("🧾 From:", process.env.GMAIL_USER);
+  console.log("🖼️ HTML Preview:", html);
+
   const mailOptions = {
     from: `QuickProCV <${process.env.GMAIL_USER}>`,
     to,
