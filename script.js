@@ -482,9 +482,9 @@ function autofillTestData() {
 // --- DOMContentLoaded: Main Initialization and Event Listener Setup ---
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("🚀 DOM fully loaded and parsed. Initializing main page...");
-   console.log("--- DOMContentLoaded START after redirect ---");
-  console.log("Initial userEmail from localStorage on load:", localStorage.getItem('userEmail'));
-  console.log("Initial supabaseUserToken from localStorage on load:", localStorage.getItem('supabaseUserToken'));
+
+
+
   // --- END OF ADDED LINES ---
    const currentUrlParams = new URLSearchParams(window.location.search);
 
@@ -830,15 +830,13 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
     }
   }
    
-  // --- Attach AI Skills Button Listener ---
-    console.log("DEBUG: Trying to attach Generate Skills button listener...");
-    const generateSkillsButton = document.getElementById('generate-skills-btn');
-    console.log("DEBUG: Result of getElementById('generate-skills-btn'):", generateSkillsButton);
+
+  
 
     if (generateSkillsButton) {
-        console.log("DEBUG: Generate Skills Button FOUND! Attaching listener...");
+      
         generateSkillsButton.addEventListener('click', generateSkillsAI);
-        console.log("DEBUG: Listener ATTACHED to Generate Skills button.");
+      
     } else {
         console.error("DEBUG: Generate Skills button was NOT found. Listener NOT attached.");
     }
@@ -1358,14 +1356,17 @@ async function generateWorkExperienceAI() {
     workButton.disabled = true;
 
     try {
-        const promptText = `Generate detailed work experience entries for a CV. The candidate’s job title is "${jobTitle}". Use only these company names: ${companiesString}. 
+       const promptText = `Generate CV-style work experience for a "${jobTitle}". ONLY use this company: ${companiesString}. 
 
         For each company:
-      - Invent a realistic job title if not provided (e.g., Software Developer, Marketing Associate).
+      - Invent a realistic job title if not provided.
       - Include a date range within the last 10 years (e.g., 2019 – 2022).
-      - Write 3 to 4 bullet points using concise, professional phrasing.
+      - Write 3–4 bullet points using concise, professional phrasing.
       - Focus on key responsibilities and measurable achievements.
-      - Use hyphens (-) for bullet formatting and leave one blank line between companies.`;
+      - Use hyphens (-) for bullet formatting.
+      - Leave one blank line between companies.
+
+        ⚠️ Do NOT add any companies other than: ${companiesString}.`;
         console.log("[generateWorkExperienceAI] Sending prompt to backend (Enhance Mode):", promptText);
 
         const response = await fetch('http://localhost:3000/api/ai/generate', {
