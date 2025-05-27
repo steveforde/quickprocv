@@ -831,7 +831,8 @@ document.getElementById('backToTop')?.addEventListener('click', () => {
   }
    
 
-  
+  const generateSkillsButton = document.getElementById('generate-skills-btn');
+
 
     if (generateSkillsButton) {
       
@@ -1356,18 +1357,20 @@ async function generateWorkExperienceAI() {
     workButton.disabled = true;
 
     try {
-       const promptText = `Generate CV-style work experience for a "${jobTitle}". ONLY use this company: ${companiesString}. 
+       const promptText = `Generate CV-style work experience for a "${jobTitle}". ONLY use this company or companies: ${companiesString}.
 
-        For each company:
-      - Invent a realistic job title if not provided.
-      - Include a date range within the last 10 years (e.g., 2019 – 2022).
-      - Write 3–4 bullet points using concise, professional phrasing.
+        For each entry:
+      - Use the exact company name and year(s) as entered by the user.
+      - Do NOT change or invent any dates.
+      - Infer a realistic job title only if not already provided.
+      - Write 3–4 bullet points with concise, professional phrasing.
       - Focus on key responsibilities and measurable achievements.
       - Use hyphens (-) for bullet formatting.
       - Leave one blank line between companies.
 
-        ⚠️ Do NOT add any companies other than: ${companiesString}.`;
-        console.log("[generateWorkExperienceAI] Sending prompt to backend (Enhance Mode):", promptText);
+      ⚠️ Do NOT add any other companies or date ranges outside of: ${companiesString}.`;
+
+      console.log("[generateWorkExperienceAI] Sending prompt to backend (Enhance Mode):", promptText);
 
         const response = await fetch('http://localhost:3000/api/ai/generate', {
             method: 'POST',

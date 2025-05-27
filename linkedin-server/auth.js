@@ -32,14 +32,17 @@ app.post('/api/register', async (req, res) => {
     const userId = userData.user.id;
     console.log(`✅ [AUTH /register] Supabase user created: ${userId}`);
 
-    const { error: insertError } = await supabaseGlobalInstance
-      .from('users')
-      .insert([{ 
-        id: userId,
-        email: email.toLowerCase().trim(),
-        full_name: full_name || '',
-        is_pro: false 
-      }]);
+    const normalizedEmail = email.toLowerCase().trim(); // 🔑
+
+await supabaseGlobalInstance
+  .from('users')
+  .insert([{ 
+    id: userId,
+    email: normalizedEmail, // ✅ Use normalized email
+    full_name: full_name || '',
+    is_pro: false
+  }]);
+
 
     if (insertError) {
       console.error(`❌ [AUTH /register] Error inserting user profile:`, insertError.message);
@@ -84,13 +87,18 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid login credentials or action required.' });
     }
 
-    const { data: profileData, error: profileError } = await supabaseGlobalInstance
-      .from('users')
-      .select('full_name')
-      .eq('email', email.toLowerCase().trim())
-      .single();
+   const normalizedEmail = email.toLowerCase().trim(); // 🔑
 
-    const fullName = profileData?.full_name || '';
+await supabaseGlobalInstance
+  .from('users')
+  .insert([{ 
+    id: userId,
+    email: normalizedEmail, // ✅ Use normalized email
+    full_name: full_name || '',
+    is_pro: false
+  }]);
+
+    const fullName = profileData?.full_name || email.split('@')[0]; // fallback to first part of email
     const loginMessage = `You have successfully logged into your QuickProCV account.`;
     await sendEmail(email, '🔓 Login Notification', '', generateHtmlTemplate(`Welcome back, ${fullName}`, loginMessage), fullName);
 
