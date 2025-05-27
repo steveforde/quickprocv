@@ -42,7 +42,7 @@ if (!supabaseUrl || !supabaseServiceKey ||
     !process.env.STRIPE_SECRET_KEY || !endpointSecret || 
     !process.env.STRIPE_PRICE_ID || !process.env.OPENAI_API_KEY || 
     !process.env.STRIPE_TOKEN_TOPUP_PRICE_ID) { 
-  console.error('CRITICAL ERROR: One or more required environment variables (Supabase, Stripe Keys, Webhook Secret, Price IDs, OpenAI Key) are missing. Check your .env file and path.'); 
+  console.error('CRITICAL ERROR: One or more required environment variables (Supabase, Stripe Keys, Webhook Secret, Price IDs, OpenAI Key, Token Topup Price ID) are missing. Check your .env file and path.'); 
   process.exit(1); 
 }
 
@@ -85,7 +85,6 @@ app.use(cors()); // Enable CORS
 
 // --- Stripe Webhook Endpoint (Needs Raw Body) ---
 // IMPORTANT: This route MUST be defined BEFORE app.use(express.json()) 
-// because Stripe needs the raw request body for signature verification.
 app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
@@ -98,7 +97,6 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Handle the event
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     console.log(`[Stripe Webhook] Checkout session completed. ID: ${session.id}`);
@@ -106,7 +104,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
     const userIdFromClientRef = session.client_reference_id;
     const userEmailFromSession = session.customer_details ? session.customer_details.email : null;
     const purchaseType = session.metadata ? session.metadata.purchaseType : null;
-    const userIdFromMetadata = session.metadata ? session.metadata.userId : null; // Get userId from metadata too
+    const userIdFromMetadata = session.metadata ? session.metadata.userId : null;
 
     const effectiveUserId = userIdFromClientRef || userIdFromMetadata;
 
@@ -116,7 +114,6 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
     }
     
     if (purchaseType === 'ai_tokens_50_topup') {
-        // --- Handle AI Token Top-up Purchase ---
         if (!effectiveUserId) { 
             console.error('❌ [Stripe Webhook] User ID (effectiveUserId) is missing for token top-up. Cannot update limits.');
             return res.status(400).json({ error: 'User ID missing for token top-up processing.' });
@@ -125,7 +122,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
         try {
             const { data: currentUserData, error: fetchUserError } = await supabase
                 .from('users')
-                .select('ai_monthly_limit, email') // Also select email if needed for notification and not relying on session
+                .select('ai_monthly_limit, email') 
                 .eq('id', effectiveUserId)
                 .single();
 
@@ -161,15 +158,12 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
             } else {
                 console.warn(`[Stripe Webhook] No email available to send token purchase confirmation for user ${effectiveUserId}.`);
             }
-
         } catch (dbProcessingError) { 
             console.error('❌ [Stripe Webhook] Error processing token top-up for user ID', effectiveUserId, dbProcessingError.message);
             return res.status(500).json({ error: 'Internal server error during token top-up processing.' });
         }
-
     } else {
         // --- Handle Original Pro Subscription Purchase ---
-        // For new pro subscriptions, we primarily rely on email as per original logic.
         if (!userEmailFromSession) { 
             console.error('❌ [Stripe Webhook] No customer email found in session for Pro subscription.');
             return res.status(400).json({ error: 'No customer email found for Pro subscription.' });
@@ -190,7 +184,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
                 .update({
                     is_pro: true,
                     pro_expiry: expiryISOString,
-                    ai_monthly_limit: 50,
+                    ai_monthly_limit: 100, // This was 100 in your last paste
                     ai_monthly_usage_count: 0,
                     ai_usage_cycle_reset_date: initialAiUsageResetDateISOString
                 })
@@ -201,7 +195,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
                 return res.status(500).json({ error: 'Database update failed for Pro subscription.' }); 
             }
 
-            console.log(`✨ [Stripe Webhook] User ${userEmailFromSession} marked as Pro with AI limit of 50 and usage reset.`);
+            console.log(`✨ [Stripe Webhook] User ${userEmailFromSession} marked as Pro with AI limit of 100 and usage reset.`); // Updated log for 100
             await sendEmail(
                 userEmailFromSession,
                 'QuickProCV Pro Access (2 Years)',
@@ -209,17 +203,14 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
                 `<p>Hi there,</p><p>Thanks for upgrading to <strong>Pro</strong>! 🎉<br>You now have full access to <a href="https://quickprocv.com">QuickProCV</a> for 2 years.</p>`
             );
             console.log('📧 Pro subscription confirmation email sent to:', userEmailFromSession);
-
         } catch (dbOrEmailProcessingError) { 
             console.error('❌ Supabase update or Email send error for Pro subscription:', dbOrEmailProcessingError.message);
             return res.status(500).json({ error: 'Internal server error during Pro subscription processing.' });
         }
     }
-
   } else {
     console.log(`ℹ️ [Stripe Webhook] Unhandled event type ${event.type}`);
   }
-
   res.status(200).json({ received: true });
 });
 
@@ -232,8 +223,29 @@ app.get('/', (req, res) => {
   res.send('QuickProCV API is live');
 });
 
+// THIS IS THE VERSION OF /api/send-reset-email WE ARE KEEPING (for localhost testing)
+app.post('/api/send-reset-email', async (req, res) => {
+  const { email } = req.body;
+  console.log(`[API /api/send-reset-email] Received request for email: ${email}`);
+  try {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'http://localhost:5500/reset.html', // For local testing
+    });
+
+    if (error) {
+        console.error('[Password Reset Error]', error.message);
+        throw error; // Throw error to be caught by the catch block
+    }
+    console.log('[API /api/send-reset-email] Supabase resetPasswordForEmail call successful for:', email);
+    res.json({ success: true, message: 'Reset email sent.' });
+  } catch (err) {
+    console.error(`❌ [API /api/send-reset-email] Catch block error for ${email}:`, err.message);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 app.post('/create-checkout-session', async (req, res) => {
-    const { email } = req.body; // Assuming for now this doesn't strictly need auth to initiate
+    const { email } = req.body; 
 
     if (!email) {
         return res.status(400).json({ error: 'Email is required.' });
@@ -258,10 +270,7 @@ app.post('/create-checkout-session', async (req, res) => {
             success_url: `${process.env.FRONTEND_URL || 'http://localhost:5500'}/main.html?payment_success=true&email=${encodeURIComponent(email)}`,
             cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5500'}/main.html?payment_cancelled=true`,
             customer_email: email,
-            // For a new subscription, Stripe creates a customer. If user is already logged in,
-            // you might want to pass existing Stripe customer ID if you store it.
         });
-
         res.json({ url: session.url });
     } catch (err) {
         console.error('❌ Stripe session creation failed:', err.message);
@@ -407,7 +416,6 @@ app.post('/api/create-token-purchase-session', async (req, res) => {
         res.status(500).json({ error: 'Stripe session creation failed for token top-up.' });
     }
 });
-
 
 // --- Server Start ---
 const PORT = process.env.PORT || 3000;

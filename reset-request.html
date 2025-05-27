@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light"> <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" type="image/png" href="assets/branding/logo-qpro.png">
+  <title>Request Password Reset - QuickProCV</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8; /* This was login.html's body bg, override with theme if needed */
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh; /* Use min-height if content can grow */
+    }
+   
+   .branding-logo {
+      text-align: center; 
+      padding: 20px 0;    
+    }
+
+    .branding-logo img {
+      max-width: 80%;  
+      width: 200px;    
+      height: auto;     
+      display: block;   
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Changed h1 to match login.html more closely - it was a class there */
+    .page-title { /* You can use this class for "QuickProCV" title */
+      margin-top: -60px; /* Only if logo is small and above it or no logo */
+      font-size: 2.5rem;
+      color: #007bff;
+      text-align: center; /* Added for explicit centering */
+      margin-bottom: 20px; /* Space below title */
+    }
+
+    .auth-box { /* Renamed from login-box for generality, but using login-box styles */
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+      max-width: 400px;
+      width: 100%;
+      margin-top: 20px; /* Consistent with login-box */
+      box-sizing: border-box; /* Added for better padding/width behavior */
+    }
+
+    /* Added h2 styling for inside the auth-box */
+    .auth-box h2 {
+        text-align: center;
+        color: #222; /* From your register.html example */
+        margin-top: 0;
+        margin-bottom: 25px;
+        font-weight: 600;
+    }
+
+    /* General input and button styles from login.html */
+    input { /* Assuming you want all inputs on this page styled this way */
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      box-sizing: border-box; /* Added */
+    }
+
+    button { /* Assuming you want all buttons on this page styled this way */
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-weight: 600; /* Added from my reset.html suggestion */
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+     button:disabled { /* Added from my reset.html suggestion */
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+
+    /* General p and a styles from login.html */
+    p {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .back-link {
+      margin-top: 20px;
+    }
+    /* If your style.css handles dark theme for these generic elements, great.
+       If not, you'd need to add html[data-theme='dark'] overrides here too.
+       For now, this aims to match your light mode login.html. */
+  </style>
+</head>
+<body>
+  <h1 class="page-title">QuickProCV</h1> <div class="branding-logo">
+    <img src="assets/branding/logo.png" alt="Q-Pro Logo">
+  </div>
+
+  <div class="auth-box"> <h2>Reset Password</h2> <form id="reset-form">
+      <input type="email" id="reset-email" placeholder="Enter your email" required />
+      <button type="submit" id="send-reset-btn">Send Reset Link</button>
+    </form>
+  </div>
+
+  <div class="back-link">
+    <a href="login.html">← Back to Login</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    // ❗❗ ENSURE THIS IS YOUR ACTUAL PUBLIC ANONYMOUS KEY ❗❗
+    const SUPABASE_URL = 'https://pjrqqrxlzbpjkpxligup.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqcnFxcnhsemJwamtweGxpZ3VwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyMDIyMzksImV4cCI6MjA2MTc3ODIzOX0.QLdWGmJKHshfLKUTi5T2rQYDmqore8r0o-MhxmFYgK4'; 
+
+    // 👇 CORRECTED LINE 👇
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
+    // Or, if you prefer, you can often just do:
+    // const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ...but window.supabase.createClient is more explicit that you're using the global from the CDN.
+
+    document.getElementById('reset-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById('reset-email');
+      const email = emailInput.value.trim();
+      const button = e.target.querySelector('button[type="submit"]'); 
+      
+      if (!email) {
+        alert('Please enter your email address.');
+        return;
+      }
+      if (!email.includes('@') || !email.includes('.')) { 
+        alert('Please enter a valid email address.');
+        return;
+      }
+
+      console.log(`[ResetRequest] Requesting password reset for: ${email}`);
+      button.disabled = true; 
+      button.textContent = 'Sending...';
+
+      // Now this 'supabase' object should be correctly initialized
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'http://localhost:5500/reset.html' 
+      });
+
+      button.disabled = false; 
+      button.textContent = 'Send Reset Link';
+
+      if (error) {
+        console.error('[ResetRequest] Error sending reset link:', error);
+        alert('❌ Failed to send reset link: ' + error.message);
+      } else {
+        console.log('[ResetRequest] Reset link sent successfully to:', email, data);
+        alert('✅ Reset link sent. Please check your email inbox (and spam folder). You can now close this page.');
+        emailInput.value = ''; 
+      }
+    });
+  </script>
+</body>
+</html>
