@@ -5,6 +5,7 @@ import cors from 'cors';
 import Stripe from 'stripe';
 import bodyParser from 'body-parser';
 import sendEmail from './linkedin-server/email.js'; // Ensure this path is correct
+import generateHtmlTemplate from './linkedin-server/emailTemplates/baseHtml.js'; // Ensure this path is correct
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai'; 
 
@@ -122,7 +123,7 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
         try {
             const { data: currentUserData, error: fetchUserError } = await supabase
                 .from('users')
-                .select('ai_monthly_limit, email') 
+                .select('ai_monthly_limit, email, full_name') // Added full_name
                 .eq('id', effectiveUserId)
                 .single();
 
@@ -146,13 +147,17 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
             console.log(`✨ [Stripe Webhook] User ${effectiveUserId} had 50 AI tokens added. New monthly limit for this cycle: ${newLimit}.`);
             
             const emailForNotification = userEmailFromSession || currentUserData.email;
+            const fullName = currentUserData.full_name || '';
 
             if(emailForNotification) {
+                 const tokenSubject = '✅ 50 Additional AI Generations Added!';
+                 const tokenMessageContent = `You've successfully added 50 additional AI generations to your QuickProCV account. Your AI generation limit for the current monthly cycle has been increased to ${newLimit}.`;
+                 const tokenHtmlBody = generateHtmlTemplate(`Hi ${fullName || 'QuickProCV User'}!`, tokenMessageContent);
                  await sendEmail(
                     emailForNotification,
-                    'QuickProCV - 50 Additional AI Generations Added!',
-                    'Your purchase of 50 additional AI generations was successful.',
-                    `<p>Hi there,</p><p>You've successfully added <strong>50 additional AI generations</strong> to your QuickProCV account for the current monthly cycle.</p>`
+                    tokenSubject,
+                    tokenMessageContent,
+                    tokenHtmlBody
                  );
                  console.log(`📧 Token purchase confirmation email sent to: ${emailForNotification}`);
             } else {
@@ -179,12 +184,28 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
         const initialAiUsageResetDateISOString = initialAiUsageResetDate.toISOString();
 
         try {
+            let fullName = '';
+            try {
+                const { data: profileData, error: profileFetchError } = await supabase
+                    .from('users')
+                    .select('full_name')
+                    .eq('email', userEmailFromSession.toLowerCase().trim())
+                    .single();
+                if (profileFetchError) {
+                    console.warn(`[Stripe Webhook - Pro Sub] Could not fetch full_name for ${userEmailFromSession}:`, profileFetchError.message);
+                } else if (profileData) {
+                    fullName = profileData.full_name || '';
+                }
+            } catch (e) {
+                 console.warn(`[Stripe Webhook - Pro Sub] Exception fetching full_name for ${userEmailFromSession}:`, e.message);
+            }
+
             const { error: updateProError } = await supabase
                 .from('users')
                 .update({
                     is_pro: true,
                     pro_expiry: expiryISOString,
-                    ai_monthly_limit: 100, // This was 100 in your last paste
+                    ai_monthly_limit: 100, 
                     ai_monthly_usage_count: 0,
                     ai_usage_cycle_reset_date: initialAiUsageResetDateISOString
                 })
@@ -195,12 +216,17 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
                 return res.status(500).json({ error: 'Database update failed for Pro subscription.' }); 
             }
 
-            console.log(`✨ [Stripe Webhook] User ${userEmailFromSession} marked as Pro with AI limit of 100 and usage reset.`); // Updated log for 100
+            console.log(`✨ [Stripe Webhook] User ${userEmailFromSession} marked as Pro with AI limit of 100 and usage reset.`);
+            
+            const proSubject = '🎉 Welcome to QuickProCV Pro!';
+            const proMessageContent = `Thanks for upgrading to Pro! You now have full access to all features, including 100 AI generations per month, for the next 2 years. Log in to explore your new benefits!`;
+            const proHtmlBody = generateHtmlTemplate(`Welcome to Pro, ${fullName || 'QuickProCV User'}!`, proMessageContent);
+            
             await sendEmail(
                 userEmailFromSession,
-                'QuickProCV Pro Access (2 Years)',
-                'Thanks for purchasing Pro! You now have access for 2 years.',
-                `<p>Hi there,</p><p>Thanks for upgrading to <strong>Pro</strong>! 🎉<br>You now have full access to <a href="https://quickprocv.com">QuickProCV</a> for 2 years.</p>`
+                proSubject,
+                proMessageContent, 
+                proHtmlBody
             );
             console.log('📧 Pro subscription confirmation email sent to:', userEmailFromSession);
         } catch (dbOrEmailProcessingError) { 
@@ -223,10 +249,13 @@ app.get('/', (req, res) => {
   res.send('QuickProCV API is live');
 });
 
-// THIS IS THE VERSION OF /api/send-reset-email WE ARE KEEPING (for localhost testing)
+// --- Password Reset Request Route (Only one instance now) ---
 app.post('/api/send-reset-email', async (req, res) => {
   const { email } = req.body;
   console.log(`[API /api/send-reset-email] Received request for email: ${email}`);
+  if (!email) { // Added basic validation for email
+    return res.status(400).json({ success: false, error: 'Email is required.' });
+  }
   try {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: 'http://localhost:5500/reset.html', // For local testing
@@ -234,7 +263,7 @@ app.post('/api/send-reset-email', async (req, res) => {
 
     if (error) {
         console.error('[Password Reset Error]', error.message);
-        throw error; // Throw error to be caught by the catch block
+        throw error; 
     }
     console.log('[API /api/send-reset-email] Supabase resetPasswordForEmail call successful for:', email);
     res.json({ success: true, message: 'Reset email sent.' });
@@ -244,9 +273,9 @@ app.post('/api/send-reset-email', async (req, res) => {
   }
 });
 
+// --- Stripe Checkout Session for Main Pro Subscription ---
 app.post('/create-checkout-session', async (req, res) => {
     const { email } = req.body; 
-
     if (!email) {
         return res.status(400).json({ error: 'Email is required.' });
     }

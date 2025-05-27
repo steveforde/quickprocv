@@ -51,7 +51,9 @@ await supabaseGlobalInstance
 
     // ✅ Send Welcome Email
     const welcomeMessage = `Thanks for joining QuickProCV! You can now start creating professional CVs and cover letters with AI assistance.`;
-    console.log("📨 Sending welcome email...");
+    console.log("📨 Sending welcome email...");// 👇 ADD THIS DEBUG LOG 👇
+    console.log(`[DEBUG /register] Value of full_name received in request body: "${full_name}"`); 
+
     await sendEmail(
       email,
       '🎉 Welcome to QuickProCV!',
@@ -69,44 +71,76 @@ await supabaseGlobalInstance
   }
 });
 
+// In auth.js
+// Replace your entire app.post('/api/login', ...) route with this:
+
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   console.log(`[AUTH.JS /api/login] Attempting login for: ${email}`);
   try {
-    const { data, error } = await supabaseGlobalInstance.auth.signInWithPassword({ 
+    const { data, error: signInError } = await supabaseGlobalInstance.auth.signInWithPassword({ 
       email: email.trim(),
       password 
     });
 
-    if (error) {
-      console.warn(`[AUTH.JS /api/login] Supabase signInWithPassword error for ${email}:`, error.message);
-      return res.status(400).json({ error: error.message });
+    if (signInError) {
+      console.warn(`[AUTH.JS /api/login] Supabase signInWithPassword error for ${email}:`, signInError.message);
+      return res.status(400).json({ error: signInError.message });
     }
     if (!data.session) {
-      console.warn(`[AUTH.JS /api/login] No session returned for ${email} (login failed).`);
-      return res.status(401).json({ error: 'Invalid login credentials or action required.' });
+      console.warn(`[AUTH.JS /api/login] No session returned for ${email} (login failed, possibly MFA or other issue).`);
+      return res.status(401).json({ error: 'Invalid login credentials or further action required.' });
     }
 
-   const normalizedEmail = email.toLowerCase().trim(); // 🔑
+    // --- CORRECTLY FETCH full_name FROM YOUR 'users' TABLE ---
+    let fullName = ''; // Default to empty string
+    try {
+        const normalizedEmail = email.toLowerCase().trim();
+        const { data: profileData, error: profileError } = await supabaseGlobalInstance
+            .from('users')
+            .select('full_name')
+            .eq('email', normalizedEmail) // Use the normalized email for lookup
+            .single();
 
-await supabaseGlobalInstance
-  .from('users')
-  .insert([{ 
-    id: userId,
-    email: normalizedEmail, // ✅ Use normalized email
-    full_name: full_name || '',
-    is_pro: false
-  }]);
+            console.log(`[DEBUG /login] Raw profileData from DB for ${normalizedEmail}:`, JSON.stringify(profileData, null, 2));
+             console.log(`[DEBUG /login] Raw profileError from DB for ${normalizedEmail}:`, JSON.stringify(profileError, null, 2));
+        // ... (the rest of the logic to set fullName) ...
 
-    const fullName = profileData?.full_name || email.split('@')[0]; // fallback to first part of email
+        if (profileError && profileError.code !== 'PGRST116') { // PGRST116 means no rows found, which is not a fatal error here
+            console.warn(`[AUTH.JS /api/login] Error fetching profile for ${normalizedEmail}:`, profileError.message);
+            // Decide if you want to proceed without full_name or return an error
+        }
+        
+        if (profileData && profileData.full_name) {
+            fullName = profileData.full_name;
+        } else {
+            // Fallback to first part of email if full_name is not in profile or profile not found
+            fullName = email.split('@')[0]; 
+            console.log(`[AUTH.JS /api/login] full_name not found in DB for ${email}, using email part: "${fullName}"`);
+        }
+    } catch (e) {
+        console.error(`[AUTH.JS /api/login] Exception while fetching profile for ${email}:`, e.message);
+        fullName = email.split('@')[0]; // Fallback in case of unexpected error
+    }
+    
+    // --- DEBUG LOG FOR fullName ---
+    console.log(`[DEBUG /login] Value of fullName for email template: "${fullName}"`); 
+    
     const loginMessage = `You have successfully logged into your QuickProCV account.`;
-    await sendEmail(email, '🔓 Login Notification', '', generateHtmlTemplate(`Welcome back, ${fullName}`, loginMessage), fullName);
+    // Using a consistent fallback for the template greeting
+    await sendEmail(
+        email, 
+        '🔓 Login Notification - QuickProCV', // Slightly more specific subject
+        loginMessage, // Pass plain text message
+        generateHtmlTemplate(`Welcome back, ${fullName || 'User'}!`, loginMessage), 
+        fullName // Pass fullName for potential use by sendEmail internals or template logic
+    );
 
     console.log(`[AUTH.JS /api/login] Login successful and email sent for ${email}.`);
-    res.json({ message: 'Login successful', data });
+    res.json({ message: 'Login successful', data }); // data from signInWithPassword contains session and user
 
   } catch (err) {
-    console.error(`❌ [AUTH.JS /api/login] Unexpected error during login for ${email}:`, err);
+    console.error(`❌ [AUTH.JS /api/login] Unexpected outer error during login for ${email}:`, err);
     res.status(500).json({ error: 'An unexpected error occurred during login.' });
   }
 });

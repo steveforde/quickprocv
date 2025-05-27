@@ -43,6 +43,38 @@
       text-align: center;
     }
 
+
+   /* CSS for password strength feedback */
+.password-feedback-container {
+    font-size: 0.85em; /* Slightly smaller text */
+    margin-top: -8px;  /* Pulls it a bit closer to the password field */
+    margin-bottom: 15px; /* Space before the register button */
+    text-align: left;    /* Align text to the left */
+    padding-left: 2px;   /* Small indent */
+}
+
+.password-feedback-container div { /* Style for each individual criterion message */
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.feedback-invalid {
+    color: #dc3545; /* A common red for errors */
+}
+.feedback-invalid::before {
+    content: "✗ "; /* Cross mark */
+    margin-right: 4px;
+}
+
+.feedback-valid {
+    color: #28a745; /* A common green for success */
+}
+.feedback-valid::before {
+    content: "✓ "; /* Check mark */
+    margin-right: 4px;
+}
+
+
     .auth-box {
       background: var(--card-bg-light);
       padding: 30px 40px;
@@ -87,6 +119,8 @@
     <input type="text" id="name" class="form-input" placeholder="Full Name" required />
     <input type="email" id="email" class="form-input" placeholder="Email" required />
     <input type="password" id="password" class="form-input" placeholder="Password" required />
+    <div id="password-strength-feedback" class="password-feedback-container">
+        </div>
     <button id="register-btn">Register</button>
     <p>Already have an account? <a href="login.html">Login</a></p>
   </div>
@@ -96,54 +130,135 @@
   </div>
 
   <script>
-   document.getElementById('register-btn').addEventListener('click', async () => {
-    console.log('Register button clicked at: ' + new Date().toLocaleTimeString()); 
-
     const nameInput = document.getElementById('name');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
+    const registerBtn = document.getElementById('register-btn');
+    const passwordFeedbackEl = document.getElementById('password-strength-feedback');
 
-    const full_name = nameInput.value.trim();
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
+    function validatePasswordPolicy(password) {
+        const criteria = {
+            length: { met: false, message: "At least 10 characters" },
+            uppercase: { met: false, message: "An uppercase letter (A-Z)" },
+            lowercase: { met: false, message: "A lowercase letter (a-z)" },
+            number: { met: false, message: "A number (0-9)" }
+        };
+        let allCriteriaMet = true;
 
-    if (!full_name || !email || !password) {
-      alert('Please enter full name, email and password.');
-      return;
+        // Length check
+        if (password.length >= 10) {
+            criteria.length.met = true;
+        } else {
+            allCriteriaMet = false;
+        }
+
+        // Uppercase check
+        if (/[A-Z]/.test(password)) {
+            criteria.uppercase.met = true;
+        } else {
+            allCriteriaMet = false;
+        }
+
+        // Lowercase check
+        if (/[a-z]/.test(password)) {
+            criteria.lowercase.met = true;
+        } else {
+            allCriteriaMet = false;
+        }
+
+        // Number check
+        if (/[0-9]/.test(password)) {
+            criteria.number.met = true;
+        } else {
+            allCriteriaMet = false;
+        }
+
+        if (passwordFeedbackEl) {
+            passwordFeedbackEl.innerHTML = ''; // Clear previous messages
+            if (password.length > 0) { // Only show criteria if user has started typing
+                for (const key in criteria) {
+                    const criterion = criteria[key];
+                    const div = document.createElement('div');
+                    div.textContent = `${criterion.message}`;
+                    div.className = criterion.met ? 'feedback-valid' : 'feedback-invalid';
+                    passwordFeedbackEl.appendChild(div);
+                }
+            }
+        }
+        
+        // Optionally, disable/enable register button based on policy
+        // registerBtn.disabled = !allCriteriaMet; (Consider if other fields also need to be valid)
+
+        return allCriteriaMet;
     }
-    if (!email.includes('@') || !email.includes('.')) {
-      alert('Please enter a valid email address.');
-      return;
+
+    if (passwordInput) {
+        // Initial validation message for an empty field, or when focused
+        passwordInput.addEventListener('focus', () => {
+            if (!passwordInput.value) { // Show criteria if empty and focused
+                 validatePasswordPolicy(""); // Call with empty to show all as unmet initially
+            }
+        });
+        passwordInput.addEventListener('input', () => {
+            validatePasswordPolicy(passwordInput.value);
+        });
     }
-    if (password.length < 6) {
-      alert('Password must be at least 6 characters long.');
-      return;
-    }
 
-    console.log(`[Register.html] Attempting registration for: ${email}`);
+    registerBtn.addEventListener('click', async () => {
+        console.log('Register button clicked at: ' + new Date().toLocaleTimeString()); 
 
-    try {
-      const response = await fetch('http://localhost:3002/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name, email, password })
-      });
+        const full_name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value; // Use the raw password for policy check and sending
 
-      const result = await response.json();
+        // --- Standard field validation ---
+        if (!full_name || !email || !password) { // Password being empty also caught here
+            alert('Please enter full name, email, and password.');
+            return;
+        }
+        if (!email.includes('@') || !email.includes('.')) {
+            alert('Please enter a valid email address.');
+            return;
+        }
 
-      if (!response.ok) {
-        console.error('[Register.html] Registration failed from backend:', response.status, result.error);
-        alert('Registration failed: ' + (result.error || 'An unknown error occurred. Please try again.'));
-      } else {
-        console.log('[Register.html] Registration successful:', result.message);
-        alert('Registration successful! Please proceed to login.');
-        window.location.href = 'login.html';
-      }
-    } catch (err) {
-      console.error('[Register.html] Registration fetch/network error or JSON parse error:', err);
-      alert('Register error: Failed to connect or server returned an invalid response. Please try again.');
-    }
-  });
+        // --- Call our new password policy validation ---
+        if (!validatePasswordPolicy(password)) {
+            alert('Password does not meet all the required criteria. Please check the feedback below the password field.');
+            // Optional: scroll to the password field or feedback area
+            // passwordInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return; 
+        }
+        // --- End password policy validation ---
+
+        console.log(`[Register.html] Attempting registration for: ${email}`);
+        registerBtn.disabled = true;
+        registerBtn.textContent = 'Registering...';
+
+        try {
+            const response = await fetch('http://localhost:3002/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ full_name, email, password }) // Send non-trimmed password
+            });
+    
+            const result = await response.json(); 
+    
+            if (!response.ok) {
+                console.error('[Register.html] Registration failed from backend:', response.status, result.error);
+                alert('Registration failed: ' + (result.error || 'An unknown error occurred. Please try again.'));
+            } else {
+                console.log('[Register.html] Registration successful:', result.message);
+                alert('Registration successful! Please proceed to login.');
+                window.location.href = 'login.html'; 
+            }
+        } catch (err) {
+            console.error('[Register.html] Registration fetch/network error or JSON parse error:', err);
+            alert('Register error: Failed to connect or server returned an invalid response. Please try again.');
+        } finally {
+            registerBtn.disabled = false;
+            registerBtn.textContent = 'Register';
+        }
+    });
   </script>
 
 </body>
