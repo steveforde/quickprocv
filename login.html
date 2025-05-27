@@ -114,31 +114,71 @@
 
   <script>
     document.getElementById('login-btn').addEventListener('click', async () => {
-  const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value.trim();
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const loginBtn = document.getElementById('login-btn'); // Get the button itself
 
-  try {
-    const response = await fetch('http://localhost:3002/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      const email = emailInput.value.trim();
+      const password = passwordInput.value.trim(); // Trimming password for login is generally okay
+
+      // --- 👇 START: ADDED CLIENT-SIDE VALIDATION ---
+      if (!email || !password) {
+        alert('Please enter both email and password.');
+        return; // Stop if fields are empty
+      }
+      if (!email.includes('@') || !email.includes('.')) { // Basic email format check
+        alert('Please enter a valid email address.');
+        if (emailInput) emailInput.focus(); // Optional: focus the email field
+        return; // Stop if email format is basic invalid
+      }
+      // No need for password *complexity* check here, as it's an existing password.
+      // --- 👆 END: ADDED CLIENT-SIDE VALIDATION ---
+
+      console.log(`[Login.html] Attempting login for: ${email}`); // Good to have a log
+      
+      if (loginBtn) {
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Logging in...';
+      }
+
+      try {
+        const response = await fetch('http://localhost:3002/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          // Error message from your backend /api/login route
+          alert('Login failed: ' + (result.error || 'Invalid credentials or an unknown error occurred.'));
+        } else {
+          // Login was successful according to your backend
+          alert('Login successful!');
+          localStorage.clear(); 
+          localStorage.setItem('userEmail', email); 
+          // Make sure your backend /api/login route sends back result.data.session.access_token
+          if (result.data && result.data.session && result.data.session.access_token) {
+            localStorage.setItem('supabaseUserToken', result.data.session.access_token); 
+            window.location.href = 'main.html';
+          } else {
+            console.error("[Login.html] Login response OK, but access token missing in response from /api/login", result);
+            alert('Login succeeded but session token was not received. Please try again or contact support.');
+          }
+        }
+      } catch (err) {
+        // Network errors or if response.json() fails
+        console.error('[Login.html] Login fetch/network error or JSON parse error:', err);
+        alert('Login error: Could not connect to the server or an invalid response was received. Please try again. ' + err.message);
+      } finally {
+        // Re-enable the button
+        if (loginBtn) {
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Login';
+        }
+      }
     });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      alert('Login failed: ' + result.error);
-    } else {
-      alert('Login successful!');
-      localStorage.clear(); // ✅ Clear out previous user before storing new one
-      localStorage.setItem('userEmail', email); // ✅ Store fresh login email
-      localStorage.setItem('supabaseUserToken', result.data.session.access_token); 
-      window.location.href = 'main.html';
-    }
-  } catch (err) {
-    alert('Login error: ' + err.message);
-  }
-});
   </script>
 </body>
 </html>
