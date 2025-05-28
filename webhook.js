@@ -28,6 +28,8 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     const session = event.data.object;
     const email = session.customer_email;
 
+
+
     if (!email) {
       console.error('❌ No customer_email in session');
       return res.status(400).send('Missing customer email');
@@ -49,11 +51,16 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       console.error('❌ Email sending failed:', err);
     }
 
-    // ✅ Update Supabase
+     const expiryDate = new Date();
+     expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+
     const { error } = await supabase
-      .from('users')
-      .update({ is_pro: true })
-      .eq('email', email.toLowerCase().trim());
+    .from('users')
+    .update({ 
+    is_pro: true, 
+    pro_expiry: expiryDate.toISOString()
+   })
+  .eq('email', email.toLowerCase().trim());
 
     if (error) {
       console.error('❌ Supabase update failed:', error.message);
