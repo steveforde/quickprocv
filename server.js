@@ -249,29 +249,34 @@ app.get('/', (req, res) => {
   res.send('QuickProCV API is live');
 });
 
-// --- Password Reset Request Route (Only one instance now) ---
+// --- Password Reset Request Route ---
 app.post('/api/send-reset-email', async (req, res) => {
   const { email } = req.body;
   console.log(`[API /api/send-reset-email] Received request for email: ${email}`);
-  if (!email) { // Added basic validation for email
+
+  if (!email) {
     return res.status(400).json({ success: false, error: 'Email is required.' });
   }
+
   try {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'http://localhost:5500/reset.html', // For local testing
+      redirectTo: 'http://localhost:5500/reset.html', // ✅ Make sure this is your real reset page
     });
 
     if (error) {
-        console.error('[Password Reset Error]', error.message);
-        throw error; 
+      console.error('[Password Reset Error]', error.message);
+      return res.status(400).json({ success: false, error: error.message });
     }
-    console.log('[API /api/send-reset-email] Supabase resetPasswordForEmail call successful for:', email);
-    res.json({ success: true, message: 'Reset email sent.' });
+
+    console.log('[✅ Reset Email Sent] Supabase response:', data);
+    return res.json({ success: true, message: 'Reset email sent.' });
   } catch (err) {
-    console.error(`❌ [API /api/send-reset-email] Catch block error for ${email}:`, err.message);
-    res.status(400).json({ success: false, error: err.message });
+    console.error(`[❌ Exception] Failed to send reset email:`, err.message);
+    return res.status(500).json({ success: false, error: 'Server error sending reset email.' });
   }
 });
+
+
 
 // --- Stripe Checkout Session for Main Pro Subscription ---
 app.post('/create-checkout-session', async (req, res) => {

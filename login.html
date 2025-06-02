@@ -107,7 +107,8 @@
     <button id="login-btn">Login</button>
     <p>Don't have an account? <a href="register.html">Register</a></p>
   </div>
-  <p><a href="reset.html">Forgot password?</a></p>
+  <p><a href="#" id="forgot-password-link">Forgot password?</a></p>
+
   <div class="back-link">
     <a href="landing.html">← Back to Landing Page</a>
   </div>
@@ -179,7 +180,44 @@
         }
       }
     });
+
   </script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const forgotLink = document.getElementById('forgot-password-link');
+
+    forgotLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value.trim();
+
+      if (!email || !email.includes('@')) {
+        alert("Please enter your email above before clicking 'Forgot password?'.");
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:3000/api/send-reset-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert("✅ A password reset email has been sent. Check your inbox.");
+        } else {
+          alert("❌ " + (result.error || "Failed to send reset email."));
+        }
+      } catch (err) {
+        console.error("Reset request failed:", err);
+        alert("❌ An error occurred. Please try again later.");
+      }
+    });
+  });
+</script>
+
 </body>
 </html>
 

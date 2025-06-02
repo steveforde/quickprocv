@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 // Make sure these paths are correct relative to where webhook.js is located
 import supabase from './linkedin-server/supabaseClient.js'; 
 import sendEmail from './linkedin-server/email.js';
-import generateHtmlTemplate from './linkedin-server/emailTemplates/baseHtml.js'; // Assumes 2-param version
+import generateHtmlTemplate from './linkedin-server/emailTemplates/baseHtml.js'; // Using this for all emails for now
 
 dotenv.config({ path: './linkedin-server/.env' }); // Ensure .env is loaded
 
@@ -13,18 +13,25 @@ const app = express();
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-if (!process.env.STRIPE_SECRET_KEY || !webhookSecret || !process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    console.error("❌ CRITICAL: Missing one or more essential environment variables for webhook.js (Stripe Secret, Webhook Secret, Supabase URL/Service Key).");
+// Critical Environment Variable Check
+if (!process.env.STRIPE_SECRET_KEY || 
+    !webhookSecret || 
+    !process.env.SUPABASE_URL || 
+    !process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    !process.env.STRIPE_PRICE_ID || // Added check based on your server.js
+    !process.env.STRIPE_TOKEN_TOPUP_PRICE_ID) { // Added check based on your server.js
+    console.error("❌ CRITICAL: Missing one or more essential environment variables for webhook.js. Check Stripe keys, webhook secret, Supabase URL/Service Key, and Price IDs.");
     process.exit(1);
 }
 
-// Middleware to log incoming requests - helpful for debugging if webhook is hit
+// Middleware to log incoming requests
 app.use((req, res, next) => {
   console.log(`[WEBHOOK.JS] Request received: ${req.method} ${req.originalUrl}`);
   next();
 });
 
-// Stripe webhook handler - MUST BE BEFORE express.json()
+// Stripe webhook handler - MUST BE DEFINED BEFORE express.json() if other routes use it.
+// For a dedicated webhook server, this is fine here.
 app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   console.log("--- [WEBHOOK.JS] /webhook route HIT ---");
   const sig = req.headers['stripe-signature'];
@@ -38,14 +45,13 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+  // Handle the event
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     console.log(`[WEBHOOK.JS] Processing checkout.session.completed. Session ID: ${session.id}`);
 
     const userEmailFromStripe = session.customer_details ? session.customer_details.email : session.customer_email;
     const purchaseType = session.metadata ? session.metadata.purchaseType : null;
-    // IMPORTANT: client_reference_id should be your Supabase User ID (auth.users.id)
-    // It must be passed when creating the Stripe Checkout Session
     const userIdFromStripe = session.client_reference_id || (session.metadata ? session.metadata.userId : null);
 
     if (!userIdFromStripe && !userEmailFromStripe) {
@@ -54,7 +60,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     }
     console.log(`[WEBHOOK.JS] Identified User - Email: ${userEmailFromStripe}, Stripe UserID: ${userIdFromStripe}, PurchaseType: ${purchaseType}`);
 
-
     if (purchaseType === 'ai_tokens_50_topup') {
         // --- Handle AI Token Top-up Purchase ---
         if (!userIdFromStripe) { 
@@ -62,11 +67,11 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
             return res.status(400).json({ error: 'User ID missing for token top-up processing.' });
         }
         console.log(`[WEBHOOK.JS] Identified as 'ai_tokens_50_topup' for User ID: ${userIdFromStripe}`);
-        try {
+        try { // try for token top-up logic
             const { data: currentUserData, error: fetchUserError } = await supabase
-                .from('users') // Your public.users table
+                .from('users') 
                 .select('ai_monthly_limit, email, full_name') 
-                .eq('id', userIdFromStripe) // Query by Supabase User ID
+                .eq('id', userIdFromStripe) 
                 .single();
 
             if (fetchUserError || !currentUserData) {
@@ -103,11 +108,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
             }
         } catch (processingError) { 
             console.error('❌ [WEBHOOK.JS] Error processing token top-up for User ID', userIdFromStripe, processingError.message, processingError.stack);
-            return res.status(500).json({ error: 'Internal server error during token top-up processing.' });
+            // Return 500 only if headers not already sent by a previous error
+            if (!res.headersSent) {
+                 return res.status(500).json({ error: 'Internal server error during token top-up processing.' });
+            }
         }
-    } else {
+        // End of 'ai_tokens_50_topup' block
+    } else { 
         // --- Handle Original Pro Subscription Purchase (Assume if not a token top-up) ---
-        // This part relies more on email if userIdFromStripe wasn't passed from Pro checkout session
         const identifierForPro = userIdFromStripe || userEmailFromStripe;
         if (!identifierForPro) {
              console.error('❌ [WEBHOOK.JS] Cannot identify user for Pro subscription (missing ID and Email).');
@@ -124,32 +132,42 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
         const initialAiUsageResetDateISOString = initialAiUsageResetDate.toISOString();
         
         let fullName = '';
-        let updateKey = {}; // Will be { id: userIdFromStripe } or { email: userEmailFromStripe.toLowerCase().trim() }
+        let updateKey = {}; 
         let targetEmailForNotification = userEmailFromStripe;
 
-        try {
-            // Try to fetch profile to get full_name and confirm existing record by ID or Email
+        try { // This try block covers the entire Pro subscription logic
             let profileToUpdate;
             if (userIdFromStripe) {
                 updateKey = { id: userIdFromStripe };
                 const { data: profileDataById, error: fetchByIdError } = await supabase.from('users').select('full_name, email').eq('id', userIdFromStripe).single();
-                if (fetchByIdError && fetchByIdError.code !== 'PGRST116') throw fetchByIdError;
+                if (fetchByIdError && fetchByIdError.code !== 'PGRST116') { // PGRST116 means no rows found, not necessarily an error for .single() if that's okay
+                    console.error(`[WEBHOOK.JS - Pro Sub] Error fetching profile by ID ${userIdFromStripe}:`, fetchByIdError.message);
+                    throw fetchByIdError; 
+                }
                 profileToUpdate = profileDataById;
-                if (profileDataById && !targetEmailForNotification) targetEmailForNotification = profileDataById.email; // Get email if only ID was from Stripe
-            } else if (userEmailFromStripe) { // Fallback to email if ID wasn't provided
-                updateKey = { email: userEmailFromStripe.toLowerCase().trim() };
-                const { data: profileDataByEmail, error: fetchByEmailError } = await supabase.from('users').select('full_name, id').eq('email', userEmailFromStripe.toLowerCase().trim()).single();
-                if (fetchByEmailError && fetchByEmailError.code !== 'PGRST116') throw fetchByEmailError;
+                if (profileDataById && !targetEmailForNotification) targetEmailForNotification = profileDataById.email;
+            } else if (userEmailFromStripe) { 
+                const normalizedEmailForPro = userEmailFromStripe.toLowerCase().trim();
+                updateKey = { email: normalizedEmailForPro };
+                const { data: profileDataByEmail, error: fetchByEmailError } = await supabase.from('users').select('full_name, id').eq('email', normalizedEmailForPro).single();
+                 if (fetchByEmailError && fetchByEmailError.code !== 'PGRST116') {
+                    console.error(`[WEBHOOK.JS - Pro Sub] Error fetching profile by email ${normalizedEmailForPro}:`, fetchByEmailError.message);
+                    throw fetchByEmailError;
+                }
                 profileToUpdate = profileDataByEmail;
             }
 
             if (profileToUpdate && profileToUpdate.full_name) {
                 fullName = profileToUpdate.full_name.trim();
             } else {
-                fullName = targetEmailForNotification ? targetEmailForNotification.split('@')[0] : '';
+                fullName = targetEmailForNotification ? targetEmailForNotification.split('@')[0] : 'QuickProCV User';
             }
-            console.log(`[WEBHOOK.JS - Pro Sub] Fetched profile for update. FullName resolved to: "${fullName}". Updating by:`, updateKey);
+            console.log(`[WEBHOOK.JS - Pro Sub] Fetched profile for update. FullName resolved to: "${fullName}". Updating by:`, JSON.stringify(updateKey));
 
+            if (Object.keys(updateKey).length === 0) { 
+                console.error(`❌ [WEBHOOK.JS - Pro Sub] Cannot determine update key for user: ${identifierForPro}. User might not exist in 'users' table.`);
+                return res.status(404).json({ error: "User profile not found to apply Pro subscription." });
+            }
 
             const { error: updateProError } = await supabase
                 .from('users')
@@ -160,7 +178,7 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
                     ai_monthly_usage_count: 0,
                     ai_usage_cycle_reset_date: initialAiUsageResetDateISOString
                 })
-                .match(updateKey); // Use .match(updateKey) which can be {id: ...} or {email: ...}
+                .match(updateKey); 
 
             if (updateProError) {
                 console.error(`❌ [WEBHOOK.JS] Supabase update error for ${identifierForPro} (setting Pro):`, updateProError.message);
@@ -172,25 +190,38 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
             if (targetEmailForNotification) {
                 const proSubject = '🎉 Welcome to QuickProCV Pro!';
                 const proMessageContent = `Thanks for upgrading to Pro! You now have full access to all features, including 100 AI generations per month, for the next 2 years. Log in to explore your new benefits!`;
-                const proHtmlBody = generateHtmlTemplate(`Welcome to Pro, ${fullName || 'QuickProCV User'}!`, proMessageContent);
+                const proHtmlBody = generateHtmlTemplate(`Welcome to Pro, ${fullName}!`, proMessageContent);
                 
                 await sendEmail(targetEmailForNotification, proSubject, proMessageContent, proHtmlBody);
                 console.log(`📧 Pro subscription confirmation email sent to: ${targetEmailForNotification}`);
             } else {
                  console.warn(`[WEBHOOK.JS - Pro Sub] No target email for notification for user: ${identifierForPro}`);
             }
-        } catch (processingError) { 
+        } catch (processingError) { // This catch is for the try block handling Pro subscription logic
             console.error(`❌ [WEBHOOK.JS] Error processing Pro subscription for ${identifierForPro}:`, processingError.message, processingError.stack);
-            return res.status(500).json({ error: 'Internal server error during Pro subscription processing.' });
+            if (!res.headersSent) {
+                return res.status(500).json({ error: 'Internal server error during Pro subscription processing.' });
+            }
         }
+      // End of the 'else' block for Pro Subscription
     }
-  } else {
+  // This is the end of the 'if (event.type === 'checkout.session.completed')' block
+  } else { // This 'else' handles event types that are NOT 'checkout.session.completed'
     console.log(`[WEBHOOK.JS] Received unhandled event type: ${event.type}`);
   }
 
-  res.status(200).json({ received: true }); 
+  // Send a 200 OK response to Stripe if an error response hasn't already been sent
+  if (!res.headersSent) {
+    res.status(200).json({ received: true }); 
+  }
 });
 
+// If you have other routes or express.json() middleware, ensure it's placed correctly.
+// For a dedicated webhook server, having express.raw for the webhook and then express.json()
+// for other potential routes (if any) is fine. If /webhook is the ONLY route,
+// you don't strictly need express.json() or express.urlencoded() after it.
+// app.use(express.json()); // Example: if you had other JSON routes
+// app.use(express.urlencoded({ extended: true })); // Example: if you had other form-urlencoded routes
 
 const PORT = process.env.WEBHOOK_PORT || 3003;
 app.listen(PORT, () => {

@@ -6,6 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 import supabaseGlobalInstance from './supabaseClient.js'; // From ./linkedin-server/supabaseClient.js
 import sendEmail from './email.js'; // From ./linkedin-server/email.js
 import generateHtmlTemplate from './emailTemplates/baseHtml.js'; // From ./linkedin-server/emailTemplates/baseHtml.js
+import generateProConfirmationHtml from './emailTemplates/proConfirmationHtml.js';
+
 
 dotenv.config({ path: './linkedin-server/.env' });
 

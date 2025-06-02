@@ -515,9 +515,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  // Inside your document.addEventListener('DOMContentLoaded', async () => { ... });
+async function updateTokenTracker() {
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user;
+  if (!user) return;
 
- 
+  const { data, error } = await supabase
+    .from('users')
+    .select('ai_monthly_limit, ai_monthly_usage_count')
+    .eq('id', user.id)
+    .single();
+
+  if (error || !data) return;
+
+  const used = data.ai_monthly_usage_count || 0;
+  const limit = data.ai_monthly_limit || 100;
+  const percent = Math.min(100, Math.round((used / limit) * 100));
+
+  const tokenProgress = document.getElementById('token-progress');
+  const tokenPercentage = document.getElementById('token-percentage');
+
+  if (tokenProgress && tokenPercentage) {
+    tokenProgress.value = percent;
+    tokenPercentage.textContent = `${percent}%`;
+  }
+}
+
+
+
+
 
    console.log("[CompletionTracker] Attaching input listeners to tracked fields...");
   trackedFields.forEach(id => {

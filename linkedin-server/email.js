@@ -2,6 +2,13 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import generateHtmlTemplate from './emailTemplates/baseHtml.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const logoPath = path.resolve(__dirname, '../assets/branding/logo_email.png');
 
 dotenv.config({ path: './linkedin-server/.env' });
 
@@ -30,13 +37,13 @@ export default async function sendEmail(to, subject, text = '', messageHtml = ''
     subject,
     text,
     html,
-    attachments: [
-      {
-        filename: 'logo.png',
-        path: './assets/branding/logo.png',
-        cid: 'qprologo' // 👈 used as src="cid:qprologo"
-      }
-    ]
+attachments: [
+  {
+    filename: 'logo_email.png',
+    path: logoPath, // full path to your image file
+    cid: 'qprologo' // must match the "cid:" used in your HTML
+  }
+]
   };
 
   try {

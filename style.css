@@ -1798,4 +1798,40 @@ html[data-theme='dark'] .template-temp #preview-contact {
 }
 
 
+#token-tracker-container {
+  margin-bottom: 20px;
+}
+
+#token-tracker-container label {
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+#token-progress {
+  width: 220px;
+  height: 14px;
+  border-radius: 10px;
+  appearance: none;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+
+#token-percentage {
+  font-size: 0.85rem;
+  color: #ccc;
+  margin-bottom: 40px;
+}
+
+/* Optional: match white bar fill in WebKit browsers */
+#token-progress::-webkit-progress-bar {
+  background-color: #ccc;
+  border-radius: 10px;
+}
+
+#token-progress::-webkit-progress-value {
+  background-color: white;
+  border-radius: 10px;
+}
 
