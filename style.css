@@ -1835,3 +1835,188 @@ html[data-theme='dark'] .template-temp #preview-contact {
   border-radius: 10px;
 }
 
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: var(--accent);
+  color: white;
+  padding: 12px 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.top-bar-item {
+  font-weight: 600;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.top-bar-item.left {
+  flex: 1;
+  min-width: 120px;
+  max-width: 50%;
+  text-align: left;
+}
+
+.top-bar-item.right {
+  flex: 1;
+  min-width: 200px;
+  max-width: 50%;
+  text-align: right;
+}
+
+/* FIXED CSS to prevent header text cut-off */
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px; /* Reduced padding to give more space */
+  background-color: var(--primary-action-color);
+  color: white;
+  border-bottom: 1px solid var(--primary-action-hover-color);
+  min-height: 50px; /* Ensure minimum height */
+  box-sizing: border-box;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1; /* Each side gets equal space */
+  min-width: 0; /* Allows flex items to shrink below content size */
+}
+
+.header-left {
+  justify-content: flex-start;
+}
+
+.header-right {
+  justify-content: flex-end;
+}
+
+.cv-tips-bubble {
+  background: #f0f8ff;
+  color: #222;
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  padding: 24px;
+  margin-top: 20px;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  font-size: 15px;
+  line-height: 1.6;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  animation: bounceIn 0.6s ease;
+  transition: transform 0.2s ease;
+}
+
+.cv-tips-bubble:hover {
+  transform: scale(1.015);
+}
+
+.cv-tips-bubble::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50px;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid var(--accent);
+}
+
+.cv-tips-bubble ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.cv-tips-bubble li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.cv-tips-bubble li::before {
+  content: "💬";
+  font-size: 16px;
+  margin-right: 6px;
+  transform: scale(1.1);
+}
+
+/* Animation */
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cv-letter-bubble {
+  background: #f0f8ff;
+  color: #222;
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  padding: 24px;
+  margin-top: 20px;
+  max-width: 380px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  font-size: 15px;
+  line-height: 1.6;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+  animation: bounceIn 0.6s ease;
+  transition: transform 0.2s ease;
+}
+
+.cv-letter-bubble:hover {
+  transform: scale(1.015);
+}
+
+.cv-letter-bubble::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50px;
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 12px solid var(--accent);
+}
+
+.cv-letter-bubble ul {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.cv-letter-bubble li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.cv-letter-bubble li::before {
+  content: "💬";
+  font-size: 16px;
+  margin-right: 6px;
+  transform: scale(1.1);
+}

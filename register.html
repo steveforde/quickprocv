@@ -136,6 +136,31 @@
     const registerBtn = document.getElementById('register-btn');
     const passwordFeedbackEl = document.getElementById('password-strength-feedback');
 
+    // 🆕 ADD THIS FUNCTION: Save user data for CV auto-fill
+    function saveUserDataForAutoFill(userData) {
+        console.log('[Register] Saving user data for CV auto-fill:', userData);
+        
+        try {
+            // Create user profile for auto-fill
+            const userProfile = {
+                fullName: userData.full_name,
+                email: userData.email,
+                registeredAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('userProfile', JSON.stringify(userProfile));
+            localStorage.setItem('userEmail', userData.email);
+            
+            console.log('[Register] User profile saved for auto-fill');
+            return true;
+        } catch (error) {
+            console.error('[Register] Error saving user data:', error);
+            return false;
+        }
+    }
+
     function validatePasswordPolicy(password) {
         const criteria = {
             length: { met: false, message: "At least 10 characters" },
@@ -186,9 +211,6 @@
             }
         }
         
-        // Optionally, disable/enable register button based on policy
-        // registerBtn.disabled = !allCriteriaMet; (Consider if other fields also need to be valid)
-
         return allCriteriaMet;
     }
 
@@ -224,11 +246,8 @@
         // --- Call our new password policy validation ---
         if (!validatePasswordPolicy(password)) {
             alert('Password does not meet all the required criteria. Please check the feedback below the password field.');
-            // Optional: scroll to the password field or feedback area
-            // passwordInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return; 
         }
-        // --- End password policy validation ---
 
         console.log(`[Register.html] Attempting registration for: ${email}`);
         registerBtn.disabled = true;
@@ -238,7 +257,7 @@
             const response = await fetch('http://localhost:3002/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ full_name, email, password }) // Send non-trimmed password
+                body: JSON.stringify({ full_name, email, password })
             });
     
             const result = await response.json(); 
@@ -248,7 +267,20 @@
                 alert('Registration failed: ' + (result.error || 'An unknown error occurred. Please try again.'));
             } else {
                 console.log('[Register.html] Registration successful:', result.message);
-                alert('Registration successful! Please proceed to login.');
+                
+                // 🆕 SAVE USER DATA FOR AUTO-FILL AFTER SUCCESSFUL REGISTRATION
+                const savedSuccessfully = saveUserDataForAutoFill({
+                    full_name: full_name,
+                    email: email
+                });
+                
+                if (savedSuccessfully) {
+                    alert('Registration successful! Your name and email will be auto-filled in your CV. Redirecting to login...');
+                } else {
+                    alert('Registration successful! Please proceed to login.');
+                }
+                
+                // 🆕 REDIRECT TO LOGIN PAGE (user still needs to login)
                 window.location.href = 'login.html'; 
             }
         } catch (err) {

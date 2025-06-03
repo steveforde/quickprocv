@@ -3,13 +3,17 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
-import supabaseGlobalInstance from './supabaseClient.js'; // From ./linkedin-server/supabaseClient.js
-import sendEmail from './email.js'; // From ./linkedin-server/email.js
-import generateHtmlTemplate from './emailTemplates/baseHtml.js'; // From ./linkedin-server/emailTemplates/baseHtml.js
+import Stripe from 'stripe';
+import supabaseGlobalInstance from './supabaseClient.js';
+import supabase from './supabaseClient.js';
+import sendEmail from './email.js';
+import generateHtmlTemplate from './emailTemplates/baseHtml.js';
 import generateProConfirmationHtml from './emailTemplates/proConfirmationHtml.js';
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-dotenv.config({ path: './linkedin-server/.env' });
+
+dotenv.config({ path: './.env' });
 
 const app = express();
 app.use(cors());
@@ -241,6 +245,115 @@ app.post('/api/check-pro', async (req, res) => {
     res.status(500).json({ error: 'Internal server error during Pro status check.', isPro: false });
   }
 });
+
+// 🆕 CHECKOUT ROUTE - Added to auth.js
+app.post('/create-checkout-session', async (req, res) => {
+  try {
+    // Debug logging
+    console.log('🚨 [DEBUG] ===== CHECKOUT REQUEST DEBUG =====');
+    console.log('🚨 [DEBUG] Full request body:', JSON.stringify(req.body, null, 2));
+    console.log('🚨 [DEBUG] Request headers (Content-Type):', req.headers['content-type']);
+    console.log('🚨 [DEBUG] ================================');
+
+    const { email, subscriptionType } = req.body;
+
+    console.log(`🔍 [Checkout] Received request:`, { email, subscriptionType });
+
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Invalid email provided.' });
+    }
+
+    // Determine which Stripe Price ID to use
+    let priceId;
+    let subscriptionName;
+    
+    if (subscriptionType === '1year') {
+      priceId = process.env.STRIPE_PRICE_ID_1_YEAR;
+      subscriptionName = '1 Year Pro';
+      console.log(`💰 [Checkout] Using 1-YEAR Price ID: ${priceId}`);
+    } else if (subscriptionType === '2year') {
+      priceId = process.env.STRIPE_PRICE_ID_2_YEAR; // Your existing 2-year price ID
+      subscriptionName = '2 Year Pro';
+      console.log(`💰 [Checkout] Using 2-YEAR Price ID: ${priceId}`);
+    } else {
+      console.error(`❌ [Checkout] Invalid subscription type: "${subscriptionType}"`);
+      return res.status(400).json({ 
+        error: 'Invalid subscription type. Must be "1year" or "2year".' 
+      });
+    }
+
+    if (!priceId) {
+      console.error(`❌ [Checkout] No price ID found for subscription type: ${subscriptionType}`);
+      return res.status(500).json({ error: 'Price configuration error.' });
+    }
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price: priceId,
+        quantity: 1,
+      }],
+      mode: 'payment',
+      customer_email: email,
+      success_url: `http://localhost:5500/main.html?email=${encodeURIComponent(email)}&subscription=${subscriptionType}`,
+      cancel_url: 'http://localhost:5500/main.html?cancelled=true',
+      metadata: {
+        email: email,
+        subscriptionType: subscriptionType
+      }
+    });
+
+    console.log(`✅ [Checkout] Session created successfully for ${email}: ${session.id}`);
+    res.json({ url: session.url });
+
+  } catch (error) {
+    console.error('❌ [Checkout] Error:', error);
+    res.status(500).json({ error: 'Failed to create checkout session.' });
+  }
+});
+
+// Add this route to your auth.js after the existing routes
+app.post('/api/force-pro', async (req, res) => {
+    const { email, subscriptionType = '1year' } = req.body;
+    console.log(`[AUTH.JS] FORCE PRO activation for: ${email}, type: ${subscriptionType}`);
+    
+    // Calculate dynamic expiry date
+    const now = new Date();
+    let expiryDate;
+    
+    if (subscriptionType === '2year') {
+        expiryDate = new Date(now.getFullYear() + 2, now.getMonth(), now.getDate());
+        console.log('[AUTH.JS] 2-year subscription - setting expiry to:', expiryDate.toISOString());
+    } else {
+        // Default to 1 year
+        expiryDate = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+        console.log('[AUTH.JS] 1-year subscription - setting expiry to:', expiryDate.toISOString());
+    }
+    
+    try {
+        const { data, error } = await supabase
+            .from('users')
+            .update({ 
+                is_pro: true, 
+                pro_expiry: expiryDate.toISOString()
+            })
+            .eq('email', email);
+            
+        if (error) throw error;
+        
+        console.log(`✅ [AUTH.JS] FORCE PRO activated for ${email} until ${expiryDate.toISOString()}`);
+        res.json({ 
+            success: true, 
+            message: 'Pro status activated', 
+            expiry: expiryDate.toISOString() 
+        });
+    } catch (error) {
+        console.error('[AUTH.JS] FORCE PRO error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 const PORT = process.env.AUTH_PORT || 3002;
 app.listen(PORT, () => {

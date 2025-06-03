@@ -11,10 +11,9 @@
   <link rel="stylesheet" href="style.css" />
   <style>
     .branding-logo {
-  text-align: center; /* This will center the logo if it's not full width */
-  padding: 20px 0;    /* Add some vertical spacing around the logo */
-  /* You might want to add a background to this div if needed, 
-     or adjust its position relative to the header/features */
+  text-align: center; 
+  padding: 20px 0;    
+  
 }
 
 .branding-logo img {
@@ -26,13 +25,21 @@
   margin-right: auto;
 }
   </style>
+ 
 </head>
 <body>
-  <div class="top-bar">
-    <button id="theme-toggle">🌙 Dark Mode</button>
-    <button id="buy-pro-btn">Buy Pro - €24.99 / 2 Years</button>
-    <button id="logout-btn">Logout</button>
-    </div>
+
+<div class="top-bar">
+  <span id="header-expiry-date" class="top-bar-item left"></span>
+  <button id="theme-toggle">🌙 Dark Mode</button>
+  <button id="buy-pro-btn">Buy Pro</button>
+  <button id="logout-btn">Logout</button>
+  <span id="header-pro-status" class="top-bar-item right"></span>
+</div>
+
+
+
+
     
     <div class="accent-wrapper">
   <label for="accent-picker">Select favourite colour</label>
@@ -43,14 +50,21 @@
       <div class="branding-logo">
       <img src="assets/branding/logo.png" alt="Q-Pro Logo">
      </div>
+      <div class="cv-tips-bubble">
+       <ul>
+         <li>📝 Start by building some details like Job Title and enter basic work history</li>
+         <li>📸 Upload a great photo with upload file button.</li>
+          <li>🛠 Highlight a few skills</li>
+          <li>💡 Use Generate AI button to generate content like summary, Jod details , and skills</li>
+          <li>🎓 Talior the details generated to suit yourself</li>
+          <li>🧠 Mention achievements & projects</li>
+          <li>🧠 Press Preview CV at very buttom of page on left side and cv will appear on right panel</li>
+          <li>📤 Download pdf button at end to get your polished CV ready for job hunting</li>
+       </ul>
+    </div>
+
+
       <h1 class="main-title">QuickProCV</h1>
-      <p id="welcome-msg">Welcome! Please log in.</p>
-       <div id="membership-status-section">
-        <p id="welcome-msg">Welcome!</p>
-       <p id="membership-expiry-message" style="display:none; font-weight: bold;"></p>
-      </div>
-
-
 
       <label for="photo-upload">Profile Photo:</label>
       <input type="file" id="photo-upload" accept="image/*" />
@@ -88,15 +102,12 @@
 
   <label for="summary">Summary</label>
   <textarea id="summary" placeholder=""></textarea>
-  <button type="button" class="ai-button" disabled id="generate-summary-button">
-  Generate Summary <span class="lock-icon">🔒</span>
 </button>
 
   <label for="work">Work Experience</label>
   <textarea id="work" placeholder=""></textarea>
-  <button type="button" class="ai-button" disabled id="generate-work-experience-button">
-  Generate Work Experience <span class="lock-icon">🔒</span>
-</button>
+   
+  
 
   <label for="education">Education <span class="tooltip-icon" title="Pro tip – How to write student CVs"></span></label>
   <textarea id="education" placeholder=""></textarea>
@@ -116,14 +127,20 @@
   <span class="pro-tooltip" title="Pro users can generate skill sets based on job title"></span>
   <textarea id="skills"></textarea>
 
-  <button type="button" class="ai-button" disabled id="generate-skills-btn">
-    ✨ Generate Skills <span class="lock-icon">🔒</span>
-  </button>
-
+  
+<button type="button" class="ai-button" disabled id="generate-all-btn">
+  🤖 AI Support – Fill Summary, Work & Skills
+  </button> 
 
 <label for="hobbies">Hobbies</label>
 <textarea id="hobbies" placeholder=""></textarea>
-
+   <div class="cv-letter-bubble">
+       <ul>
+         <li>📝 Please enter company name for position.</li>
+         <li>📸 Please copy over or write a job descripion as best can.</li>
+         <li>🛠 Press Generate Cover Letter.</li>
+       </ul>
+    </div>
 
   <hr> <h3 class="section-heading">Cover Letter Details (AI Generated)</h3>
   <p>Fill these details to generate a tailored cover letter.</p>
@@ -150,18 +167,18 @@
     <div class="preview-column">
     <h2 class="template-options-title">Choose Your Template</h2>
   <div class="template-options">
-  <button type="button" class="template-card" data-template="tech">Tech</button>
+  <button type="button" class="template-card" data-template="tech">Technical</button>
   <button type="button" class="template-card" data-template="marketing">
-    Marketing<span class="lock-icon">🔒</span>
+    Marketing and Sales<span class="lock-icon">🔒</span>
   </button>
   <button type="button" class="template-card" data-template="business">
-    Business<span class="lock-icon">🔒</span>
+    Exective<span class="lock-icon">🔒</span>
   </button>
   <button type="button" class="template-card" data-template="student">
-    Student<span class="lock-icon">🔒</span>
+    Student/Temp<span class="lock-icon">🔒</span>
   </button>
   <button type="button" class="template-card" data-template="temp">
-    Temp<span class="lock-icon">🔒</span>
+    Business<span class="lock-icon">🔒</span>
   </button>
 
 </div>
